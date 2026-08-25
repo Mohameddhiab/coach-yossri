@@ -1,0 +1,395 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  COACH
+  USER
+}
+
+enum SubscriptionStatus {
+  ACTIF
+  ESSAI
+  EXPIRE
+  EXPIRE_BIENTOT
+}
+
+enum PaymentMode {
+  ESPECE
+  ESSAI
+}
+
+enum SubscriptionTier {
+  BASIC
+  PREMIUM
+  ELITE
+}
+
+enum PlanObjective {
+  PRISE_DE_MASSE
+  SECHE
+  MAINTIEN
+}
+
+enum Sexe {
+  HOMME
+  FEMME
+}
+
+enum MealPlanStatus {
+  ACTIF
+  ARCHIVE
+}
+
+enum WeekDay {
+  LUN
+  MAR
+  MER
+  JEU
+  VEN
+  SAM
+  DIM
+  TOUS_LES_JOURS
+}
+
+enum MealType {
+  PETIT_DEJ
+  DEJEUNER
+  DINER
+  COLLATION
+}
+
+model User {
+  id            String   @id @default(cuid())
+  role          Role     @default(USER)
+  email         String   @unique
+  nom           String
+  prenom        String
+  telephone     String   @default("")
+  dateNaissance DateTime?
+  sexe          Sexe?
+  tailleCm      Int?
+  coachId       String?
+  coach         User?    @relation("CoachMembers", fields: [coachId], references: [id])
+  members       User[]   @relation("CoachMembers")
+  referredBy    String?
+  passwordHash  String
+  createdAt     DateTime @default(now())
+
+  prefs         NotificationPrefs?
+  subscriptions Subscription[]
+  mealPlans     MealPlan[]
+  weightLogs    WeightLog[]
+  photos        ProgressPhoto[]
+  notes         CoachNote[]
+  goals         MonthlyGoal[]
+  weightTarget  WeightTarget?
+  resetTokens   PasswordResetToken[]
+  checkIns      CheckIn[]
+  workoutPlans  WorkoutPlan[]
+  followUps     FollowUp[]         @relation("FollowUpMember")
+  followUpsGiven FollowUp[]        @relation("FollowUpCoach")
+  conversationsAsCoach  Conversation[] @relation("ConvCoach")
+  conversationsAsMember Conversation[] @relation("ConvMember")
+
+  @@map("users")
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@map("password_reset_tokens")
+}
+
+model NotificationPrefs {
+  id              String  @id @default(cuid())
+  userId          String  @unique
+  user            User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rappelPoids     Boolean @default(true)
+  motivation      Boolean @default(true)
+  expirationProche Boolean @default(true)
+  nouveauPlan     Boolean @default(true)
+
+  @@map("notification_prefs")
+}
+
+model Subscription {
+  id           String             @id @default(cuid())
+  userId       String
+  user         User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dateDebut    DateTime
+  dateFin      DateTime
+  montant      Float              @default(0)
+  tier         SubscriptionTier   @default(BASIC)
+  modePaiement PaymentMode        @default(ESPECE)
+  statut       SubscriptionStatus @default(ACTIF)
+  createdBy    String
+  pauseStart   DateTime?
+  pauseDays    Int                @default(0)
+  createdAt    DateTime           @default(now())
+
+  @@index([userId, createdAt])
+  @@map("subscriptions")
+}
+
+model MealPlan {
+  id           String         @id @default(cuid())
+  userId       String
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  coachId      String
+  titre        String
+  objectif     PlanObjective  @default(MAINTIEN)
+  caloriesCible Float        @default(0)
+  proteinesG   Float          @default(0)
+  glucidesG    Float          @default(0)
+  lipidesG     Float          @default(0)
+  statut       MealPlanStatus @default(ACTIF)
+  isTemplate   Boolean        @default(false)
+  version      Int            @default(1)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  meals     Meal[]
+  versions  MealPlanVersion[]
+
+  @@index([userId, statut])
+  @@map("meal_plans")
+}
+
+model MealPlanVersion {
+  id        String   @id @default(cuid())
+  planId    String
+  plan      MealPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  version   Int
+  snapshot  Json
+  updatedAt DateTime @default(now())
+
+  @@unique([planId, version])
+  @@map("meal_plan_versions")
+}
+
+model Meal {
+  id          String   @id @default(cuid())
+  mealPlanId  String
+  mealPlan    MealPlan @relation(fields: [mealPlanId], references: [id], onDelete: Cascade)
+  jourSemaine WeekDay  @default(TOUS_LES_JOURS)
+  typeRepas   MealType @default(DEJEUNER)
+  description String
+  calories    Float?
+  proteinesG  Float?
+  glucidesG   Float?
+  lipidesG    Float?
+  alternatives String?
+
+  @@index([mealPlanId])
+  @@map("meals")
+}
+
+model WeightLog {
+  id       String   @id @default(cuid())
+  userId   String
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date     DateTime @default(now())
+  poidsKg  Float
+  note     String?
+
+  @@index([userId, date])
+  @@map("weight_logs")
+}
+
+model ProgressPhoto {
+  id     String   @id @default(cuid())
+  userId String
+  user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date   DateTime @default(now())
+  url    String
+  note   String?
+
+  @@index([userId, date])
+  @@map("progress_photos")
+}
+
+model CoachNote {
+  id        String   @id @default(cuid())
+  coachId   String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contenu   String
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@map("coach_notes")
+}
+
+model MonthlyGoal {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  titre     String
+  mois      String // YYYY-MM
+  cible     Int
+  checkins  Json     @default("[]")
+  createdAt DateTime @default(now())
+
+  @@unique([userId, mois])
+  @@map("monthly_goals")
+}
+
+model WeightTarget {
+  id       String   @id @default(cuid())
+  userId   String   @unique
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  poidsKg  Float
+  date     DateTime
+
+  @@map("weight_targets")
+}
+
+model CoachSettings {
+  id                  String   @id @default("singleton")
+  motivationMessage   String
+  rappelIntervalJours Int      @default(7)
+  sendMotivation      Boolean  @default(true)
+  messageTemplates    Json     @default("[]")
+  updatedAt           DateTime @updatedAt
+
+  @@map("coach_settings")
+}
+
+model CheckIn {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  coachId   String
+  checkedAt DateTime @default(now())
+
+  @@index([userId, checkedAt])
+  @@map("check_ins")
+}
+
+model WorkoutPlan {
+  id         String         @id @default(cuid())
+  userId     String
+  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  coachId    String
+  titre      String
+  objectif   PlanObjective  @default(MAINTIEN)
+  statut     MealPlanStatus @default(ACTIF)
+  isTemplate Boolean        @default(false)
+  version    Int            @default(1)
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+
+  exercises WorkoutExercise[]
+  versions  WorkoutPlanVersion[]
+
+  @@index([userId, statut])
+  @@map("workout_plans")
+}
+
+model WorkoutExercise {
+  id               String      @id @default(cuid())
+  workoutPlanId    String
+  workoutPlan      WorkoutPlan @relation(fields: [workoutPlanId], references: [id], onDelete: Cascade)
+  jourSemaine      WeekDay     @default(TOUS_LES_JOURS)
+  nom              String
+  charge           String?
+  repetitions      String?
+  series           String?
+  tempo            String?
+  repos            String?
+  groupeMusculaire String?
+  notes            String?
+  imageUrl         String?
+
+  @@index([workoutPlanId])
+  @@map("workout_exercises")
+}
+
+model WorkoutPlanVersion {
+  id        String      @id @default(cuid())
+  planId    String
+  plan      WorkoutPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  version   Int
+  snapshot  Json
+  updatedAt DateTime    @default(now())
+
+  @@unique([planId, version])
+  @@map("workout_plan_versions")
+}
+
+model Conversation {
+  id            String    @id @default(cuid())
+  coachId       String
+  coach         User      @relation("ConvCoach", fields: [coachId], references: [id])
+  userId        String
+  member        User      @relation("ConvMember", fields: [userId], references: [id])
+  lastMessageAt DateTime?
+  messages      ChatMessage[]
+
+  @@unique([coachId, userId])
+  @@map("conversations")
+}
+
+model ChatMessage {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId       String
+  contenu        String
+  lu             Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+
+  @@index([conversationId, createdAt])
+  @@map("chat_messages")
+}
+
+model FollowUp {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation("FollowUpMember", fields: [userId], references: [id], onDelete: Cascade)
+  coachId     String
+  coach       User     @relation("FollowUpCoach", fields: [coachId], references: [id])
+  periode     String
+  bilan       String
+  ajustements String?
+  createdAt   DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@map("follow_ups")
+}
+
+enum ExerciseSource {
+  WGER
+  MANUAL
+}
+
+model Exercise {
+  id            String         @id @default(cuid())
+  name          String
+  imageUrl      String?
+  imageThumbUrl String?
+  source        ExerciseSource @default(MANUAL)
+  wgerUuid      String?        @unique
+  category      String?
+  licenseTitle  String?
+  licenseAuthor String?
+  createdBy     String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@index([name])
+  @@map("exercises")
+}

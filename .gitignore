@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+
+# Builds
+dist/
+build/
+next-env.d.ts
+
+# Expo
+.expo/
+dist-expo/
+
+# Next.js
+.next/
+out/
+
+# Env files (keep .env.example)
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Prisma (generated client is in node_modules)
+prisma/migrations/dev.db*
