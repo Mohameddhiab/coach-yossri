@@ -97,7 +97,9 @@ export default function NotificationsPage() {
       ) : (
         <Accordion
           type="multiple"
-          defaultValue={groups.filter((g) => g.kind !== "stale").map((g) => g.kind)}
+          defaultValue={groups
+            .filter((g) => g.kind === "expired" || g.kind === "expiring")
+            .map((g) => g.kind)}
           className="rounded-xl border px-4"
         >
           {groups.map(({ kind, alerts }) => (

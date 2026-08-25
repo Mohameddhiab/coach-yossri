@@ -243,8 +243,9 @@ export default function UserDetailPage() {
       />
 
       <Tabs defaultValue="overview">
-        <TabsList>
+        <TabsList className="w-full justify-start overflow-x-auto sm:w-auto">
           <TabsTrigger value="overview">نظرة عامة</TabsTrigger>
+          <TabsTrigger value="suivi">المتابعة</TabsTrigger>
           <TabsTrigger value="progress">التقدّم</TabsTrigger>
           <TabsTrigger value="plan">الخطة</TabsTrigger>
         </TabsList>
@@ -437,22 +438,27 @@ export default function UserDetailPage() {
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        <TabsContent value="suivi" className="space-y-4">
           <div className="grid gap-4 lg:grid-cols-2">
             <CoachGoalCard userId={userId} />
             <FidelityCard history={subscriptions} />
+            <ReferralCard user={user} />
+            <FollowUpCoachCard userId={userId} />
           </div>
-          <ReferralCard user={user} />
-          <MemberTimeline userId={userId} />
-          <NotesPanel
-            userId={userId}
-            userName={`${user.prenom} ${user.nom}`}
-            daysLeft={remaining}
-          />
-          <FollowUpCoachCard userId={userId} />
+          <div className="grid gap-4 lg:grid-cols-2">
+            <MemberTimeline userId={userId} />
+            <NotesPanel
+              userId={userId}
+              userName={`${user.prenom} ${user.nom}`}
+              daysLeft={remaining}
+            />
+          </div>
         </TabsContent>
 
         <TabsContent value="progress" className="space-y-6">
-          <WeightTargetCard userId={userId} logs={weightLogs} />
+          <WeightTargetCard userId={userId} logs={weightLogs} canEdit />
           <WeightProjectionCard logs={weightLogs} />
           <WeeklyReport
             userName={`${user.prenom} ${user.nom}`}

@@ -16,7 +16,6 @@ import {
   Menu,
   MessageCircle,
   Phone,
-  QrCode,
   Sparkles,
   Trophy,
   Users,
@@ -313,25 +312,75 @@ function MiniPlanTable() {
   );
 }
 
+function MiniMacrosPreview() {
+  const macros = [
+    { label: "Calories", value: "2200" },
+    { label: "Protéines", value: "160g" },
+    { label: "Glucides", value: "220g" },
+    { label: "Lipides", value: "65g" },
+  ];
+  return (
+    <div className="grid grid-cols-2 gap-2 rounded-xl border border-primary/15 bg-background/60 p-4 sm:grid-cols-4">
+      {macros.map((m) => (
+        <div key={m.label} className="rounded-lg bg-muted/50 px-3 py-3 text-center">
+          <div className="amber-gradient-text text-xl font-black tabular-nums">{m.value}</div>
+          <div className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+            {m.label}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function MiniChatPreview() {
+  const messages = [
+    { from: "member" as const, text: "أهلاً مدرب، هل يمكن تعديل تمرين اليوم؟" },
+    { from: "coach" as const, text: "بالتأكيد — استبدل السكوات بجهاز الضغط للأرجل بـ 60 كغ." },
+  ];
+  return (
+    <div className="space-y-2 rounded-xl border border-primary/15 bg-background/60 p-4">
+      {messages.map((m) => (
+        <div key={m.text} className={m.from === "coach" ? "flex justify-start" : "flex justify-end"}>
+          <span
+            className={`max-w-[85%] rounded-2xl px-3.5 py-2 text-xs leading-relaxed ${
+              m.from === "coach"
+                ? "bg-primary/12 font-medium text-foreground"
+                : "bg-muted text-muted-foreground"
+            }`}
+          >
+            {m.text}
+          </span>
+        </div>
+      ))}
+      <div className="pt-1 text-center text-[10px] text-muted-foreground">
+        ردّ سريع داخل التطبيق — بدون واتساب
+      </div>
+    </div>
+  );
+}
+
 const PILLARS = [
   {
     label: "NUTRITION",
     num: "01",
     title: "خطة غذائية مرنة ومحسوبة",
     desc: "سعرات ومغذيات محسوبة بدقة حسب هدفك، مع بدائل كثيرة تناسب طعامك وميزانيتك — دون أن تشعر أنك مقيّد بنظام جامد.",
+    visual: "macros" as const,
   },
   {
     label: "TRAINING",
     num: "02",
     title: "جدول تمارين احترافي",
     desc: "كل تمرين بصورة توضيحية، مع عدد المجموعات والتكرارات والإيقاع وفترات الراحة — كما في أكبر القاعات.",
-    table: true,
+    visual: "table" as const,
   },
   {
     label: "SUPPORT",
     num: "03",
     title: "متابعة حقيقية يوماً بيوم",
     desc: "وزنك وصورك وهدفك الشهري في تطبيق واحد، ومحادثة مباشرة مع المدرب — تعديلات حسب استجابة جسمك.",
+    visual: "chat" as const,
   },
 ];
 
@@ -354,12 +403,12 @@ function FeaturesSection() {
                   <h3 className="text-xl font-black">{p.title}</h3>
                   <p className="text-sm leading-relaxed text-muted-foreground">{p.desc}</p>
                 </div>
-                {p.table ? (
+                {p.visual === "table" ? (
                   <MiniPlanTable />
+                ) : p.visual === "macros" ? (
+                  <MiniMacrosPreview />
                 ) : (
-                  <div className="flex items-center justify-center rounded-xl border border-primary/15 bg-primary/[0.04] p-8">
-                    <Dumbbell className="size-16 text-primary/25" />
-                  </div>
+                  <MiniChatPreview />
                 )}
               </CardContent>
             </Card>
@@ -369,6 +418,8 @@ function FeaturesSection() {
     </section>
   );
 }
+
+const SHOW_RESULTS = false;
 
 function ResultsSection() {
   const placeholders = [0, 1, 2];
@@ -416,12 +467,11 @@ function ResultsSection() {
 function B2BSection() {
   const items = [
     { icon: Users, text: "أعضاء واشتراكات — تتبع كامل بالدينار" },
-    { icon: QrCode, text: "بوابة حضور QR — تسجيل أوتوماتيكي" },
     { icon: Trophy, text: "تصنيف وتحديات أسبوعية بين الأعضاء" },
     { icon: MessageCircle, text: "محادثة مباشرة مع كل عضو" },
   ];
   return (
-    <section className="py-14">
+    <section id="b2b" className="scroll-mt-20 py-14">
       <Reveal>
         <Card className="overflow-hidden border-primary/25 bg-gradient-to-l from-primary/10 to-transparent">
           <CardContent className="grid gap-6 p-6 lg:grid-cols-2 lg:items-center">
@@ -474,7 +524,7 @@ function PricingSection({ whatsappUrl }: { whatsappUrl: string }) {
 
   return (
     <section id="plans" className="scroll-mt-20 space-y-6 py-14">
-      <SectionLabel>05 / الباقات</SectionLabel>
+      <SectionLabel>04 / الباقات</SectionLabel>
       <SectionTitle icon={<Award className="size-5" />}>
         اختر مستوى المتابعة الذي يناسبك
       </SectionTitle>
@@ -559,7 +609,6 @@ function PricingSection({ whatsappUrl }: { whatsappUrl: string }) {
 
 const COMPARISON_ROWS: { label: string; basic: boolean; premium: boolean; elite: boolean }[] = [
   { label: "دخول القاعة", basic: true, premium: true, elite: true },
-  { label: "تسجيل الحضور QR", basic: true, premium: true, elite: true },
   { label: "خطة غذائية محسوبة", basic: false, premium: true, elite: true },
   { label: "جدول تمارين بالصور", basic: false, premium: true, elite: true },
   { label: "تتبع وزن وصور وتصدير PDF", basic: false, premium: true, elite: true },
@@ -569,40 +618,45 @@ const COMPARISON_ROWS: { label: string; basic: boolean; premium: boolean; elite:
 
 function ComparisonSection() {
   return (
-    <section className="space-y-6 py-14">
-      <SectionLabel>06 / مقارنة سريعة</SectionLabel>
-      <SectionTitle icon={<Check className="size-5" />}>
-        الفرق بين الباقات في نظرة
-      </SectionTitle>
+    <section className="pb-14">
       <Reveal>
-        <div className="overflow-x-auto rounded-xl border">
-          <table className="w-full min-w-[560px] border-collapse text-sm">
-            <thead>
-              <tr className="bg-muted/60 text-xs font-bold text-muted-foreground">
-                <th className="border-b px-3 py-3 text-start">الميزة</th>
-                <th className="border-b px-3 py-3">باسيك</th>
-                <th className="border-b px-3 py-3 text-primary">بريميوم</th>
-                <th className="border-b px-3 py-3">إيليت</th>
-              </tr>
-            </thead>
-            <tbody>
-              {COMPARISON_ROWS.map((row) => (
-                <tr key={row.label} className="hover:bg-muted/20">
-                  <td className="border-b px-3 py-2.5 font-medium">{row.label}</td>
-                  {[row.basic, row.premium, row.elite].map((on, i) => (
-                    <td key={i} className="border-b px-3 py-2.5 text-center">
-                      {on ? (
-                        <Check className="mx-auto size-4 text-primary" />
-                      ) : (
-                        <X className="mx-auto size-4 text-muted-foreground/40" />
-                      )}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <Accordion type="single" collapsible className="rounded-xl border px-4">
+          <AccordionItem value="comparison" className="border-b-0">
+            <AccordionTrigger className="text-start text-sm font-bold hover:no-underline">
+              مقارنة تفصيلية بين الباقات
+            </AccordionTrigger>
+            <AccordionContent>
+              <div className="overflow-x-auto rounded-xl border">
+                <table className="w-full min-w-[560px] border-collapse text-sm">
+                  <thead>
+                    <tr className="bg-muted/60 text-xs font-bold text-muted-foreground">
+                      <th className="border-b px-3 py-3 text-start">الميزة</th>
+                      <th className="border-b px-3 py-3">باسيك</th>
+                      <th className="border-b px-3 py-3 text-primary">بريميوم</th>
+                      <th className="border-b px-3 py-3">إيليت</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {COMPARISON_ROWS.map((row) => (
+                      <tr key={row.label} className="hover:bg-muted/20">
+                        <td className="border-b px-3 py-2.5 font-medium">{row.label}</td>
+                        {[row.basic, row.premium, row.elite].map((on, i) => (
+                          <td key={i} className="border-b px-3 py-2.5 text-center">
+                            {on ? (
+                              <Check className="mx-auto size-4 text-primary" />
+                            ) : (
+                              <X className="mx-auto size-4 text-muted-foreground/40" />
+                            )}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
       </Reveal>
     </section>
   );
@@ -611,7 +665,7 @@ function ComparisonSection() {
 function FaqSection() {
   return (
     <section id="faq" className="scroll-mt-20 space-y-6 py-14">
-      <SectionLabel>07 / FAQ</SectionLabel>
+      <SectionLabel>06 / FAQ</SectionLabel>
       <SectionTitle icon={<MessageCircle className="size-5" />}>
         عندك سؤال؟ غالباً جوابه هنا.
       </SectionTitle>
@@ -686,7 +740,7 @@ export function LandingPage() {
     { href: "#results", label: "النتائج" },
     { href: "#plans", label: "الباقات" },
     { href: "#faq", label: "FAQ" },
-  ];
+  ].filter((link) => SHOW_RESULTS || link.href !== "#results");
 
   return (
     <div className="min-h-screen">
@@ -824,22 +878,28 @@ export function LandingPage() {
           <SectionTitle icon={<Dumbbell className="size-5" />}>
             نبني الأجسام بدقة
           </SectionTitle>
-          <Reveal delay={120} className="mx-auto max-w-3xl space-y-4">
-            <p className="text-lg leading-relaxed text-muted-foreground">{COACH_INFO.about}</p>
-            <blockquote className="border-s-4 border-primary ps-4 text-lg font-bold leading-relaxed">
-              « الجسم يتغير عندما يكون البرنامج مصمماً خصيصاً لك — وليس لجيرانك. »
-            </blockquote>
-            <div className="flex flex-wrap gap-2 pt-1">
-              {["تحويل الجسم", "تغذية رياضية", "متابعة يومية", "برامج مفصّلة"].map((chip, index) => (
-                <Badge
-                  key={chip}
-                  variant="secondary"
-                  className="transition-all duration-300 hover:-translate-y-0.5 hover:bg-primary/15 hover:text-primary"
-                  style={{ "--reveal-delay": `${index * 60}ms` } as React.CSSProperties}
-                >
-                  {chip}
-                </Badge>
-              ))}
+          <Reveal delay={120}>
+            <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr] lg:items-start">
+              <div className="space-y-4">
+                <p className="text-lg leading-relaxed text-muted-foreground">{COACH_INFO.about}</p>
+                <blockquote className="border-s-4 border-primary ps-4 text-lg font-bold leading-relaxed">
+                  « الجسم يتغير عندما يكون البرنامج مصمماً خصيصاً لك — وليس لجيرانك. »
+                </blockquote>
+              </div>
+              <div className="space-y-2.5 rounded-2xl border border-border/60 bg-card p-5">
+                {["تحويل الجسم", "تغذية رياضية", "متابعة يومية", "برامج مفصّلة"].map((chip, index) => (
+                  <div
+                    key={chip}
+                    className="flex items-center gap-2.5 text-sm font-semibold transition-transform duration-300 hover:translate-x-[-2px]"
+                    style={{ "--reveal-delay": `${index * 60}ms` } as React.CSSProperties}
+                  >
+                    <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/12 text-primary">
+                      <Check className="size-3.5" />
+                    </span>
+                    {chip}
+                  </div>
+                ))}
+              </div>
             </div>
           </Reveal>
         </section>
@@ -906,8 +966,7 @@ export function LandingPage() {
 
         <StepsSection />
         <FeaturesSection />
-        <ResultsSection />
-        <B2BSection />
+        {SHOW_RESULTS && <ResultsSection />}
         <PricingSection whatsappUrl={whatsappUrl} />
         <ComparisonSection />
         <FaqSection />
@@ -960,6 +1019,8 @@ export function LandingPage() {
         </section>
 
         <FinalCta whatsappUrl={whatsappUrl} />
+
+        <B2BSection />
       </main>
 
       <footer className="border-t py-8 text-center text-sm text-muted-foreground">

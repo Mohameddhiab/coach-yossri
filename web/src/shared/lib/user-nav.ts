@@ -1,6 +1,5 @@
 import {
   CalendarCheck,
-  CreditCard,
   MessagesSquare,
   Scale,
   Settings,
@@ -34,5 +33,5 @@ export function navForTier(tier: SubscriptionTier | null): UserNavItem[] {
   if (tier === "PREMIUM") {
     return [{ href: "/plan", label: "خطتي", icon: CalendarCheck }, ...BASE_NAV];
   }
-  return [{ href: "/ma-carte", label: "بطاقتي", icon: CreditCard }, ...BASE_NAV];
+  return [...BASE_NAV];
 }

@@ -22,8 +22,11 @@ export function WorkoutPlanPdfDocument({ plan }: { plan: WorkoutPlan }) {
         <div className="mt-1 text-neutral-500">تنسخ: {formatDateShort(new Date().toISOString())}</div>
       </header>
 
-      {WEEK_DAYS.filter((d) => d !== "TOUS_LES_JOURS").map((day: WeekDay) => {
-        const dayExercises = plan.exercises.filter((e) => e.jour_semaine === day);
+      {WEEK_DAYS.map((day: WeekDay) => {
+        const dayExercises = [
+          ...plan.exercises.filter((e) => e.jour_semaine === day),
+          ...plan.exercises.filter((e) => e.jour_semaine === "TOUS_LES_JOURS"),
+        ];
         return (
           <section key={day} className="mt-6">
             <h2 className="mb-2 border-b border-neutral-200 pb-1 text-[15px] font-extrabold text-neutral-900">

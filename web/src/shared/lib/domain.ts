@@ -29,7 +29,7 @@ export const OFFRES: Offre[] = [
     tier: "BASIC",
     prix: 30,
     nom: "باسيك",
-    features: ["دخول القاعة", "تسجيل الحضور QR"],
+    features: ["دخول القاعة", "تسجيل الحضور"],
   },
   {
     tier: "PREMIUM",

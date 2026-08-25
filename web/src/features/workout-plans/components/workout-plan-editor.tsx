@@ -4,14 +4,16 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
+  Calendar,
   Copy,
   Dumbbell,
   ImageIcon,
   Loader2,
+  Pencil,
   Plus,
   Save,
   Trash2,
-  UtensilsCrossed,
+  Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -30,6 +32,16 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   Dialog,
   DialogContent,
@@ -57,6 +69,7 @@ import {
 } from "@/features/workout-plans/hooks/useWorkoutPlan";
 import type { WorkoutExerciseInput, WorkoutPlan } from "@/features/workout-plans/api/workoutPlans.api";
 import { useLocalExercises } from "@/features/exercises/hooks/useExercises";
+import type { Exercise } from "@/features/exercises/api/exercises.api";
 import { fallbackForCategory } from "@/shared/lib/exercise-fallbacks";
 import { formatDateShort } from "@/lib/utils";
 
@@ -123,6 +136,182 @@ const CATEGORY_LABEL: Record<string, string> = {
   Abs: "Abs",
 };
 
+const DURATION_OPTIONS = [
+  { value: 3, label: "3 أيام", days: ["DIM", "MAR", "VEN"] as WeekDay[] },
+  { value: 5, label: "5 أيام", days: ["SAM", "DIM", "LUN", "MAR", "MER"] as WeekDay[] },
+  { value: 7, label: "7 أيام", days: WEEK_DAYS },
+  { value: 8, label: "7 + كل الأيام", days: [...WEEK_DAYS, "TOUS_LES_JOURS" as WeekDay] },
+] as const;
+
+function ExerciseFormDialog({
+  open,
+  onOpenChange,
+  data,
+  onChange,
+  onSubmit,
+  curatedByCategory,
+  activeDays,
+  isEditing,
+}: {
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+  data: DraftExercise;
+  onChange: (p: Partial<DraftExercise>) => void;
+  onSubmit: () => void;
+  curatedByCategory: Record<string, Exercise[]>;
+  activeDays: readonly WeekDay[];
+  isEditing: boolean;
+}) {
+  const [search, setSearch] = useState("");
+  const curatedHit = data.nom
+    ? (Object.values(curatedByCategory)
+        .flat()
+        .find((c: Exercise) => c.name.trim().toLowerCase() === data.nom.trim().toLowerCase()) as unknown as
+        | { imageUrl: string | null; category: string | null }
+        | undefined)
+    : null;
+  const displayImage = data.image_url ?? curatedHit?.imageUrl ?? fallbackForCategory(curatedHit?.category ?? null) ?? null;
+
+  const filteredByCategory = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    const result: Record<string, Exercise[]> = {};
+    for (const cat of CATEGORY_ORDER) {
+      const list = curatedByCategory[cat];
+      if (!list?.length) continue;
+      const filtered = q ? list.filter((ex) => ex.name.toLowerCase().includes(q)) : list;
+      if (filtered.length) result[cat] = filtered;
+    }
+    return result;
+  }, [curatedByCategory, search]);
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>{isEditing ? "تعديل التمرين" : "إضافة تمرين جديد"}</DialogTitle>
+          <DialogDescription>اختر التمرين من القائمة المخصصة وحدد التفاصيل</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4 py-2">
+          <div className="space-y-1.5">
+            <Label>اليوم</Label>
+            <Select value={data.jour_semaine} onValueChange={(v) => onChange({ jour_semaine: v as WeekDay })}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {activeDays.map((d) => (
+                  <SelectItem key={d} value={d}>
+                    {WEEK_DAY_LABELS[d]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label>Nom exercice *</Label>
+            <Input
+              value={search || data.nom}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                if (!e.target.value) onChange({ nom: "" });
+              }}
+              onFocus={() => setSearch("")}
+              placeholder="ابحث بالاسم..."
+              className="mb-1"
+            />
+            <Select
+              value={data.nom || ""}
+              onValueChange={(v) => {
+                const hit = Object.values(curatedByCategory)
+                  .flat()
+                  .find((c: Exercise) => c.name === v) as unknown as
+                  | { name: string; imageUrl: string | null; category: string | null }
+                  | undefined;
+                onChange({
+                  nom: v,
+                  image_url: hit?.imageUrl ?? fallbackForCategory(hit?.category ?? null) ?? null,
+                });
+                setSearch("");
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="اختر تمرينًا من القائمة" />
+              </SelectTrigger>
+              <SelectContent className="max-h-80">
+                {Object.keys(filteredByCategory).length === 0 && (
+                  <div className="px-3 py-2 text-sm text-muted-foreground">لا توجد نتائج</div>
+                )}
+                {Object.entries(filteredByCategory).map(([cat, list]) => (
+                  <SelectGroup key={cat}>
+                    <SelectLabel className="text-xs font-bold text-primary">
+                      {CATEGORY_LABEL[cat]} ({list.length})
+                    </SelectLabel>
+                    {list.map((ex) => (
+                      <SelectItem key={ex.id} value={ex.name}>
+                        {ex.name}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex justify-center">
+            <div className="flex size-24 items-center justify-center overflow-hidden rounded-xl border bg-muted">
+              {displayImage ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={displayImage} alt={data.nom || "exercice"} className="h-full w-full object-cover" />
+              ) : (
+                <ImageIcon className="size-8 text-muted-foreground" />
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label>charge</Label>
+              <Input value={data.charge ?? ""} onChange={(e) => onChange({ charge: e.target.value || null })} placeholder="15 kg" />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Nbre serie</Label>
+              <Input value={data.series ?? ""} onChange={(e) => onChange({ series: e.target.value || null })} placeholder="4 3 2" dir="ltr" />
+            </div>
+            <div className="space-y-1.5">
+              <Label>tempo</Label>
+              <Input value={data.tempo ?? ""} onChange={(e) => onChange({ tempo: e.target.value || null })} placeholder="3-1-3-1" dir="ltr" className="font-mono" />
+            </div>
+            <div className="space-y-1.5">
+              <Label>rest</Label>
+              <Input value={data.repos ?? ""} onChange={(e) => onChange({ repos: e.target.value || null })} placeholder="1 min entre série" />
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label>reps</Label>
+            <Textarea
+              value={data.repetitions ?? ""}
+              onChange={(e) => onChange({ repetitions: e.target.value || null })}
+              placeholder="Entre 6 et 12 échec&#10;Si >12 augmente charge&#10;Si <5 Diminue charge"
+              rows={3}
+              className="text-sm leading-4"
+            />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            إلغاء
+          </Button>
+          <Button onClick={onSubmit} disabled={!data.nom.trim()}>
+            {isEditing ? "حفظ التعديل" : "إضافة التمرين"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export function WorkoutPlanEditor({ userId }: { userId: string }) {
   const { data: plan, isLoading } = useWorkoutPlan(userId);
   const createPlan = useCreateWorkoutPlan(userId);
@@ -130,19 +319,18 @@ export function WorkoutPlanEditor({ userId }: { userId: string }) {
   const { data: curatedAll } = useLocalExercises("");
 
   const curatedByCategory = useMemo(() => {
-    if (!curatedAll?.length) return {} as Record<string, typeof curatedAll>;
-    const grouped: Record<string, typeof curatedAll> = {};
+    if (!curatedAll?.length) return {} as Record<string, Exercise[]>;
+    const grouped: Record<string, Exercise[]> = {};
     for (const ex of curatedAll) {
       const cat = ex.category ?? "Autre";
       if (!grouped[cat]) grouped[cat] = [];
       grouped[cat].push(ex);
     }
-    // trier selon CATEGORY_ORDER
     return grouped;
   }, [curatedAll]);
 
   const findCuratedByName = (name: string) =>
-    curatedAll?.find((c) => c.name.trim().toLowerCase() === name.trim().toLowerCase()) ?? null;
+    curatedAll?.find((c: Exercise) => c.name.trim().toLowerCase() === name.trim().toLowerCase()) ?? null;
 
   const initial = useMemo(() => draftFromPlan(plan ?? null), [plan]);
   const [titre, setTitre] = useState(initial.titre);
@@ -150,7 +338,23 @@ export function WorkoutPlanEditor({ userId }: { userId: string }) {
   const [exercises, setExercises] = useState<DraftExercise[]>(initial.exercises);
   const [day, setDay] = useState<WeekDay>(todayWeekDay());
 
-  // sync when plan loads / changes
+  const [duree, setDuree] = useState<3 | 5 | 7 | 8>(() => {
+    if (!plan) return 7;
+    const daysInPlan = new Set(plan.exercises.map((e) => e.jour_semaine));
+    if (daysInPlan.has("TOUS_LES_JOURS")) return 8;
+    return daysInPlan.size <= 3 ? 3 : daysInPlan.size <= 5 ? 5 : 7;
+  });
+
+  const activeDays = useMemo(() => {
+    const opt = DURATION_OPTIONS.find((o) => o.value === duree);
+    return opt ? opt.days : WEEK_DAYS;
+  }, [duree]);
+
+  const [formOpen, setFormOpen] = useState(false);
+  const [editingIdx, setEditingIdx] = useState<number | null>(null);
+  const [formData, setFormData] = useState<DraftExercise>(emptyExercise(todayWeekDay()));
+  const [removeIdx, setRemoveIdx] = useState<number | null>(null);
+
   useEffect(() => {
     setTitre(initial.titre);
     setObjectif(initial.objectif);
@@ -173,24 +377,51 @@ export function WorkoutPlanEditor({ userId }: { userId: string }) {
     return () => window.removeEventListener("beforeunload", handler);
   }, [dirty]);
 
-  const addRow = () => setExercises((rows) => [...rows, emptyExercise(day)]);
+  const openAddForm = () => {
+    setFormData(emptyExercise(day));
+    setEditingIdx(null);
+    setFormOpen(true);
+  };
 
-  const patch = (idx: number, p: Partial<DraftExercise>) =>
-    setExercises((rows) => rows.map((r, i) => (i === idx ? { ...r, ...p } : r)));
+  const openEditForm = (idx: number) => {
+    setFormData({ ...exercises[idx] });
+    setEditingIdx(idx);
+    setFormOpen(true);
+  };
+
+  const handleFormSubmit = () => {
+    if (!formData.nom.trim()) {
+      toast.error("اختر اسم التمرين");
+      return;
+    }
+    const hit = findCuratedByName(formData.nom);
+    const finalImage = formData.image_url ?? hit?.imageUrl ?? fallbackForCategory(hit?.category ?? null) ?? null;
+    const toSave: DraftExercise = {
+      ...formData,
+      key: editingIdx !== null ? exercises[editingIdx].key : newKey(),
+      image_url: finalImage,
+    };
+    if (editingIdx !== null) {
+      setExercises((rows) => rows.map((r, i) => (i === editingIdx ? toSave : r)));
+    } else {
+      setExercises((rows) => [...rows, toSave]);
+    }
+    setFormOpen(false);
+    setEditingIdx(null);
+  };
 
   const remove = (idx: number) =>
     setExercises((rows) => rows.filter((_, i) => i !== idx));
 
-  const handleSelectExercise = (idx: number, selectedName: string) => {
-    const hit = findCuratedByName(selectedName);
-    if (hit) {
-      patch(idx, {
-        nom: hit.name,
-        image_url: hit.imageUrl ?? fallbackForCategory(hit.category) ?? null,
-      });
-    } else {
-      patch(idx, { nom: selectedName });
-    }
+  const duplicateExercise = (idx: number) => {
+    const src = exercises[idx];
+    const dup: DraftExercise = { ...src, key: newKey() };
+    setExercises((rows) => {
+      const next = [...rows];
+      next.splice(idx + 1, 0, dup);
+      return next;
+    });
+    toast.success("تم نسخ التمرين");
   };
 
   const handleSave = async () => {
@@ -264,7 +495,7 @@ export function WorkoutPlanEditor({ userId }: { userId: string }) {
 
       <Card>
         <CardContent className="space-y-4 p-4">
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-3">
             <div className="space-y-1.5">
               <Label>عنوان الخطة</Label>
               <Input value={titre} onChange={(e) => setTitre(e.target.value)} placeholder="خطة تمارين" />
@@ -284,6 +515,23 @@ export function WorkoutPlanEditor({ userId }: { userId: string }) {
                 </SelectContent>
               </Select>
             </div>
+            <div className="space-y-1.5">
+              <Label className="flex items-center gap-1.5">
+                <Calendar className="size-3.5" /> مدة البرنامج
+              </Label>
+              <Select value={String(duree)} onValueChange={(v) => setDuree(Number(v) as 3 | 5 | 7 | 8)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {DURATION_OPTIONS.map((o) => (
+                    <SelectItem key={o.value} value={String(o.value)}>
+                      {o.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <Tabs value={day} onValueChange={(v) => setDay(v as WeekDay)}>
@@ -291,8 +539,8 @@ export function WorkoutPlanEditor({ userId }: { userId: string }) {
               variant="line"
               className="w-full justify-start gap-0 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden rounded-none border-b bg-transparent p-0 h-auto"
             >
-              {WEEK_DAYS.map((d) => {
-                const count = exercises.filter((e) => e.jour_semaine === d).length;
+              {activeDays.map((d) => {
+                const count = exercises.filter((e) => e.jour_semaine === d || (d === "TOUS_LES_JOURS" && e.jour_semaine === "TOUS_LES_JOURS")).length;
                 const isActive = d === day;
                 const isToday = d === today;
                 return (
@@ -322,12 +570,22 @@ export function WorkoutPlanEditor({ userId }: { userId: string }) {
             </TabsList>
 
             <TabsContent value={day} className="pt-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-bold">
+                  تمارين يوم {WEEK_DAY_LABELS[day]}
+                  {day === "TOUS_LES_JOURS" && <span className="ms-2 text-xs text-muted-foreground">(تُطبّق كل يوم)</span>}
+                </h3>
+                <Button size="sm" onClick={openAddForm}>
+                  <Plus /> إضافة تمرين
+                </Button>
+              </div>
+
               {!dayRows.length ? (
                 <EmptyState
                   title={`لا يوجد تمارين يوم ${WEEK_DAY_LABELS[day]}`}
-                  description="أضف تمرينًا من القائمة المخصصة"
+                  description="أضف تمرينًا من النموذج"
                   action={
-                    <Button onClick={addRow}>
+                    <Button onClick={openAddForm}>
                       <Plus /> أضف تمرين
                     </Button>
                   }
@@ -346,138 +604,43 @@ export function WorkoutPlanEditor({ userId }: { userId: string }) {
                           <th className={TH}>Nbre serie</th>
                           <th className={TH}>tempo</th>
                           <th className={TH}>rest</th>
-                          <th className={`${TH} w-10`} />
+                          <th className={`${TH} w-20`} />
                         </tr>
                       </thead>
                       <tbody>
                         {dayRows.map(({ e, idx }) => {
                           const curatedHit = findCuratedByName(e.nom);
                           const displayImage = e.image_url ?? curatedHit?.imageUrl ?? fallbackForCategory(curatedHit?.category) ?? null;
-                          const isFallback = !e.image_url && !!displayImage;
-                          const isCustomValue = e.nom && !curatedHit;
                           return (
-                            <tr key={e.key} className="align-top">
-                              <td className={TD}>
-                                <div className="min-w-[200px]">
-                                  <Select
-                                    value={curatedHit ? e.nom : e.nom ? "__custom__" : ""}
-                                    onValueChange={(v) => {
-                                      if (v === "__custom__") return;
-                                      handleSelectExercise(idx, v);
-                                    }}
-                                  >
-                                    <SelectTrigger className="h-8 text-sm font-medium">
-                                      <SelectValue placeholder="اختر تمرينًا" />
-                                    </SelectTrigger>
-                                    <SelectContent className="max-h-80">
-                                      {isCustomValue && (
-                                        <SelectItem value="__custom__" disabled>
-                                          {e.nom} (مخصص)
-                                        </SelectItem>
-                                      )}
-                                      {CATEGORY_ORDER.map((cat) => {
-                                        const list = curatedByCategory[cat];
-                                        if (!list?.length) return null;
-                                        return (
-                                          <SelectGroup key={cat}>
-                                            <SelectLabel className="text-xs font-bold text-primary">
-                                              {CATEGORY_LABEL[cat]} ({list.length})
-                                            </SelectLabel>
-                                            {list.map((ex) => (
-                                              <SelectItem key={ex.id} value={ex.name}>
-                                                {ex.name}
-                                              </SelectItem>
-                                            ))}
-                                          </SelectGroup>
-                                        );
-                                      })}
-                                      {/* Autres sans catégorie */}
-                                      {Object.keys(curatedByCategory)
-                                        .filter((c) => !CATEGORY_ORDER.includes(c as never))
-                                        .map((cat) => (
-                                          <SelectGroup key={cat}>
-                                            <SelectLabel>{cat}</SelectLabel>
-                                            {(curatedByCategory[cat] ?? []).map((ex) => (
-                                              <SelectItem key={ex.id} value={ex.name}>
-                                                {ex.name}
-                                              </SelectItem>
-                                            ))}
-                                          </SelectGroup>
-                                        ))}
-                                    </SelectContent>
-                                  </Select>
-                                </div>
-                              </td>
+                            <tr key={e.key} className="align-top hover:bg-muted/20">
+                              <td className={`${TD} font-semibold`}>{e.nom}</td>
                               <td className={TD}>
                                 <div className="flex size-14 items-center justify-center overflow-hidden rounded-lg border bg-muted">
                                   {displayImage ? (
                                     // eslint-disable-next-line @next/next/no-img-element
-                                    <img
-                                      src={displayImage}
-                                      alt={e.nom || "exercice"}
-                                      className={`h-full w-full object-cover ${isFallback ? "opacity-90" : ""}`}
-                                      onError={(ev) => {
-                                        (ev.target as HTMLImageElement).style.display = "none";
-                                      }}
-                                    />
+                                    <img src={displayImage} alt={e.nom} className="h-full w-full object-cover" />
                                   ) : (
                                     <ImageIcon className="size-5 text-muted-foreground" />
                                   )}
                                 </div>
                               </td>
+                              <td className={`${TD} tabular-nums`}>{e.charge ?? "—"}</td>
+                              <td className={`${TD} whitespace-pre-line text-xs leading-4`}>{e.repetitions ?? "—"}</td>
+                              <td className={`${TD} tabular-nums`}>{e.series ?? "—"}</td>
+                              <td className={`${TD} font-mono text-xs`}>{e.tempo ?? "—"}</td>
+                              <td className={`${TD} text-xs`}>{e.repos ?? "—"}</td>
                               <td className={TD}>
-                                <Input
-                                  value={e.charge ?? ""}
-                                  onChange={(ev) => patch(idx, { charge: ev.target.value || null })}
-                                  placeholder="15 kg"
-                                  className="h-8 min-w-[80px]"
-                                />
-                              </td>
-                              <td className={TD}>
-                                <Textarea
-                                  value={e.repetitions ?? ""}
-                                  onChange={(ev) => patch(idx, { repetitions: ev.target.value || null })}
-                                  placeholder="Entre 6 et 12 échec&#10;Si >12 augmente charge&#10;Si <5 Diminue charge"
-                                  rows={3}
-                                  className="min-h-[72px] min-w-[160px] text-xs leading-4"
-                                />
-                              </td>
-                              <td className={TD}>
-                                <Input
-                                  value={e.series ?? ""}
-                                  onChange={(ev) => patch(idx, { series: ev.target.value || null })}
-                                  placeholder="4 3 2"
-                                  dir="ltr"
-                                  className="h-8 min-w-[70px] tabular-nums"
-                                />
-                              </td>
-                              <td className={TD}>
-                                <Input
-                                  value={e.tempo ?? ""}
-                                  onChange={(ev) => patch(idx, { tempo: ev.target.value || null })}
-                                  placeholder="3-1-3-1"
-                                  dir="ltr"
-                                  className="h-8 min-w-[90px] font-mono text-xs"
-                                />
-                              </td>
-                              <td className={TD}>
-                                <Input
-                                  value={e.repos ?? ""}
-                                  onChange={(ev) => patch(idx, { repos: ev.target.value || null })}
-                                  placeholder="1 min entre série"
-                                  className="h-8 min-w-[120px] text-xs"
-                                />
-                              </td>
-                              <td className={TD}>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  aria-label="حذف"
-                                  onClick={() => remove(idx)}
-                                  className="size-8"
-                                >
-                                  <Trash2 className="size-4 text-destructive" />
-                                </Button>
+                                <div className="flex items-center gap-1">
+                                  <Button variant="ghost" size="icon" className="size-8" onClick={() => openEditForm(idx)}>
+                                    <Pencil className="size-4" />
+                                  </Button>
+                                  <Button variant="ghost" size="icon" className="size-8" onClick={() => duplicateExercise(idx)}>
+                                    <Copy className="size-4" />
+                                  </Button>
+                                  <Button variant="ghost" size="icon" className="size-8" onClick={() => setRemoveIdx(idx)}>
+                                    <Trash2 className="size-4 text-destructive" />
+                                  </Button>
+                                </div>
                               </td>
                             </tr>
                           );
@@ -486,111 +649,106 @@ export function WorkoutPlanEditor({ userId }: { userId: string }) {
                     </table>
                   </div>
 
-                  {/* Mobile stacked */}
+                  {/* Mobile cards */}
                   <div className="space-y-3 md:hidden">
                     {dayRows.map(({ e, idx }) => {
                       const curatedHit = findCuratedByName(e.nom);
                       const displayImage = e.image_url ?? curatedHit?.imageUrl ?? fallbackForCategory(curatedHit?.category) ?? null;
-                      const isFallback = !e.image_url && !!displayImage;
-                      const isCustomValue = e.nom && !curatedHit;
                       return (
-                        <div key={e.key} className="space-y-2.5 rounded-xl border p-3">
-                          <div className="space-y-1.5">
-                            <Label className="text-xs">Nom exercice</Label>
-                            <Select
-                              value={curatedHit ? e.nom : e.nom ? "__custom__" : ""}
-                              onValueChange={(v) => {
-                                if (v === "__custom__") return;
-                                handleSelectExercise(idx, v);
-                              }}
-                            >
-                              <SelectTrigger className="h-9 font-medium">
-                                <SelectValue placeholder="اختر تمرينًا" />
-                              </SelectTrigger>
-                              <SelectContent className="max-h-80">
-                                {isCustomValue && (
-                                  <SelectItem value="__custom__" disabled>
-                                    {e.nom} (مخصص)
-                                  </SelectItem>
-                                )}
-                                {CATEGORY_ORDER.map((cat) => {
-                                  const list = curatedByCategory[cat];
-                                  if (!list?.length) return null;
-                                  return (
-                                    <SelectGroup key={cat}>
-                                      <SelectLabel className="text-xs font-bold text-primary">
-                                        {CATEGORY_LABEL[cat]} ({list.length})
-                                      </SelectLabel>
-                                      {list.map((ex) => (
-                                        <SelectItem key={ex.id} value={ex.name}>
-                                          {ex.name}
-                                        </SelectItem>
-                                      ))}
-                                    </SelectGroup>
-                                  );
-                                })}
-                              </SelectContent>
-                            </Select>
+                        <div key={e.key} className="space-y-3 rounded-xl border p-3">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="font-bold">{e.nom}</div>
+                            <div className="flex shrink-0 items-center gap-1">
+                              <Button variant="ghost" size="icon" className="size-8" onClick={() => openEditForm(idx)}>
+                                <Pencil className="size-4" />
+                              </Button>
+                              <Button variant="ghost" size="icon" className="size-8" onClick={() => duplicateExercise(idx)}>
+                                <Copy className="size-4" />
+                              </Button>
+                              <Button variant="ghost" size="icon" className="size-8" onClick={() => setRemoveIdx(idx)}>
+                                <Trash2 className="size-4 text-destructive" />
+                              </Button>
+                            </div>
                           </div>
-                          <div className="flex items-center justify-center">
+                          <div className="flex justify-center">
                             <div className="flex size-20 items-center justify-center overflow-hidden rounded-xl border bg-muted">
                               {displayImage ? (
                                 // eslint-disable-next-line @next/next/no-img-element
-                                <img
-                                  src={displayImage}
-                                  alt={e.nom || "exercice"}
-                                  className={`h-full w-full object-cover ${isFallback ? "opacity-90" : ""}`}
-                                />
+                                <img src={displayImage} alt={e.nom} className="h-full w-full object-cover" />
                               ) : (
                                 <ImageIcon className="size-6 text-muted-foreground" />
                               )}
                             </div>
                           </div>
-                          <div className="grid grid-cols-2 gap-2">
-                            <div className="space-y-1">
-                              <Label className="text-xs">charge</Label>
-                              <Input value={e.charge ?? ""} onChange={(ev) => patch(idx, { charge: ev.target.value || null })} placeholder="15 kg" />
+                          <div className="grid grid-cols-2 gap-2 text-sm">
+                            <div className="rounded-lg bg-muted/50 p-2">
+                              <div className="text-xs text-muted-foreground">charge</div>
+                              <div className="font-medium">{e.charge ?? "—"}</div>
                             </div>
-                            <div className="space-y-1">
-                              <Label className="text-xs">Nbre serie</Label>
-                              <Input value={e.series ?? ""} onChange={(ev) => patch(idx, { series: ev.target.value || null })} placeholder="4 3 2" dir="ltr" />
+                            <div className="rounded-lg bg-muted/50 p-2">
+                              <div className="text-xs text-muted-foreground">Nbre serie</div>
+                              <div>{e.series ?? "—"}</div>
                             </div>
-                            <div className="space-y-1">
-                              <Label className="text-xs">tempo</Label>
-                              <Input value={e.tempo ?? ""} onChange={(ev) => patch(idx, { tempo: ev.target.value || null })} placeholder="3-1-3-1" dir="ltr" />
+                            <div className="rounded-lg bg-muted/50 p-2">
+                              <div className="text-xs text-muted-foreground">tempo</div>
+                              <div className="font-mono text-xs">{e.tempo ?? "—"}</div>
                             </div>
-                            <div className="space-y-1">
-                              <Label className="text-xs">rest</Label>
-                              <Input value={e.repos ?? ""} onChange={(ev) => patch(idx, { repos: ev.target.value || null })} placeholder="1 min entre série" />
+                            <div className="rounded-lg bg-muted/50 p-2">
+                              <div className="text-xs text-muted-foreground">rest</div>
+                              <div>{e.repos ?? "—"}</div>
                             </div>
                           </div>
-                          <div className="space-y-1">
-                            <Label className="text-xs">reps</Label>
-                            <Textarea
-                              value={e.repetitions ?? ""}
-                              onChange={(ev) => patch(idx, { repetitions: ev.target.value || null })}
-                              placeholder="Entre 6 et 12 échec — Si >12 augmente charge — Si <5 Diminue charge"
-                              rows={3}
-                              className="text-xs"
-                            />
+                          <div className="rounded-lg bg-muted/50 p-2 text-sm">
+                            <div className="text-xs text-muted-foreground">reps</div>
+                            <div className="whitespace-pre-line text-xs leading-4">{e.repetitions ?? "—"}</div>
                           </div>
-                          <Button variant="ghost" size="icon" onClick={() => remove(idx)} className="h-8 w-full">
-                            <Trash2 className="size-4 text-destructive" /> حذف
-                          </Button>
                         </div>
                       );
                     })}
                   </div>
-
-                  <Button variant="outline" onClick={addRow} className="mt-3">
-                    <Plus /> أضف تمرين
-                  </Button>
                 </>
               )}
             </TabsContent>
           </Tabs>
         </CardContent>
       </Card>
+
+      <ExerciseFormDialog
+        open={formOpen}
+        onOpenChange={(o) => {
+          setFormOpen(o);
+          if (!o) setEditingIdx(null);
+        }}
+        data={formData}
+        onChange={(p) => setFormData((prev) => ({ ...prev, ...p }))}
+        onSubmit={handleFormSubmit}
+        curatedByCategory={curatedByCategory}
+        activeDays={activeDays}
+        isEditing={editingIdx !== null}
+      />
+
+      <AlertDialog open={removeIdx !== null} onOpenChange={(o) => { if (!o) setRemoveIdx(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>حذف التمرين</AlertDialogTitle>
+            <AlertDialogDescription>
+              هل تريد حذف التمرين &laquo;{removeIdx !== null ? exercises[removeIdx]?.nom : ""}&raquo;؟ هذا الإجراء لا رجعة فيه.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>إلغاء</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (removeIdx !== null) remove(removeIdx);
+                setRemoveIdx(null);
+              }}
+            >
+              حذف
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
@@ -647,7 +805,7 @@ function CopyTemplateDialog({ userId }: { userId: string }) {
           {members.length > 0 && (
             <>
               <div className="flex items-center gap-1.5 pt-2 text-xs font-semibold text-muted-foreground">
-                <UtensilsCrossed className="size-3.5" />
+                <Users className="size-3.5" />
                 خطط الأعضاء
               </div>
               {members.map((t) => (
@@ -693,7 +851,7 @@ function TemplateRow({
       <div className="min-w-0 flex-1 leading-tight">
         <div className="truncate text-sm font-semibold">{t.titre}</div>
         <div className="truncate text-xs text-muted-foreground">
-          {OBJECTIVE_LABELS[t.objectif]} • الإصدار {t.version}
+          {OBJECTIVE_LABELS[t.objectif]} · الإصدار {t.version}
         </div>
       </div>
       <Badge variant="secondary" className="shrink-0 text-[10px]">

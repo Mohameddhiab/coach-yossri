@@ -119,7 +119,7 @@ export default function DashboardPage() {
           label="ينتهي خلال 7 أيام"
           value={bientot}
           icon={<AlertTriangle />}
-          className="border-amber-500/40"
+          className="border-amber-500/40 bg-amber-500/[0.06]"
         />
         <ClickableStat
           href="/users"

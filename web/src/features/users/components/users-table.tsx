@@ -131,8 +131,9 @@ export function UsersTable() {
           }
         />
       ) : (
-        <div className="overflow-hidden rounded-xl border">
-          <Table>
+        <>
+          <div className="hidden overflow-x-auto rounded-xl border sm:block">
+            <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent">
                 <TableHead>العضو</TableHead>
@@ -227,7 +228,58 @@ export function UsersTable() {
               })}
             </TableBody>
           </Table>
-        </div>
+          </div>
+          <div className="space-y-2 sm:hidden">
+            {rows?.map((user) => {
+              const statusValue = getSubscriptionStatus(user.subscription);
+              const engagement = computeEngagement(user);
+              const stale =
+                user.days_since_last_weight === null || user.days_since_last_weight >= 14;
+              return (
+                <Link
+                  key={user.id}
+                  href={`/users/${user.id}`}
+                  className="flex items-center gap-3 rounded-xl border bg-card p-3 transition-colors hover:bg-muted/40"
+                >
+                  <UserAvatar prenom={user.prenom} nom={user.nom} />
+                  <div className="min-w-0 flex-1 leading-tight">
+                    <div className="flex items-center gap-1.5 font-semibold">
+                      <span
+                        title={`الالتزام: ${engagement.score}/100 — ${engagement.label}`}
+                        className={cn("size-2 shrink-0 rounded-full", ENGAGEMENT_DOT[engagement.color])}
+                      />
+                      <span className="truncate">
+                        {user.prenom} {user.nom}
+                      </span>
+                      <span className="text-[11px] font-normal text-muted-foreground tabular-nums">
+                        {engagement.score}
+                      </span>
+                    </div>
+                    <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                      <SubscriptionBadge status={statusValue} />
+                      {user.last_weight ? (
+                        <span
+                          className={cn(
+                            "text-xs tabular-nums",
+                            stale ? "text-destructive" : "text-muted-foreground",
+                          )}
+                        >
+                          {user.last_weight.poids_kg} كغ ·{" "}
+                          {user.days_since_last_weight === 0
+                            ? "اليوم"
+                            : `منذ ${user.days_since_last_weight} يوم`}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-destructive">لم يسجل وزنه بعد</span>
+                      )}
+                    </div>
+                  </div>
+                  <ChevronLeft className="size-4 shrink-0 text-muted-foreground" />
+                </Link>
+              );
+            })}
+          </div>
+        </>
       )}
     </div>
   );

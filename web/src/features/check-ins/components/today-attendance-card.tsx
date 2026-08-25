@@ -56,7 +56,7 @@ export function TodayAttendanceCard({
         {!rows.length ? (
           <EmptyState
             title="حتى واحد ما سجّل حضورو بعد"
-            description="استخدم الماسح في صفحة الحضور لتسجيل الأعضاء."
+            description="سجّل الحضور من صفحة الحضور بإدخال معرّف العضو."
           />
         ) : (
           <div className="flex flex-wrap gap-2">

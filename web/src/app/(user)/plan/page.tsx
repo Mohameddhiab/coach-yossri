@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { CalendarDays, Dumbbell, FileDown, UtensilsCrossed } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PageHeader } from "@/shared/components/page-header";
@@ -53,14 +53,15 @@ export default function MyPlanPage() {
   });
 
   const tier = me ? getActiveTier(me.subscription) : null;
-  const plansAllowed = tierAllows(tier, "meal-plan");
+  const plansAllowedMeal = tierAllows(tier, "meal-plan");
+  const plansAllowedWorkout = tierAllows(tier, "workout-plan");
 
   const planQuery = useQuery({
     queryKey: ["me", "plan"],
     queryFn: () => getPlan("me"),
-    enabled: plansAllowed,
+    enabled: plansAllowedMeal,
   });
-  const workoutQuery = useWorkoutPlan("me", plansAllowed);
+  const workoutQuery = useWorkoutPlan("me", plansAllowedWorkout);
 
   const { data: logs } = useWeightLogs("me");
   const { data: target } = useWeightTarget("me");
@@ -92,20 +93,35 @@ export default function MyPlanPage() {
     }
   };
 
-  if (subLoading || (plansAllowed && planQuery.isLoading)) return <PageLoader rows={2} />;
+  if (subLoading) return <PageLoader rows={2} />;
 
-  if (!plansAllowed) {
+  if (plansAllowedMeal && planQuery.isLoading) return <PageLoader rows={2} />;
+  if (plansAllowedWorkout && workoutQuery.isLoading) return <PageLoader rows={2} />;
+
+  if (plansAllowedMeal && planQuery.isError) {
+    return (
+      <div className="space-y-6">
+        <PageHeader title="خطتي" description="برنامجك — تغذية وتمارين 💪" />
+        <ErrorState onRetry={() => planQuery.refetch()} retrying={planQuery.isRefetching} />
+      </div>
+    );
+  }
+
+  if (plansAllowedWorkout && workoutQuery.isError) {
+    return (
+      <div className="space-y-6">
+        <PageHeader title="خطتي" description="برنامجك — تغذية وتمارين 💪" />
+        <ErrorState onRetry={() => workoutQuery.refetch()} retrying={workoutQuery.isRefetching} />
+      </div>
+    );
+  }
+
+  if (!plansAllowedMeal && !plansAllowedWorkout) {
     return (
       <div className="space-y-6">
         <PageHeader title="خطتي" description="برنامجك — تغذية وتمارين 💪" />
         <UpsellCard require="PREMIUM" />
       </div>
-    );
-  }
-
-  if (planQuery.isError) {
-    return (
-      <ErrorState onRetry={() => planQuery.refetch()} retrying={planQuery.isRefetching} />
     );
   }
 
@@ -126,7 +142,11 @@ export default function MyPlanPage() {
                 onClick={() => handlePdfDownload("workout")}
                 disabled={pdfBusy !== null}
               >
-                <FileDown />
+                {pdfBusy === "workout" ? (
+                  <span className="animate-spin inline-block size-4 border-2 border-current border-t-transparent rounded-full" />
+                ) : (
+                  <FileDown />
+                )}
                 {pdfBusy === "workout" ? "جاري التحميل..." : "PDF التمارين"}
               </Button>
             ) : undefined}
@@ -137,7 +157,11 @@ export default function MyPlanPage() {
                 onClick={() => handlePdfDownload("meal")}
                 disabled={pdfBusy !== null}
               >
-                <FileDown />
+                {pdfBusy === "meal" ? (
+                  <span className="animate-spin inline-block size-4 border-2 border-current border-t-transparent rounded-full" />
+                ) : (
+                  <FileDown />
+                )}
                 {pdfBusy === "meal" ? "جاري التحميل..." : "PDF الغذاء"}
               </Button>
             ) : undefined}
@@ -149,7 +173,7 @@ export default function MyPlanPage() {
         <EmptyState
           title="لا يوجد خطة بعد"
           description="لم يقم مدربك بإعداد خطتك بعد. ستصلك إشعار فور جاهزيتها."
-          action={<CalendarDays className="size-5 text-muted-foreground" />}
+          icon={<CalendarDays className="size-5 text-muted-foreground" />}
         />
       ) : (
         <>
@@ -181,7 +205,6 @@ export default function MyPlanPage() {
                 {workout ? <Dumbbell className="size-4 text-primary" /> : <UtensilsCrossed className="size-4 text-primary" />}
                 برنامج الأسبوع
               </CardTitle>
-              <CardDescription>اليوم معلّم باللون — {WEEK_DAY_LABELS[today]}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <Tabs value={day} onValueChange={setDay}>
@@ -192,6 +215,13 @@ export default function MyPlanPage() {
                   {WEEK_DAYS.map((d) => {
                     const isActive = d === day;
                     const isToday = d === today;
+                    const mealCount = plan?.meals.filter(
+                      (m) => m.jour_semaine === d || m.jour_semaine === "TOUS_LES_JOURS",
+                    ).length ?? 0;
+                    const exCount = workout?.exercises.filter(
+                      (e) => e.jour_semaine === d || e.jour_semaine === "TOUS_LES_JOURS",
+                    ).length ?? 0;
+                    const count = mealCount + exCount;
                     return (
                       <TabsTrigger
                         key={d}
@@ -202,29 +232,47 @@ export default function MyPlanPage() {
                           {isToday ? (
                             <span className={`size-1.5 shrink-0 rounded-full ${isActive ? "bg-primary" : "bg-primary/60"}`} />
                           ) : null}
-                          {isToday ? "اليوم" : WEEK_DAY_LABELS[d]}
+                          {WEEK_DAY_LABELS[d]}
+                          {isToday ? <span className="text-muted-foreground">· اليوم</span> : null}
+                          {count ? (
+                            <span
+                              className={`ms-1 inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-[11px] font-bold tabular-nums ${
+                                isActive ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                              }`}
+                            >
+                              {count}
+                            </span>
+                          ) : null}
                         </span>
                       </TabsTrigger>
                     );
                   })}
                 </TabsList>
                 {WEEK_DAYS.map((d) => (
-                  <TabsContent key={d} value={d} className="space-y-4 pt-4">
+                  <TabsContent key={d} value={d} className="grid gap-4 pt-4 lg:grid-cols-2 lg:items-start">
                     {plan ? (
-                      <>
-                        <h3 className="flex items-center gap-1.5 text-sm font-bold text-muted-foreground">
-                          <UtensilsCrossed className="size-3.5" /> الوجبات
-                        </h3>
-                        <MealPlanDayView plan={plan} day={d} highlightToday={d === today} accent />
-                      </>
+                      <Card>
+                        <CardHeader className="pb-2">
+                          <CardTitle className="flex items-center gap-1.5 text-sm font-bold">
+                            <UtensilsCrossed className="size-3.5 text-primary" /> الوجبات
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <MealPlanDayView plan={plan} day={d} highlightToday={d === today} accent />
+                        </CardContent>
+                      </Card>
                     ) : null}
                     {workout ? (
-                      <>
-                        <h3 className="flex items-center gap-1.5 text-sm font-bold text-muted-foreground">
-                          <Dumbbell className="size-3.5" /> التمارين
-                        </h3>
-                        <WorkoutPlanDayView day={d} exercises={workout.exercises} />
-                      </>
+                      <Card>
+                        <CardHeader className="pb-2">
+                          <CardTitle className="flex items-center gap-1.5 text-sm font-bold">
+                            <Dumbbell className="size-3.5 text-primary" /> التمارين
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <WorkoutPlanDayView day={d} exercises={workout.exercises} />
+                        </CardContent>
+                      </Card>
                     ) : null}
                     {!plan && !workout ? null : null}
                   </TabsContent>

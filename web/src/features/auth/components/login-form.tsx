@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Loader2, LogIn } from "lucide-react";
+import { Eye, EyeOff, Loader2, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -31,6 +31,7 @@ export function LoginForm() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -81,7 +82,27 @@ export function LoginForm() {
                 <FormItem>
                   <FormLabel>كلمة السر</FormLabel>
                   <FormControl>
-                    <Input type="password" dir="ltr" placeholder="••••••••" {...field} />
+                    <div className="relative">
+                      <Input
+                        type={showPassword ? "text" : "password"}
+                        dir="ltr"
+                        placeholder="••••••••"
+                        className="pe-10"
+                        {...field}
+                      />
+                      <button
+                        type="button"
+                        aria-label={showPassword ? "إخفاء كلمة السر" : "إظهار كلمة السر"}
+                        onClick={() => setShowPassword((v) => !v)}
+                        className="absolute end-2 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
+                      >
+                        {showPassword ? (
+                          <EyeOff className="size-4" />
+                        ) : (
+                          <Eye className="size-4" />
+                        )}
+                      </button>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -106,31 +127,33 @@ export function LoginForm() {
             </Button>
           </form>
         </Form>
-        <div className="mt-6 rounded-lg border border-dashed p-3 text-xs text-muted-foreground">
-          <div className="mb-1.5 font-semibold text-foreground">بيانات تجريبية (سيرفور محلي)</div>
-          <div className="flex flex-wrap justify-between gap-2">
-            <button
-              type="button"
-              className="hover:text-primary"
-              onClick={() => {
-                form.setValue("email", DEMO_CREDENTIALS.coach.email);
-                form.setValue("password", DEMO_CREDENTIALS.coach.password);
-              }}
-            >
-              المدرب: {DEMO_CREDENTIALS.coach.email} / {DEMO_CREDENTIALS.coach.password}
-            </button>
-            <button
-              type="button"
-              className="hover:text-primary"
-              onClick={() => {
-                form.setValue("email", DEMO_CREDENTIALS.user.email);
-                form.setValue("password", DEMO_CREDENTIALS.user.password);
-              }}
-            >
-              عضو: {DEMO_CREDENTIALS.user.email} / {DEMO_CREDENTIALS.user.password}
-            </button>
+        {process.env.NODE_ENV !== "production" && (
+          <div className="mt-6 rounded-lg border border-dashed p-3 text-xs text-muted-foreground">
+            <div className="mb-1.5 font-semibold text-foreground">بيانات تجريبية (سيرفور محلي)</div>
+            <div className="flex flex-wrap justify-between gap-2">
+              <button
+                type="button"
+                className="hover:text-primary"
+                onClick={() => {
+                  form.setValue("email", DEMO_CREDENTIALS.coach.email);
+                  form.setValue("password", DEMO_CREDENTIALS.coach.password);
+                }}
+              >
+                المدرب: {DEMO_CREDENTIALS.coach.email} / {DEMO_CREDENTIALS.coach.password}
+              </button>
+              <button
+                type="button"
+                className="hover:text-primary"
+                onClick={() => {
+                  form.setValue("email", DEMO_CREDENTIALS.user.email);
+                  form.setValue("password", DEMO_CREDENTIALS.user.password);
+                }}
+              >
+                عضو: {DEMO_CREDENTIALS.user.email} / {DEMO_CREDENTIALS.user.password}
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </CardContent>
     </Card>
   );

@@ -39,7 +39,6 @@ export const COACH_NAV: {
   { href: "/messages", label: "الرسائل", icon: MessagesSquare },
   { href: "/notifications", label: "الإشعارات", icon: BellRing },
   { href: "/classification", label: "التصنيف", icon: Trophy },
-  { href: "/users/new", label: "أضف عضو", icon: UserPlus, exact: true },
   { href: "/settings", label: "الإعدادات", icon: Settings },
 ];
 
@@ -74,6 +73,12 @@ function SidebarContent() {
         <Logo />
       </div>
       <nav className="flex-1 space-y-1 overflow-y-auto p-3">
+        <Button asChild className="mb-3 w-full justify-start gap-2 font-bold shadow-[0_8px_24px_-10px] shadow-primary/50">
+          <Link href="/users/new">
+            <UserPlus className="size-4" />
+            أضف عضو
+          </Link>
+        </Button>
         {COACH_NAV.map((item) => {
           const active = isActive(pathname, item.href, item.exact);
           return (

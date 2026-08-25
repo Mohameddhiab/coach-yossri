@@ -2,9 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Html5Qrcode } from "html5-qrcode";
 import { toast } from "sonner";
-import { CheckCircle2, Keyboard, ScanLine, XCircle } from "lucide-react";
+import { CheckCircle2, Keyboard, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -28,44 +27,10 @@ import { formatTime } from "@/lib/utils";
 export default function PointagePage() {
   const [scannedId, setScannedId] = useState<string | null>(null);
   const [manualId, setManualId] = useState("");
-  const [cameraFailed, setCameraFailed] = useState(false);
-  const scannerRef = useRef<Html5Qrcode | null>(null);
-  const scanningRef = useRef(false);
   const confirmRef = useRef<HTMLDivElement | null>(null);
   const createCheckIn = useCreateCheckIn();
   const { data: member, isLoading: memberLoading, error } = useResolveMember(scannedId);
   const { data: today } = useTodayCheckIns(30000);
-
-  useEffect(() => {
-    const el = document.getElementById("qr-reader");
-    if (!el || scannerRef.current) return;
-    const scanner = new Html5Qrcode("qr-reader");
-    scannerRef.current = scanner;
-    scanner
-      .start(
-        { facingMode: "environment" },
-        { fps: 10, qrbox: { width: 230, height: 230 } },
-        (decoded) => {
-          if (!scanningRef.current) {
-            scanningRef.current = true;
-            setScannedId(decoded);
-          }
-        },
-        () => {},
-      )
-      .then(() => setCameraFailed(false))
-      .catch(() => {
-        setCameraFailed(true);
-        toast.error("تعذر فتح الكاميرا — أدخل معرف البطاقة يدويًا");
-      });
-    return () => {
-      scanner
-        .stop()
-        .then(() => scanner.clear())
-        .catch(() => {});
-      scannerRef.current = null;
-    };
-  }, []);
 
   useEffect(() => {
     if (scannedId) {
@@ -75,13 +40,11 @@ export default function PointagePage() {
 
   const reset = () => {
     setScannedId(null);
-    scanningRef.current = false;
   };
 
   const submitManual = () => {
     const id = manualId.trim();
     if (!id) return;
-    scanningRef.current = true;
     setScannedId(id);
     setManualId("");
   };
@@ -101,45 +64,26 @@ export default function PointagePage() {
     <div className="space-y-6">
       <PageHeader
         title="تسجيل الحضور"
-        description="امسح بطاقة العضو لتسجيل حضوره في القاعة"
+        description="سجّل حضور الأعضاء في القاعة بإدخال معرّفهم"
       />
 
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <ScanLine className="size-5 text-primary" />
-            الماسح الضوئي
+            <Keyboard className="size-5 text-primary" />
+            إدخال معرف العضو
           </CardTitle>
-          <CardDescription>وجه الكاميرا نحو رمز QR على بطاقة العضو</CardDescription>
+          <CardDescription>أدخل معرّف العضو ثم اضغط تحقّق لتأكيد الحضور</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
-          {cameraFailed ? (
-            <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed py-8 text-center">
-              <XCircle className="size-6 text-destructive" />
-              <div className="text-sm font-semibold">تعذر فتح الكاميرا</div>
-              <div className="max-w-xs text-xs text-muted-foreground">
-                تحقق من صلاحيات الكاميرا في المتصفح، أو أدخل معرف البطاقة يدويًا أدناه
-              </div>
-              <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
-                أعد تشغيل السكانير
-              </Button>
-            </div>
-          ) : (
-            <div
-              id="qr-reader"
-              className="mx-auto w-full max-w-sm overflow-hidden rounded-xl border border-border"
-            />
-          )}
-
           <div className="mx-auto flex w-full max-w-sm items-center gap-2">
-            <Keyboard className="size-4 shrink-0 text-muted-foreground" />
             <Input
               dir="ltr"
-              placeholder="معرف البطاقة يدويًا…"
+              placeholder="معرّف العضو…"
               value={manualId}
               onChange={(e) => setManualId(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && submitManual()}
-              aria-label="معرف البطاقة"
+              aria-label="معرّف العضو"
             />
             <Button variant="outline" size="sm" onClick={submitManual} disabled={!manualId.trim()}>
               تحقّق
