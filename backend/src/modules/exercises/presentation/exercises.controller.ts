@@ -39,8 +39,6 @@ export class ExercisesController {
   }
 
   @Get()
-  @Roles("COACH")
-  @UseGuards(RolesGuard)
   async list(@Query("q") q?: string) {
     return this.listLocalUC.execute(q);
   }

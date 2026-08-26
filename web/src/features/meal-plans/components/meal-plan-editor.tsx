@@ -167,6 +167,7 @@ function PlanEditorInner({ plan, userId }: { plan: MealPlan | null; userId: stri
     if (!dirty) return;
     const handler = (e: BeforeUnloadEvent) => {
       e.preventDefault();
+      e.returnValue = "";
     };
     window.addEventListener("beforeunload", handler);
     return () => window.removeEventListener("beforeunload", handler);
@@ -267,16 +268,18 @@ function PlanEditorInner({ plan, userId }: { plan: MealPlan | null; userId: stri
     <div className="space-y-6">
       <div className="sticky top-16 z-30 flex flex-wrap items-center justify-end gap-2 rounded-xl border bg-background/90 px-3 py-2 backdrop-blur">
         {plan && (
-          <Badge variant="secondary" className="me-auto">
+          <Badge variant="outline" className="me-auto tabular-nums">
             الإصدار {plan.version}
           </Badge>
         )}
-        <CalorieDialog userId={userId} objectif={objectif} onApply={applyCalories} />
-        <CopyPlanDialog userId={userId} />
-        <Button variant="outline" onClick={() => window.print()}>
-          <Printer />
-          طباعة
-        </Button>
+        <div className="flex items-center gap-1.5 rounded-lg bg-muted/40 p-1">
+          <CalorieDialog userId={userId} objectif={objectif} onApply={applyCalories} />
+          <CopyPlanDialog userId={userId} />
+          <Button variant="ghost" size="sm" onClick={() => window.print()}>
+            <Printer className="size-4" />
+            طباعة
+          </Button>
+        </div>
         <Button onClick={save} disabled={saving}>
           {saving ? <Loader2 className="animate-spin" /> : <Save />}
           حفظ الخطة
@@ -284,10 +287,10 @@ function PlanEditorInner({ plan, userId }: { plan: MealPlan | null; userId: stri
       </div>
 
       <Card>
-        <CardContent className="space-y-4 p-4">
-          <div className="grid gap-4 sm:grid-cols-2">
+        <CardContent className="space-y-5 p-5">
+          <div className="grid gap-4 sm:grid-cols-[2fr_1fr]">
             <div className="space-y-2">
-              <Label>عنوان الخطة</Label>
+              <Label className="text-xs font-semibold">عنوان الخطة</Label>
               <Input
                 placeholder="مثال: خطة زيادة الكتلة — المرحلة 1"
                 value={titre}
@@ -295,7 +298,7 @@ function PlanEditorInner({ plan, userId }: { plan: MealPlan | null; userId: stri
               />
             </div>
             <div className="space-y-2">
-              <Label>الهدف</Label>
+              <Label className="text-xs font-semibold">الهدف</Label>
               <Select value={objectif} onValueChange={(v: string) => setObjectif(v as PlanObjective)}>
                 <SelectTrigger>
                   <SelectValue />
@@ -313,7 +316,7 @@ function PlanEditorInner({ plan, userId }: { plan: MealPlan | null; userId: stri
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {PLAN_MACRO_FIELDS.map((field) => (
               <div key={field.key} className="space-y-1.5">
-                <Label className="text-xs">{field.label}</Label>
+                <Label className="text-xs font-semibold">{field.label}</Label>
                 <div className="relative">
                   <Input
                     type="number"
@@ -329,7 +332,7 @@ function PlanEditorInner({ plan, userId }: { plan: MealPlan | null; userId: stri
                       }))
                     }
                   />
-                  <span className="absolute end-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground">
+                  <span className="absolute end-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
                     {field.unit}
                   </span>
                 </div>
@@ -342,7 +345,7 @@ function PlanEditorInner({ plan, userId }: { plan: MealPlan | null; userId: stri
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-base">الوجبات</CardTitle>
-          <CardDescription>
+          <CardDescription className="text-xs">
             نظّم الوجبات حسب اليوم — «كل الأيام» = تتكرر يومياً.
           </CardDescription>
         </CardHeader>
@@ -353,11 +356,15 @@ function PlanEditorInner({ plan, userId }: { plan: MealPlan | null; userId: stri
           >
             <TabsList
               variant="line"
+              aria-label="أيام الوجبات"
               className="w-full justify-start gap-0 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden rounded-none border-b bg-transparent p-0 h-auto"
             >
               {dayTabs.map((d) => {
                 const isActive = d === activeDay;
                 const isToday = d === today;
+                const count = d === "TOUS_LES_JOURS"
+                  ? meals.length
+                  : meals.filter((m) => m.jour_semaine === d).length;
                 return (
                   <TabsTrigger
                     key={d}
@@ -369,6 +376,15 @@ function PlanEditorInner({ plan, userId }: { plan: MealPlan | null; userId: stri
                         <span className={`size-1.5 shrink-0 rounded-full ${isActive ? "bg-primary" : "bg-primary/60"}`} />
                       ) : null}
                       {WEEK_DAY_LABELS[d]}
+                      {count ? (
+                        <span
+                          className={`ms-1 inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-xs font-bold tabular-nums ${
+                            isActive ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                          }`}
+                        >
+                          {count}
+                        </span>
+                      ) : null}
                     </span>
                   </TabsTrigger>
                 );
@@ -392,7 +408,7 @@ function PlanEditorInner({ plan, userId }: { plan: MealPlan | null; userId: stri
                       <span className="rounded-md bg-primary/12 px-2 py-0.5 text-xs font-bold text-primary">
                         {MEAL_TYPE_LABELS[type]}
                       </span>
-                      <Button variant="ghost" size="xs" onClick={() => addMeal(type)}>
+                      <Button variant="ghost" size="sm" onClick={() => addMeal(type)}>
                         <Plus />
                         أضف وجبة
                       </Button>
@@ -400,9 +416,11 @@ function PlanEditorInner({ plan, userId }: { plan: MealPlan | null; userId: stri
                     {typeMeals.map((meal) => {
                       const key = mealId(meal);
                       return (
-                        <div key={key} className="rounded-xl border p-3">
+                        <div key={key} className="rounded-xl border bg-card p-4">
                           <Textarea
+                            id={`meal-desc-${key}`}
                             rows={2}
+                            maxLength={400}
                             placeholder="وصف الوجبة: الأكل والكميات..."
                             value={meal.description}
                             onChange={(e) => updateMeal(key, { description: e.target.value })}
@@ -436,7 +454,7 @@ function PlanEditorInner({ plan, userId }: { plan: MealPlan | null; userId: stri
                               value={meal.alternatives ?? ""}
                               onChange={(e) => updateMeal(key, { alternatives: e.target.value })}
                             />
-                            <Button variant="ghost" size="xs" onClick={() => removeMeal(key)}>
+                            <Button variant="ghost" size="sm" onClick={() => removeMeal(key)}>
                               <Trash2 />
                               احذف الوجبة
                             </Button>
@@ -493,8 +511,8 @@ function CalorieDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">
-          <Activity />
+        <Button variant="ghost" size="sm">
+          <Activity className="size-4" />
           حساب السعرات
         </Button>
       </DialogTrigger>
@@ -562,7 +580,7 @@ function CalorieDialog({
                   <span dir="ltr">دهون {suggestion.lipides_g}غ</span>
                 </div>
               </div>
-              <div className="text-[11px] text-muted-foreground">
+              <div className="text-xs text-muted-foreground">
                 الوزن {data.poids_kg}كغ • الطول {data.taille_cm}سم • العمر {data.age} سنة
               </div>
             </>
@@ -603,8 +621,8 @@ function CopyPlanDialog({ userId }: { userId: string }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">
-          <Copy />
+        <Button variant="ghost" size="sm">
+          <Copy className="size-4" />
           انسخ من خطة
         </Button>
       </DialogTrigger>
@@ -648,7 +666,7 @@ function CopyPlanDialog({ userId }: { userId: string }) {
                       {OBJECTIVE_LABELS[t.objectif]} • الإصدار {t.version}
                     </div>
                   </div>
-                  <Badge variant="secondary" className="text-[10px]">
+                  <Badge variant="secondary" className="text-xs">
                     {formatDate(t.updated_at)}
                   </Badge>
                 </button>
@@ -676,7 +694,7 @@ function CopyPlanDialog({ userId }: { userId: string }) {
                       {t.user_name} • {OBJECTIVE_LABELS[t.objectif]} • الإصدار {t.version}
                     </div>
                   </div>
-                  <Badge variant="secondary" className="text-[10px]">
+                  <Badge variant="secondary" className="text-xs">
                     {formatDate(t.updated_at)}
                   </Badge>
                 </button>

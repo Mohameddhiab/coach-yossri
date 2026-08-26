@@ -121,6 +121,7 @@ export class PrismaProgressRepository implements ProgressRepository {
     const rows = await this.prisma.progressPhoto.findMany({
       where: { userId },
       orderBy: { date: "desc" },
+      take: 20,
     });
     return rows.map((r) => this.mapPhoto(r));
   }

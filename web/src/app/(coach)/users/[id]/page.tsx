@@ -41,7 +41,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -211,23 +210,20 @@ export default function UserDetailPage() {
             <SubscriptionBadge status={status} />
             <TierBadge tier={tier} />
             {remaining > 0 && (
-              <span
-                className={
-                  status === "EXPIRE_BIENTOT"
-                    ? "flex items-center gap-1 text-xs font-semibold text-amber-600 tabular-nums dark:text-amber-400"
-                    : "text-xs text-muted-foreground tabular-nums"
-                }
+              <Badge
+                variant="outline"
+                className={status === "EXPIRE_BIENTOT" ? "border-amber-500/40 text-amber-600 dark:text-amber-400 tabular-nums" : "text-muted-foreground tabular-nums"}
               >
                 {status === "EXPIRE_BIENTOT" && (
-                  <AlertTriangle className="inline size-3" />
+                  <AlertTriangle className="me-1 inline size-3" />
                 )}
                 {remaining} يوم باقي
-              </span>
+              </Badge>
             )}
           </span>
         }
         actions={
-          <>
+          <div className="flex flex-wrap gap-2">
             <RenewDialog userId={userId} userName={`${user.prenom} ${user.nom}`} />
             <Button asChild variant="outline">
               <Link href={`/users/${userId}/plan`}>الخطة الغذائية</Link>
@@ -238,23 +234,23 @@ export default function UserDetailPage() {
                 خطة التمارين
               </Link>
             </Button>
-          </>
+          </div>
         }
       />
 
       <Tabs defaultValue="overview">
-        <TabsList className="w-full justify-start overflow-x-auto sm:w-auto">
-          <TabsTrigger value="overview">نظرة عامة</TabsTrigger>
-          <TabsTrigger value="suivi">المتابعة</TabsTrigger>
-          <TabsTrigger value="progress">التقدّم</TabsTrigger>
-          <TabsTrigger value="plan">الخطة</TabsTrigger>
+        <TabsList aria-label="أقسام الملف" className="w-full justify-start overflow-x-auto sm:w-auto">
+          <TabsTrigger value="overview" className="focus-visible:ring-2 focus-visible:ring-primary/50">نظرة عامة</TabsTrigger>
+          <TabsTrigger value="suivi" className="focus-visible:ring-2 focus-visible:ring-primary/50">المتابعة</TabsTrigger>
+          <TabsTrigger value="progress" className="focus-visible:ring-2 focus-visible:ring-primary/50">التقدّم</TabsTrigger>
+          <TabsTrigger value="plan" className="focus-visible:ring-2 focus-visible:ring-primary/50">الخطة</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
           <div className="grid gap-4 lg:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">معلومات العضو</CardTitle>
+                <CardTitle className="text-[15px] font-bold">معلومات العضو</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 text-sm">
                 <div className="flex items-center gap-3">
@@ -287,17 +283,15 @@ export default function UserDetailPage() {
                       if (!o) setPasswordResult(null);
                     }}
                   >
-                    <DialogTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={handleResetPassword}
-                        disabled={resetPassword.isPending}
-                      >
-                        <KeyRound className="size-4" />
-                        غيّر كلمة السر
-                      </Button>
-                    </DialogTrigger>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleResetPassword}
+                      disabled={resetPassword.isPending}
+                    >
+                      <KeyRound className="size-4" />
+                      {resetPassword.isPending ? "جارٍ التغيير..." : "غيّر كلمة السر"}
+                    </Button>
                     <DialogContent>
                       <DialogHeader>
                         <DialogTitle>كلمة السر الجديدة</DialogTitle>
@@ -364,7 +358,7 @@ export default function UserDetailPage() {
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">الاشتراك الحالي</CardTitle>
+                <CardTitle className="text-[15px] font-bold">الاشتراك الحالي</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 text-sm">
                 {user.subscription ? (
@@ -457,7 +451,7 @@ export default function UserDetailPage() {
           </div>
         </TabsContent>
 
-        <TabsContent value="progress" className="space-y-6">
+        <TabsContent value="progress" className="space-y-4">
           <WeightTargetCard userId={userId} logs={weightLogs} canEdit />
           <WeightProjectionCard logs={weightLogs} />
           <WeeklyReport
@@ -468,7 +462,7 @@ export default function UserDetailPage() {
           />
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">منحنى الوزن</CardTitle>
+              <CardTitle className="text-sm font-semibold text-muted-foreground">منحنى الوزن</CardTitle>
             </CardHeader>
             <CardContent>
               {weightLogs && weightLogs.length > 0 ? (

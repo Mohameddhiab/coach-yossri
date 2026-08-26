@@ -122,8 +122,8 @@ function draftFromPlan(plan: WorkoutPlan | null): {
   };
 }
 
-const TH = "whitespace-nowrap border-b bg-muted/60 px-2 py-2 text-xs font-bold text-muted-foreground";
-const TD = "border-b px-1.5 py-1.5 align-top";
+const TH = "whitespace-nowrap border-b bg-muted px-2 py-2 text-xs font-bold text-muted-foreground";
+const TD = "border-b px-2 py-2 align-top";
 
 const CATEGORY_ORDER = ["Chest", "Back", "Shoulders", "Biceps", "Triceps", "Legs", "Abs"] as const;
 const CATEGORY_LABEL: Record<string, string> = {
@@ -193,9 +193,9 @@ function ExerciseFormDialog({
         </DialogHeader>
         <div className="space-y-4 py-2">
           <div className="space-y-1.5">
-            <Label>اليوم</Label>
+            <Label htmlFor="ex-day">اليوم</Label>
             <Select value={data.jour_semaine} onValueChange={(v) => onChange({ jour_semaine: v as WeekDay })}>
-              <SelectTrigger>
+              <SelectTrigger id="ex-day">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -209,16 +209,16 @@ function ExerciseFormDialog({
           </div>
 
           <div className="space-y-1.5">
-            <Label>Nom exercice *</Label>
+            <Label htmlFor="ex-search">Nom exercice *</Label>
             <Input
+              id="ex-search"
               value={search || data.nom}
               onChange={(e) => {
                 setSearch(e.target.value);
                 if (!e.target.value) onChange({ nom: "" });
               }}
               onFocus={() => setSearch("")}
-              placeholder="ابحث بالاسم..."
-              className="mb-1"
+              placeholder="ابحث عن تمرين — اكتب اسمًا..."
             />
             <Select
               value={data.nom || ""}
@@ -236,7 +236,7 @@ function ExerciseFormDialog({
               }}
             >
               <SelectTrigger>
-                <SelectValue placeholder="اختر تمرينًا من القائمة" />
+                <SelectValue placeholder="أو اختر من القائمة" />
               </SelectTrigger>
               <SelectContent className="max-h-80">
                 {Object.keys(filteredByCategory).length === 0 && (
@@ -259,7 +259,7 @@ function ExerciseFormDialog({
           </div>
 
           <div className="flex justify-center">
-            <div className="flex size-24 items-center justify-center overflow-hidden rounded-xl border bg-muted">
+            <div className="flex size-28 items-center justify-center overflow-hidden rounded-xl border-2 border-border bg-muted shadow-sm">
               {displayImage ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={displayImage} alt={data.nom || "exercice"} className="h-full w-full object-cover" />
@@ -271,35 +271,38 @@ function ExerciseFormDialog({
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label>charge</Label>
-              <Input value={data.charge ?? ""} onChange={(e) => onChange({ charge: e.target.value || null })} placeholder="15 kg" />
+              <Label htmlFor="ex-charge">charge</Label>
+              <Input id="ex-charge" value={data.charge ?? ""} onChange={(e) => onChange({ charge: e.target.value || null })} placeholder="15 kg" inputMode="decimal" />
             </div>
             <div className="space-y-1.5">
-              <Label>Nbre serie</Label>
-              <Input value={data.series ?? ""} onChange={(e) => onChange({ series: e.target.value || null })} placeholder="4 3 2" dir="ltr" />
+              <Label htmlFor="ex-series">Nbre serie</Label>
+              <Input id="ex-series" value={data.series ?? ""} onChange={(e) => onChange({ series: e.target.value || null })} placeholder="4 3 2" dir="ltr" />
             </div>
             <div className="space-y-1.5">
-              <Label>tempo</Label>
-              <Input value={data.tempo ?? ""} onChange={(e) => onChange({ tempo: e.target.value || null })} placeholder="3-1-3-1" dir="ltr" className="font-mono" />
+              <Label htmlFor="ex-tempo">tempo</Label>
+              <Input id="ex-tempo" value={data.tempo ?? ""} onChange={(e) => onChange({ tempo: e.target.value || null })} placeholder="3-1-3-1" dir="ltr" className="font-mono" />
             </div>
             <div className="space-y-1.5">
-              <Label>rest</Label>
-              <Input value={data.repos ?? ""} onChange={(e) => onChange({ repos: e.target.value || null })} placeholder="1 min entre série" />
+              <Label htmlFor="ex-rest">rest</Label>
+              <Input id="ex-rest" value={data.repos ?? ""} onChange={(e) => onChange({ repos: e.target.value || null })} placeholder="1 min entre série" />
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <Label>reps</Label>
+            <Label htmlFor="ex-reps">reps</Label>
             <Textarea
+              id="ex-reps"
               value={data.repetitions ?? ""}
               onChange={(e) => onChange({ repetitions: e.target.value || null })}
-              placeholder="Entre 6 et 12 échec&#10;Si >12 augmente charge&#10;Si <5 Diminue charge"
+              placeholder="سطر لكل مجموعة — مثال: 6-12 إخفاق"
+              maxLength={300}
               rows={3}
               className="text-sm leading-4"
             />
+            <p className="text-xs text-muted-foreground">سطر لكل مجموعة: 6-12 إخفاق، {">"}12 زِد الحِمل، {"<"}5 خِفِّض</p>
           </div>
         </div>
-        <DialogFooter>
+        <DialogFooter className="gap-2">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             إلغاء
           </Button>
@@ -372,6 +375,7 @@ export function WorkoutPlanEditor({ userId }: { userId: string }) {
     if (!dirty) return;
     const handler = (e: BeforeUnloadEvent) => {
       e.preventDefault();
+      e.returnValue = "";
     };
     window.addEventListener("beforeunload", handler);
     return () => window.removeEventListener("beforeunload", handler);
@@ -478,7 +482,7 @@ export function WorkoutPlanEditor({ userId }: { userId: string }) {
     <div className="space-y-4">
       <div className="sticky top-16 z-30 flex flex-wrap items-center justify-end gap-2 rounded-xl border bg-background/90 px-3 py-2 backdrop-blur">
         {plan ? (
-          <Badge variant="secondary" className="me-auto">
+          <Badge variant="outline" className="me-auto tabular-nums">
             الإصدار {plan.version}
           </Badge>
         ) : (
@@ -537,6 +541,7 @@ export function WorkoutPlanEditor({ userId }: { userId: string }) {
           <Tabs value={day} onValueChange={(v) => setDay(v as WeekDay)}>
             <TabsList
               variant="line"
+              aria-label="أيام التمارين"
               className="w-full justify-start gap-0 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden rounded-none border-b bg-transparent p-0 h-auto"
             >
               {activeDays.map((d) => {
@@ -556,7 +561,7 @@ export function WorkoutPlanEditor({ userId }: { userId: string }) {
                       {WEEK_DAY_LABELS[d]}
                       {count ? (
                         <span
-                          className={`ms-1 inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-[11px] font-bold tabular-nums ${
+                          className={`ms-1 inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-xs font-bold tabular-nums ${
                             isActive ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
                           }`}
                         >
@@ -569,7 +574,7 @@ export function WorkoutPlanEditor({ userId }: { userId: string }) {
               })}
             </TabsList>
 
-            <TabsContent value={day} className="pt-4">
+            <TabsContent value={day} className="space-y-4 pt-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-bold">
                   تمارين يوم {WEEK_DAY_LABELS[day]}
@@ -581,15 +586,17 @@ export function WorkoutPlanEditor({ userId }: { userId: string }) {
               </div>
 
               {!dayRows.length ? (
-                <EmptyState
-                  title={`لا يوجد تمارين يوم ${WEEK_DAY_LABELS[day]}`}
-                  description="أضف تمرينًا من النموذج"
-                  action={
-                    <Button onClick={openAddForm}>
-                      <Plus /> أضف تمرين
-                    </Button>
-                  }
-                />
+                <div className="py-10">
+                  <EmptyState
+                    title={`لا يوجد تمارين يوم ${WEEK_DAY_LABELS[day]}`}
+                    description="أضف تمرينًا من النموذج"
+                    action={
+                      <Button onClick={openAddForm}>
+                        <Plus /> أضف تمرين
+                      </Button>
+                    }
+                  />
+                </div>
               ) : (
                 <>
                   {/* Desktop table */}
@@ -776,8 +783,8 @@ function CopyTemplateDialog({ userId }: { userId: string }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">
-          <Copy />
+        <Button variant="ghost" size="sm">
+          <Copy className="size-4" />
           انسخ من خطة
         </Button>
       </DialogTrigger>
@@ -854,7 +861,7 @@ function TemplateRow({
           {OBJECTIVE_LABELS[t.objectif]} · الإصدار {t.version}
         </div>
       </div>
-      <Badge variant="secondary" className="shrink-0 text-[10px]">
+      <Badge variant="secondary" className="shrink-0 text-xs">
         {formatDateShort(t.updated_at)}
       </Badge>
     </button>

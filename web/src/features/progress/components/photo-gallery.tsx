@@ -50,7 +50,7 @@ export function PhotoGallery({ userId, canEdit = true }: { userId: string; canEd
             <input
               ref={inputRef}
               type="file"
-              accept="image/*"
+              accept="image/jpeg,image/png,image/webp"
               aria-label="اختر صورة للتقدم"
               className="hidden"
               onChange={(e) => onFile(e.target.files?.[0])}

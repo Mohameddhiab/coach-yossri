@@ -37,6 +37,11 @@ export function proxy(request: NextRequest) {
 
   if (!role) {
     if (!isAuthPage && pathname !== "/") {
+      const isRsc =
+        request.headers.get("rsc") === "1" ||
+        request.nextUrl.searchParams.has("_rsc") ||
+        request.headers.has("next-router-state-tree");
+      if (isRsc) return NextResponse.next();
       const url = request.nextUrl.clone();
       url.pathname = "/login";
       url.search = "";

@@ -140,7 +140,8 @@ export default function MyPlanPage() {
                 variant="outline"
                 size="sm"
                 onClick={() => handlePdfDownload("workout")}
-                disabled={pdfBusy !== null}
+                disabled={pdfBusy === "workout"}
+                aria-busy={pdfBusy === "workout"}
               >
                 {pdfBusy === "workout" ? (
                   <span className="animate-spin inline-block size-4 border-2 border-current border-t-transparent rounded-full" />
@@ -155,7 +156,8 @@ export default function MyPlanPage() {
                 variant="outline"
                 size="sm"
                 onClick={() => handlePdfDownload("meal")}
-                disabled={pdfBusy !== null}
+                disabled={pdfBusy === "meal"}
+                aria-busy={pdfBusy === "meal"}
               >
                 {pdfBusy === "meal" ? (
                   <span className="animate-spin inline-block size-4 border-2 border-current border-t-transparent rounded-full" />
@@ -210,6 +212,7 @@ export default function MyPlanPage() {
               <Tabs value={day} onValueChange={setDay}>
                 <TabsList
                   variant="line"
+                  aria-label="أيام الأسبوع"
                   className="w-full justify-start gap-0 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden rounded-none border-b bg-transparent p-0 h-auto"
                 >
                   {WEEK_DAYS.map((d) => {
@@ -236,7 +239,7 @@ export default function MyPlanPage() {
                           {isToday ? <span className="text-muted-foreground">· اليوم</span> : null}
                           {count ? (
                             <span
-                              className={`ms-1 inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-[11px] font-bold tabular-nums ${
+                              className={`ms-1 inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-xs font-bold tabular-nums ${
                                 isActive ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
                               }`}
                             >
@@ -251,28 +254,24 @@ export default function MyPlanPage() {
                 {WEEK_DAYS.map((d) => (
                   <TabsContent key={d} value={d} className="grid gap-4 pt-4 lg:grid-cols-2 lg:items-start">
                     {plan ? (
-                      <Card>
-                        <CardHeader className="pb-2">
-                          <CardTitle className="flex items-center gap-1.5 text-sm font-bold">
-                            <UtensilsCrossed className="size-3.5 text-primary" /> الوجبات
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
+                      <div className="rounded-xl border bg-card">
+                        <div className="flex items-center gap-1.5 px-4 pt-4 pb-2 text-sm font-bold">
+                          <UtensilsCrossed className="size-3.5 text-primary" /> الوجبات
+                        </div>
+                        <div className="px-4 pb-4">
                           <MealPlanDayView plan={plan} day={d} highlightToday={d === today} accent />
-                        </CardContent>
-                      </Card>
+                        </div>
+                      </div>
                     ) : null}
                     {workout ? (
-                      <Card>
-                        <CardHeader className="pb-2">
-                          <CardTitle className="flex items-center gap-1.5 text-sm font-bold">
-                            <Dumbbell className="size-3.5 text-primary" /> التمارين
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
+                      <div className="rounded-xl border bg-card">
+                        <div className="flex items-center gap-1.5 px-4 pt-4 pb-2 text-sm font-bold">
+                          <Dumbbell className="size-3.5 text-primary" /> التمارين
+                        </div>
+                        <div className="px-4 pb-4">
                           <WorkoutPlanDayView day={d} exercises={workout.exercises} />
-                        </CardContent>
-                      </Card>
+                        </div>
+                      </div>
                     ) : null}
                     {!plan && !workout ? null : null}
                   </TabsContent>

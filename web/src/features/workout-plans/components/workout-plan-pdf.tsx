@@ -1,9 +1,25 @@
 "use client";
 
+import { jsPDF } from "jspdf";
 import type { WeekDay } from "@/shared/lib/domain";
 import { OBJECTIVE_LABELS, WEEK_DAYS, WEEK_DAY_LABELS } from "@/shared/lib/domain";
 import type { WorkoutPlan } from "@/features/workout-plans/api/workoutPlans.api";
 import { formatDateShort } from "@/lib/utils";
+
+export async function downloadWorkoutPdf(element: HTMLElement, filename: string) {
+  const doc = new jsPDF({ unit: "px", format: "a4", compress: true });
+  await doc.html(element, {
+    margin: 0,
+    autoPaging: "slice",
+    html2canvas: {
+      scale: 2,
+      backgroundColor: "#ffffff",
+      windowWidth: element.scrollWidth,
+      useCORS: true,
+    },
+  });
+  doc.save(filename);
+}
 
 export function WorkoutPlanPdfDocument({ plan }: { plan: WorkoutPlan }) {
   const hasWgerImages = plan.exercises.some((e) => !!e.image_url);
