@@ -55,10 +55,16 @@ export function UsersTable() {
   const deferredSearch = useDebounced(search, 300);
   const [status, setStatus] = useState<SubscriptionStatus | "TOUS">("TOUS");
   const [byEngagement, setByEngagement] = useState(false);
+  const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const { data: users, isLoading, isError, refetch, isRefetching } = useUsers(
     deferredSearch,
     status,
   );
+
+  useEffect(() => {
+    const timer = setInterval(() => setPlaceholderIndex((index) => (index + 1) % 2), 2600);
+    return () => clearInterval(timer);
+  }, []);
 
   const rows = useMemo(
     () =>
@@ -76,7 +82,7 @@ export function UsersTable() {
         <div className="relative min-w-52 flex-1 sm:max-w-xs">
           <Search className="absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="بحث بالاسم، البريد الإلكتروني أو الهاتف..."
+             placeholder={placeholderIndex === 0 ? "بحث بالاسم..." : "بحث بالبريد الإلكتروني..."}
             aria-label="بحث عن عضو"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -151,9 +157,9 @@ export function UsersTable() {
                 const stale =
                   user.days_since_last_weight === null || user.days_since_last_weight >= 14;
                 return (
-                  <TableRow
+                    <TableRow
                     key={user.id}
-                    className="cursor-pointer"
+                     className="cursor-pointer transition-colors hover:bg-primary/5"
                     tabIndex={0}
                     onClick={() => router.push(`/users/${user.id}`)}
                     onKeyDown={(e) => {
@@ -165,7 +171,17 @@ export function UsersTable() {
                   >
                     <TableCell>
                       <div className="flex items-center gap-3">
-                        <UserAvatar prenom={user.prenom} nom={user.nom} />
+                         <UserAvatar
+                           prenom={user.prenom}
+                           nom={user.nom}
+                           className={cn(
+                             "ring-2 ring-offset-2 ring-offset-card",
+                             statusValue === "ACTIF" && "ring-emerald-500/70",
+                             statusValue === "ESSAI" && "ring-sky-500/70",
+                             statusValue === "EXPIRE_BIENTOT" && "ring-amber-500/70",
+                             statusValue === "EXPIRE" && "ring-destructive/70",
+                           )}
+                         />
                         <div className="leading-tight">
                           <div className="flex items-center gap-1.5 font-semibold">
                             <span
@@ -239,9 +255,25 @@ export function UsersTable() {
                 <Link
                   key={user.id}
                   href={`/users/${user.id}`}
-                  className="flex items-center gap-3 rounded-xl border bg-card p-3 transition-colors hover:bg-muted/40"
+                   className={cn(
+                     "flex items-center gap-3 rounded-xl border border-r-4 bg-card p-3 shadow-sm transition-[background-color,transform,box-shadow] hover:-translate-y-0.5 hover:bg-primary/5 hover:shadow-md",
+                     statusValue === "ACTIF" && "border-r-emerald-500",
+                     statusValue === "ESSAI" && "border-r-sky-500",
+                     statusValue === "EXPIRE_BIENTOT" && "border-r-amber-500",
+                     statusValue === "EXPIRE" && "border-r-destructive",
+                   )}
                 >
-                  <UserAvatar prenom={user.prenom} nom={user.nom} />
+                   <UserAvatar
+                     prenom={user.prenom}
+                     nom={user.nom}
+                     className={cn(
+                       "ring-2 ring-offset-2 ring-offset-card",
+                       statusValue === "ACTIF" && "ring-emerald-500/70",
+                       statusValue === "ESSAI" && "ring-sky-500/70",
+                       statusValue === "EXPIRE_BIENTOT" && "ring-amber-500/70",
+                       statusValue === "EXPIRE" && "ring-destructive/70",
+                     )}
+                   />
                   <div className="min-w-0 flex-1 leading-tight">
                     <div className="flex items-center gap-1.5 font-semibold">
                       <span
