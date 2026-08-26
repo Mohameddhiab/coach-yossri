@@ -22,6 +22,7 @@ import { useGoal } from "@/features/goals/hooks/useGoals";
 import { currentStreak } from "@/features/goals/lib/streak";
 import { formatDate } from "@/lib/utils";
 import { cn } from "@/lib/utils";
+import { AnimatedCounter } from "@/components/ui/animated-counter";
 import type { PlanObjective } from "@/shared/lib/domain";
 
 function trendFor(diff: number | null, objectif: PlanObjective | null) {
@@ -95,6 +96,18 @@ export default function MyProgressPage() {
       <WeightTargetCard userId="me" logs={sorted} canEdit />
       <WeightProjectionCard logs={sorted} />
 
+      <Card className="border-primary/20 bg-gradient-to-l from-primary/10 to-transparent">
+        <CardContent className="flex items-center gap-3 p-4">
+          <span className="flex size-11 items-center justify-center rounded-xl bg-primary/15 text-2xl">🔥</span>
+          <div>
+            <div className="text-xs text-muted-foreground">أيام الالتزام المتتالية</div>
+            <div className="text-2xl font-black text-primary">
+              <AnimatedCounter value={currentStreak(goal?.checkins ?? [])} suffix=" يوم" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center justify-between text-base">
@@ -137,8 +150,12 @@ export default function MyProgressPage() {
           </CardHeader>
           <CardContent>
             <div className="divide-y">
-              {sorted.slice(0, 8).map((log) => (
-                <div key={log.id} className="flex items-center justify-between py-2.5 text-sm">
+               {sorted.slice(0, 8).map((log, index) => (
+                 <div
+                   key={log.id}
+                   className="animate-slide-up flex items-center justify-between py-2.5 text-sm"
+                   style={{ animationDelay: `${index * 50}ms` }}
+                 >
                   <div>
                     <div className="font-medium">{formatDate(log.date)}</div>
                     {log.note && (
