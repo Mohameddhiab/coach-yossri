@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowRight, Loader2, SendHorizonal } from "lucide-react";
+import { ArrowRight, Loader2, MessageCircle, SendHorizonal } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -87,9 +87,12 @@ export function ChatPanel({
         ) : isError ? (
           <ErrorState onRetry={() => refetch()} retrying={isRefetching} />
         ) : !messages?.length ? (
-          <p className="py-8 text-center text-sm text-muted-foreground">
-            {emptyHint ?? "ابدا المحادثة — ابعث أول رسالة 👋"}
-          </p>
+           <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
+             <span className="flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+               <MessageCircle className="size-7" />
+             </span>
+             <p className="text-sm text-muted-foreground">{emptyHint ?? "ابدا المحادثة — ابعث أول رسالة 👋"}</p>
+           </div>
         ) : (
           messages.map((m) => {
             const mine =
@@ -106,7 +109,7 @@ export function ChatPanel({
                   {m.contenu}
                   <span
                     className={cn(
-                      "mt-0.5 block text-[10px] tabular-nums",
+                       "mt-1 block w-fit rounded-full bg-black/5 px-1.5 py-0.5 text-[10px] tabular-nums dark:bg-white/10",
                       mine ? "text-primary-foreground/70" : "text-muted-foreground",
                     )}
                     dir="ltr"
@@ -121,7 +124,7 @@ export function ChatPanel({
       </div>
 
       <form
-        className="flex items-center gap-2 border-t border-border p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
+         className="flex items-center gap-2 border-t border-border bg-background/80 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-lg"
         onSubmit={(e) => {
           e.preventDefault();
           handleSend();
