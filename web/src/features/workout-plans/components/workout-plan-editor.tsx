@@ -7,6 +7,7 @@ import {
   Calendar,
   Copy,
   Dumbbell,
+  GripVertical,
   ImageIcon,
   Loader2,
   Pencil,
@@ -619,8 +620,13 @@ export function WorkoutPlanEditor({ userId }: { userId: string }) {
                           const curatedHit = findCuratedByName(e.nom);
                           const displayImage = e.image_url ?? curatedHit?.imageUrl ?? fallbackForCategory(curatedHit?.category) ?? null;
                           return (
-                            <tr key={e.key} className="align-top hover:bg-muted/20">
-                              <td className={`${TD} font-semibold`}>{e.nom}</td>
+                             <tr key={e.key} className="animate-fade-in align-top transition-colors hover:bg-primary/5">
+                               <td className={`${TD} font-semibold`}>
+                                 <div className="flex items-center gap-2">
+                                   <GripVertical className="size-4 cursor-grab text-muted-foreground/60" aria-hidden="true" />
+                                   {e.nom}
+                                 </div>
+                               </td>
                               <td className={TD}>
                                 <div className="flex size-14 items-center justify-center overflow-hidden rounded-lg border bg-muted">
                                   {displayImage ? (
@@ -662,9 +668,12 @@ export function WorkoutPlanEditor({ userId }: { userId: string }) {
                       const curatedHit = findCuratedByName(e.nom);
                       const displayImage = e.image_url ?? curatedHit?.imageUrl ?? fallbackForCategory(curatedHit?.category) ?? null;
                       return (
-                        <div key={e.key} className="space-y-3 rounded-xl border p-3">
+                         <div key={e.key} className="space-y-3 rounded-xl border p-3 shadow-sm transition-shadow hover:shadow-md">
                           <div className="flex items-start justify-between gap-2">
-                            <div className="font-bold">{e.nom}</div>
+                             <div className="flex items-center gap-2 font-bold">
+                               <GripVertical className="size-4 text-muted-foreground/60" aria-hidden="true" />
+                               {e.nom}
+                             </div>
                             <div className="flex shrink-0 items-center gap-1">
                               <Button variant="ghost" size="icon" className="size-8" onClick={() => openEditForm(idx)}>
                                 <Pencil className="size-4" />
