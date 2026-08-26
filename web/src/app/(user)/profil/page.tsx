@@ -30,7 +30,9 @@ export default function MyProfilePage() {
         </CardHeader>
         <CardContent className="space-y-4 text-sm">
           <div className="flex items-center gap-4">
-            <UserAvatar prenom={user.prenom} nom={user.nom} className="size-14" />
+             <div className="rounded-full bg-gradient-to-br from-primary via-ring to-primary p-0.5 animate-float">
+               <UserAvatar prenom={user.prenom} nom={user.nom} className="size-14 ring-2 ring-background" />
+             </div>
             <div>
               <div className="text-lg font-bold">
                 {user.prenom} {user.nom}
@@ -41,16 +43,22 @@ export default function MyProfilePage() {
             </div>
           </div>
           <Separator />
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <Mail className="size-4" />
+           <div className="flex items-center gap-3 text-muted-foreground">
+             <span className="flex size-8 items-center justify-center rounded-lg bg-blue-500/10 text-blue-500">
+               <Mail className="size-4" />
+             </span>
             <span dir="ltr">{user.email}</span>
           </div>
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <Phone className="size-4" />
+           <div className="flex items-center gap-3 text-muted-foreground">
+             <span className="flex size-8 items-center justify-center rounded-lg bg-success/10 text-success">
+               <Phone className="size-4" />
+             </span>
             <span dir="ltr">{user.telephone}</span>
           </div>
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <Cake className="size-4" />
+           <div className="flex items-center gap-3 text-muted-foreground">
+             <span className="flex size-8 items-center justify-center rounded-lg bg-violet-500/10 text-violet-500">
+               <Cake className="size-4" />
+             </span>
             {user.date_naissance ? formatDate(user.date_naissance) : "—"}
           </div>
         </CardContent>
