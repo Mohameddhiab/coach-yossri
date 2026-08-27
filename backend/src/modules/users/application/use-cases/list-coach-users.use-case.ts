@@ -8,7 +8,7 @@ import { getSubscriptionStatus } from "@/shared/domain/subscription-status";
 import { toUserApi } from "@/shared/mapping/user.mapper";
 import { toUserWithSubscriptionApi } from "@/shared/mapping/api.mapper";
 
-export type UserStatusFilter = "TOUS" | "ACTIF" | "ESSAI" | "EXPIRE" | "EXPIRE_BIENTOT";
+export type UserStatusFilter = "TOUS" | "ACTIF" | "EXPIRE" | "EXPIRE_BIENTOT";
 
 @Injectable()
 export class ListCoachUsersUseCase {
@@ -63,7 +63,7 @@ export class ListCoachUsersUseCase {
               }
             : null,
         );
-        return s === status || (status === "ACTIF" && s === "ESSAI");
+        return s === status;
       });
     }
 

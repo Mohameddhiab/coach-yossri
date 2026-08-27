@@ -10,7 +10,6 @@ import type { SubscriptionTier } from "@/shared/domain/domain-types";
 
 export interface AddSubscriptionInput {
   userId: string;
-  essai: boolean;
   dateDebut?: string;
   dateFin?: string;
   montant?: number;
@@ -30,15 +29,9 @@ export class AddSubscriptionUseCase {
     if (!user) {
       fail(404, "NOT_FOUND", "المستخدم غير موجود");
     }
-    const tier: SubscriptionTier = isSubscriptionTier(input.tier) ? input.tier : "BASIC";
-    const isTrial = input.essai;
+    const tier: SubscriptionTier = isSubscriptionTier(input.tier) ? input.tier : "ONLINE";
     let dateDebut = input.dateDebut;
     let dateFin = input.dateFin;
-    if (isTrial) {
-      const now = new Date();
-      dateDebut = dateDebut || now.toISOString();
-      dateFin = new Date(now.getTime() + 7 * 86400000).toISOString();
-    }
     if (!dateDebut || !dateFin) {
       fail(400, "VALIDATION", "تواريخ الاشتراك مطلوبة");
     }
@@ -51,10 +44,10 @@ export class AddSubscriptionUseCase {
       userId: input.userId,
       dateDebut: startDate,
       dateFin: endDate,
-      montant: isTrial ? 0 : (input.montant ?? OFFRES[tier].prix),
+      montant: input.montant ?? OFFRES[tier].prix,
       tier,
-      modePaiement: isTrial ? "ESSAI" : "ESPECE",
-      statut: isTrial ? "ESSAI" : "ACTIF",
+      modePaiement: "ESPECE",
+      statut: "ACTIF",
       createdBy: input.createdBy,
     });
   }

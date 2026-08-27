@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Inject, Param, Post, Put, UseGuards } from "@nestjs/common";
-import { IsArray, IsBoolean, IsNumber, IsOptional, IsString, MinLength } from "class-validator";
+import { IsArray, IsBoolean, IsNumber, IsOptional, IsString, MaxLength, MinLength } from "class-validator";
 import { JwtAuthGuard } from "@/shared/common/guards/jwt-auth.guard";
 import { RolesGuard } from "@/shared/common/guards/roles.guard";
 import { Roles } from "@/shared/common/decorators/roles.decorator";
@@ -16,7 +16,11 @@ class SaveSettingsDto {
 }
 
 class NoteDto {
-  @IsString() @MinLength(1) contenu!: string;
+  @IsString() @MinLength(1) @MaxLength(2000) contenu!: string;
+}
+
+function sanitizeNote(input: string): string {
+  return input.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim().slice(0, 2000);
 }
 
 @Controller()
@@ -82,7 +86,7 @@ export class CoachController {
     if (!user) {
       fail(404, "NOT_FOUND", "المستخدم غير موجود");
     }
-    const n = await this.coach.addNote(auth.userId, userId, dto.contenu);
+    const n = await this.coach.addNote(auth.userId, userId, sanitizeNote(dto.contenu));
     return {
       id: n.id,
       coach_id: n.coachId,
@@ -94,10 +98,13 @@ export class CoachController {
 
   @Delete("notes/:noteId")
   @Roles("COACH")
-  async deleteNote(@Param("noteId") noteId: string) {
+  async deleteNote(@CurrentUser() auth: AuthUser, @Param("noteId") noteId: string) {
     const note = await this.coach.deleteNote(noteId);
     if (!note) {
       fail(404, "NOT_FOUND", "الملاحظة غير موجودة");
+    }
+    if (note.coachId !== auth.userId) {
+      fail(403, "FORBIDDEN", "غير مصرح به");
     }
     return { ok: true };
   }

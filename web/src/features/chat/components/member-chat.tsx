@@ -80,7 +80,7 @@ export function MemberChat() {
   return (
     <div className="space-y-4">
       {!allowed ? (
-        <UpsellCard require="ELITE" />
+        <UpsellCard require="PREMIUM_COACH" />
       ) : !convId ? (
         <FirstMessageComposer />
       ) : (

@@ -19,7 +19,7 @@ export function UnreadMessagesCard() {
           <MessagesSquare className="size-4 text-primary" />
           رسائل غير مقروءة
           {total > 0 && (
-            <span className="rounded-full bg-destructive px-2 py-0.5 text-[11px] font-bold text-white tabular-nums">
+            <span className="rounded-full bg-destructive px-2 py-0.5 text-xs font-bold text-white tabular-nums">
               {total}
             </span>
           )}
@@ -47,7 +47,7 @@ export function UnreadMessagesCard() {
                 <span className="max-w-[40%] truncate text-xs text-muted-foreground">
                   {c.last_message ?? ""}
                 </span>
-                <span className="rounded-full bg-destructive px-1.5 py-0.5 text-[10px] font-bold leading-none text-white tabular-nums">
+                <span className="rounded-full bg-destructive px-1.5 py-0.5 text-xs font-bold leading-none text-white tabular-nums">
                   {c.unread_count}
                 </span>
               </Link>

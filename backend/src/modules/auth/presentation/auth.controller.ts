@@ -30,7 +30,7 @@ export class ChangePasswordDto {
   current!: string;
 
   @IsString()
-  @MinLength(6, { message: "كلمة السر الجديدة قصيرة جداً (6 أحرف على الأقل)" })
+  @MinLength(12, { message: "كلمة السر الجديدة قصيرة جداً (12 حرفاً على الأقل)" })
   next!: string;
 }
 
@@ -52,7 +52,7 @@ export class ResetPasswordDto {
   token!: string;
 
   @IsString()
-  @MinLength(6, { message: "كلمة السر قصيرة جداً (6 أحرف على الأقل)" })
+  @MinLength(12, { message: "كلمة السر قصيرة جداً (12 حرفاً على الأقل)" })
   newPassword!: string;
 }
 
@@ -69,17 +69,21 @@ export class AuthController {
   ) {}
 
   private setTokens(res: Response, accessToken: string, refreshToken: string) {
-    const secure = false;
+    // En dev local (http://localhost) Secure doit être false sinon le navigateur refuse le cookie sur http
+    // En prod https, mettre COOKIE_SECURE=true dans l'env
+    const secure = process.env.COOKIE_SECURE === "true";
+    // Lax permet l'envoi cross-port (3000 -> 3001) qui sont same-site mais pas same-origin
+    const sameSite = "lax" as const;
     res.cookie(ACCESS_COOKIE, accessToken, {
       httpOnly: true,
-      sameSite: "lax",
+      sameSite,
       secure,
       path: "/",
       maxAge: 15 * 60 * 1000,
     });
     res.cookie(REFRESH_COOKIE, refreshToken, {
       httpOnly: true,
-      sameSite: "lax",
+      sameSite,
       secure,
       path: "/",
       maxAge: 7 * 24 * 3600 * 1000,

@@ -23,7 +23,12 @@ export function useCreatePlan(userId: string) {
     mutationFn: (input: PlanInput) => createPlan(userId, input),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["plan", userId] });
+      // Invalide aussi la vue "me" de l'utilisateur pour qu'il voie immédiatement son nouveau plan
+      qc.invalidateQueries({ queryKey: ["plan", "me"] });
+      qc.invalidateQueries({ queryKey: ["me", "plan"] });
+      qc.invalidateQueries({ queryKey: ["workout-plan", "me"] });
       qc.invalidateQueries({ queryKey: ["users"] });
+      qc.invalidateQueries({ queryKey: ["me"] });
     },
   });
 }
@@ -34,7 +39,10 @@ export function useUpdatePlan(userId: string) {
     mutationFn: (input: PlanInput) => updatePlan(userId, input),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["plan", userId] });
+      qc.invalidateQueries({ queryKey: ["plan", "me"] });
+      qc.invalidateQueries({ queryKey: ["me", "plan"] });
       qc.invalidateQueries({ queryKey: ["users"] });
+      qc.invalidateQueries({ queryKey: ["me"] });
     },
   });
 }
@@ -45,6 +53,8 @@ export function useDuplicatePlan(userId: string) {
     mutationFn: (sourcePlanId: string) => duplicatePlan(userId, sourcePlanId),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["plan", userId] });
+      qc.invalidateQueries({ queryKey: ["plan", "me"] });
+      qc.invalidateQueries({ queryKey: ["me", "plan"] });
       qc.invalidateQueries({ queryKey: ["users"] });
     },
   });

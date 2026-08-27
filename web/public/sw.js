@@ -1,4 +1,4 @@
-const CACHE = "9awi-v3";
+const CACHE = "9awi-v4";
 const PRECACHE = ["/", "/manifest.webmanifest", "/icons/icon-192.png"];
 
 self.addEventListener("install", (event) => {
@@ -28,6 +28,11 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
 
+  // Ne jamais intercepter les requêtes RSC ou API — laisser le navigateur gérer
+  if (url.searchParams.has("_rsc") || url.pathname.startsWith("/api/")) {
+    return;
+  }
+
   if (request.mode === "navigate") {
     event.respondWith(
       fetch(request)
@@ -41,13 +46,6 @@ self.addEventListener("fetch", (event) => {
             .match("/")
             .then((cached) => cached ?? Response.error()),
         ),
-    );
-    return;
-  }
-
-  if (url.pathname.startsWith("/api/")) {
-    event.respondWith(
-      fetch(request).catch(() => caches.match(request)),
     );
     return;
   }

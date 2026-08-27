@@ -54,6 +54,11 @@ export class NodemailerEmailAdapter implements IEmailSender {
         `[smtp] failed template=${message.templateName} to=${message.to}`,
         error instanceof Error ? error.message : String(error),
       );
+      // Ne pas propager l'erreur en dev — l'envoi d'email ne doit pas bloquer la création utilisateur
+      if ((process.env.EMAIL_DRIVER ?? "console") === "smtp") {
+        // En prod SMTP, on log seulement et on continue pour ne pas casser le flow utilisateur
+        return;
+      }
       throw error;
     }
   }

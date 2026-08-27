@@ -2,6 +2,7 @@ import { Controller, Get, Inject, Param, Post, UseGuards } from "@nestjs/common"
 import { JwtAuthGuard } from "@/shared/common/guards/jwt-auth.guard";
 import { RolesGuard } from "@/shared/common/guards/roles.guard";
 import { SubscriptionGuard } from "@/shared/common/guards/subscription.guard";
+import { CoachOwnershipGuard } from "@/shared/common/guards/coach-ownership.guard";
 import { Roles } from "@/shared/common/decorators/roles.decorator";
 import { CurrentUser, type AuthUser } from "@/shared/common/decorators/current-user.decorator";
 import {
@@ -30,7 +31,7 @@ export class CheckInsController {
 
   @Post("users/:userId/check-ins")
   @Roles("COACH")
-  @UseGuards(RolesGuard)
+  @UseGuards(RolesGuard, CoachOwnershipGuard)
   async create(@CurrentUser() auth: AuthUser, @Param("userId") userId: string) {
     const checkIn = await this.createUseCase.execute(userId, auth.userId);
     return {

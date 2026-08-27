@@ -1,7 +1,8 @@
 import { Body, Controller, Get, Param, Post, UseGuards } from "@nestjs/common";
-import { IsBoolean, IsNumber, IsOptional, IsString } from "class-validator";
+import { IsNumber, IsOptional, IsString } from "class-validator";
 import { JwtAuthGuard } from "@/shared/common/guards/jwt-auth.guard";
 import { RolesGuard } from "@/shared/common/guards/roles.guard";
+import { CoachOwnershipGuard } from "@/shared/common/guards/coach-ownership.guard";
 import { Roles } from "@/shared/common/decorators/roles.decorator";
 import { CurrentUser, type AuthUser } from "@/shared/common/decorators/current-user.decorator";
 import { AddSubscriptionUseCase } from "../application/use-cases/add-subscription.use-case";
@@ -14,7 +15,6 @@ import { toSubscriptionApi } from "@/shared/mapping/api.mapper";
 import { toUserApi } from "@/shared/mapping/user.mapper";
 
 export class AddSubscriptionDto {
-  @IsOptional() @IsBoolean() essai?: boolean;
   @IsOptional() @IsString() date_debut?: string;
   @IsOptional() @IsString() date_fin?: string;
   @IsOptional() @IsNumber() montant?: number;
@@ -46,6 +46,7 @@ export class SubscriptionsController {
 
   @Get("users/:userId/subscriptions")
   @Roles("COACH")
+  @UseGuards(CoachOwnershipGuard)
   async list(@Param("userId") userId: string) {
     const rows = await this.subs.list(userId);
     return rows.map(toSubscriptionApi);
@@ -60,7 +61,6 @@ export class SubscriptionsController {
   ) {
     const sub = await this.addUseCase.execute({
       userId,
-      essai: dto.essai ?? false,
       dateDebut: dto.date_debut,
       dateFin: dto.date_fin,
       montant: dto.montant,
@@ -72,6 +72,7 @@ export class SubscriptionsController {
 
   @Post("users/:userId/subscriptions/:subId/pause")
   @Roles("COACH")
+  @UseGuards(CoachOwnershipGuard)
   async pause(@Param("userId") userId: string, @Param("subId") subId: string) {
     const sub = await this.pauseUseCase.execute(userId, subId);
     return sub ? toSubscriptionApi(sub) : null;
@@ -79,6 +80,7 @@ export class SubscriptionsController {
 
   @Post("users/:userId/subscriptions/:subId/resume")
   @Roles("COACH")
+  @UseGuards(CoachOwnershipGuard)
   async resume(@Param("userId") userId: string, @Param("subId") subId: string) {
     const sub = await this.resumeUseCase.execute(userId, subId);
     return sub ? toSubscriptionApi(sub) : null;

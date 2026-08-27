@@ -47,7 +47,7 @@ export function FidelityCard({ history }: { history: Subscription[] | null | und
         </div>
         {nextLabel && fidelity.monthsToNext !== null && (
           <div>
-            <div className="mb-1 flex justify-between text-[11px] text-muted-foreground">
+            <div className="mb-1 flex justify-between text-xs text-muted-foreground">
               <span>{fidelity.months} شهر</span>
               <span>{fidelity.monthsToNext} أشهر حتى تصل إلى {nextLabel}</span>
             </div>

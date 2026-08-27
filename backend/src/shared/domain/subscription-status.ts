@@ -20,15 +20,8 @@ export function isPaused(sub: SubscriptionLike | null): boolean {
   return !!sub && !!sub.pauseStart;
 }
 
-export function isTrial(sub: SubscriptionLike | null): boolean {
-  return !!sub && (sub.statut === "ESSAI" || sub.modePaiement === "ESSAI");
-}
-
 export function getSubscriptionStatus(sub: SubscriptionLike | null): SubscriptionStatus {
   if (!sub) return "EXPIRE";
-  if (isTrial(sub)) {
-    return effectiveDateFin(sub).getTime() < Date.now() ? "EXPIRE" : "ESSAI";
-  }
   const now = Date.now();
   const fin = effectiveDateFin(sub).getTime();
   const debut = sub.dateDebut.getTime();

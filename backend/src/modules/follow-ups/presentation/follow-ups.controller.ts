@@ -12,6 +12,7 @@ import { IsOptional, IsString } from "class-validator";
 import { JwtAuthGuard } from "@/shared/common/guards/jwt-auth.guard";
 import { RolesGuard } from "@/shared/common/guards/roles.guard";
 import { SubscriptionGuard } from "@/shared/common/guards/subscription.guard";
+import { CoachOwnershipGuard } from "@/shared/common/guards/coach-ownership.guard";
 import { TierGuard } from "@/shared/common/guards/tier.guard";
 import { Roles } from "@/shared/common/decorators/roles.decorator";
 import { RequireTier } from "@/shared/common/decorators/require-tier.decorator";
@@ -53,14 +54,14 @@ export class FollowUpsController {
 
   @Get("users/:userId/follow-ups")
   @Roles("COACH")
-  @UseGuards(RolesGuard)
+  @UseGuards(RolesGuard, CoachOwnershipGuard)
   async listForUser(@Param("userId") userId: string) {
     const rows = await this.listUserUseCase.execute(userId);
     return rows.map((r) => this.toApi(r));
   }
 
   @Get("me/follow-ups")
-  @RequireTier("ELITE")
+  @RequireTier("PREMIUM_COACH")
   @UseGuards(SubscriptionGuard, TierGuard)
   async mine(@CurrentUser() auth: AuthUser) {
     const rows = await this.listUseCase.execute(auth.userId);

@@ -58,7 +58,12 @@ export class PrismaSubscriptionRepository implements SubscriptionRepository {
   }
 
   async create(input: CreateSubscriptionInput): Promise<Subscription> {
-    const row = await this.prisma.subscription.create({ data: input });
+    const row = await this.prisma.subscription.create({
+      data: {
+        ...input,
+        tier: input.tier as unknown as import("@prisma/client").$Enums.SubscriptionTier | undefined,
+      },
+    });
     return this.map(row);
   }
 

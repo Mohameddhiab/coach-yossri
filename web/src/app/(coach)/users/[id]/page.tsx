@@ -9,7 +9,6 @@ import { z } from "zod";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
-  AlertTriangle,
   CalendarDays,
   Copy,
   Dumbbell,
@@ -18,6 +17,7 @@ import {
   Mail,
   Phone,
   Trash2,
+  UtensilsCrossed,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -47,7 +47,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Separator } from "@/components/ui/separator";
 import { PageLoader } from "@/shared/components/page-loader";
-import { PageHeader } from "@/shared/components/page-header";
+import { cn } from "@/lib/utils";
 import { BackButton } from "@/shared/components/back-button";
 import { UserAvatar } from "@/shared/components/user-avatar";
 import { EmptyState } from "@/shared/components/empty-state";
@@ -201,50 +201,95 @@ export default function UserDetailPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <BackButton fallback="/users" />
-      <PageHeader
-        title={`${user.prenom} ${user.nom}`}
-        description={
-          <span className="flex flex-wrap items-center gap-2">
-            <SubscriptionBadge status={status} />
-            <TierBadge tier={tier} />
-            {remaining > 0 && (
-              <Badge
-                variant="outline"
-                className={status === "EXPIRE_BIENTOT" ? "border-amber-500/40 text-amber-600 dark:text-amber-400 tabular-nums" : "text-muted-foreground tabular-nums"}
-              >
-                {status === "EXPIRE_BIENTOT" && (
-                  <AlertTriangle className="me-1 inline size-3" />
-                )}
-                {remaining} يوم باقي
-              </Badge>
-            )}
-          </span>
-        }
-        actions={
-          <div className="flex flex-wrap gap-2">
-            <RenewDialog userId={userId} userName={`${user.prenom} ${user.nom}`} />
-            <Button asChild variant="outline">
-              <Link href={`/users/${userId}/plan`}>الخطة الغذائية</Link>
-            </Button>
-            <Button asChild variant="outline">
-              <Link href={`/users/${userId}/exercices`}>
-                <Dumbbell className="size-4" />
-                خطة التمارين
-              </Link>
-            </Button>
-          </div>
-        }
-      />
+      <div className="space-y-6">
+        <BackButton fallback="/users" />
 
-      <Tabs defaultValue="overview">
-        <TabsList aria-label="أقسام الملف" className="w-full justify-start overflow-x-auto sm:w-auto">
-          <TabsTrigger value="overview" className="focus-visible:ring-2 focus-visible:ring-primary/50">نظرة عامة</TabsTrigger>
-          <TabsTrigger value="suivi" className="focus-visible:ring-2 focus-visible:ring-primary/50">المتابعة</TabsTrigger>
-          <TabsTrigger value="progress" className="focus-visible:ring-2 focus-visible:ring-primary/50">التقدّم</TabsTrigger>
-          <TabsTrigger value="plan" className="focus-visible:ring-2 focus-visible:ring-primary/50">الخطة</TabsTrigger>
-        </TabsList>
+        {/* Member 360 Hero Card */}
+        <div className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/10 via-card to-card p-6 shadow-sm">
+          <div className="flex flex-wrap items-center justify-between gap-6">
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <UserAvatar
+                  prenom={user.prenom}
+                  nom={user.nom}
+                  className={cn(
+                    "size-16 ring-4 ring-offset-2 ring-offset-card sm:size-20",
+                    status === "ACTIF" && "ring-emerald-500",
+                    status === "EXPIRE_BIENTOT" && "ring-amber-500",
+                    status === "EXPIRE" && "ring-destructive",
+                  )}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h1 className="text-2xl font-black text-foreground sm:text-3xl">
+                    {user.prenom} {user.nom}
+                  </h1>
+                  <SubscriptionBadge status={status} />
+                  <TierBadge tier={tier} />
+                </div>
+
+                <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1" dir="ltr">
+                    <Mail className="size-3.5 text-primary" />
+                    {user.email}
+                  </span>
+                  <span className="flex items-center gap-1" dir="ltr">
+                    <Phone className="size-3.5 text-primary" />
+                    {user.telephone}
+                  </span>
+                  <span>عضو منذ {formatDate(user.created_at)}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Action Toolbar */}
+            <div className="flex flex-wrap items-center gap-2.5">
+              <RenewDialog userId={userId} userName={`${user.prenom} ${user.nom}`} />
+              <Button asChild variant="outline" className="gap-1.5 rounded-xl">
+                <Link href={`/users/${userId}/plan`}>
+                  <UtensilsCrossed className="size-4 text-primary" />
+                  <span>الخطة الغذائية</span>
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="gap-1.5 rounded-xl">
+                <Link href={`/users/${userId}/exercices`}>
+                  <Dumbbell className="size-4 text-primary" />
+                  <span>خطة التمارين</span>
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        <Tabs defaultValue="overview" className="space-y-6">
+          <TabsList aria-label="أقسام الملف" className="h-auto w-full justify-start gap-1 overflow-x-auto rounded-2xl bg-muted/60 p-1.5 sm:w-auto">
+            <TabsTrigger
+              value="overview"
+              className="gap-2 rounded-xl px-4 py-2 text-xs font-bold data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm"
+            >
+              <span>نظرة عامة</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="suivi"
+              className="gap-2 rounded-xl px-4 py-2 text-xs font-bold data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm"
+            >
+              <span>المتابعة والملاحظات</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="progress"
+              className="gap-2 rounded-xl px-4 py-2 text-xs font-bold data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm"
+            >
+              <span>التقدّم والوزن</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="plan"
+              className="gap-2 rounded-xl px-4 py-2 text-xs font-bold data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm"
+            >
+              <span>البرامج والتمارين</span>
+            </TabsTrigger>
+          </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
           <div className="grid gap-4 lg:grid-cols-2">

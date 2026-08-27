@@ -139,7 +139,7 @@ export function XpBadgesCard() {
                   )}
                 >
                   <Icon className={cn("size-6", unlocked ? "text-amber-500" : "text-muted-foreground")} />
-                  <span className="text-[10px] font-semibold leading-tight">{badge.label}</span>
+                  <span className="text-xs font-semibold leading-tight">{badge.label}</span>
                 </div>
               );
             })}

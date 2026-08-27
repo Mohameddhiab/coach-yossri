@@ -23,14 +23,14 @@ const BASE_NAV: UserNavItem[] = [
 ];
 
 export function navForTier(tier: SubscriptionTier | null): UserNavItem[] {
-  if (tier === "ELITE") {
+  if (tier === "PREMIUM_COACH") {
     return [
       { href: "/plan", label: "خطتي", icon: CalendarCheck },
       { href: "/messages", label: "رسائل", icon: MessagesSquare },
       ...BASE_NAV.slice(0, 3),
     ];
   }
-  if (tier === "PREMIUM") {
+  if (tier === "ONLINE") {
     return [{ href: "/plan", label: "خطتي", icon: CalendarCheck }, ...BASE_NAV];
   }
   return [...BASE_NAV];

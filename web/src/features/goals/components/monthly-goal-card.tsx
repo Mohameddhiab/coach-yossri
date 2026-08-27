@@ -74,7 +74,7 @@ export function MonthlyGoalCard({ userId }: { userId: string }) {
           </Button>
         )}
         {goal.checkins.length > 0 && (
-          <p className="text-[11px] text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             آخر حصة: {formatDate(goal.checkins[goal.checkins.length - 1])}
           </p>
         )}

@@ -29,7 +29,7 @@ export function TodayAttendanceCard({
   const { data: checkins } = useTodayCheckIns(30000);
   const rows = [...(checkins ?? [])].sort((a, b) => b.checked_at.localeCompare(a.checked_at));
   const activeCount = users.filter((u) =>
-    ["ACTIF", "ESSAI", "EXPIRE_BIENTOT"].includes(getSubscriptionStatus(u.subscription)),
+    ["ACTIF", "EXPIRE_BIENTOT"].includes(getSubscriptionStatus(u.subscription)),
   ).length;
 
   return (
@@ -70,7 +70,7 @@ export function TodayAttendanceCard({
                 >
                   <UserAvatar prenom={prenom} nom={nom} className="size-7 text-xs" />
                   <span className="text-sm font-medium">{c.user_name}</span>
-                  <span dir="ltr" className="text-[11px] text-muted-foreground tabular-nums">
+                  <span dir="ltr" className="text-xs text-muted-foreground tabular-nums">
                     {timeOf(c.checked_at)}
                   </span>
                 </Link>

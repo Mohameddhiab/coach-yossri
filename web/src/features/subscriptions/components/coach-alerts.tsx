@@ -5,7 +5,6 @@ import {
   AlertTriangle,
   BellRing,
   ChevronLeft,
-  Flame,
   UserX,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,10 +21,6 @@ const KIND_STYLES: Record<AlertKind, { icon: React.ReactNode; iconClass: string 
   expiring: {
     icon: <AlertTriangle className="size-4" />,
     iconClass: "bg-amber-500/15 text-amber-500",
-  },
-  trial: {
-    icon: <Flame className="size-4" />,
-    iconClass: "bg-primary/12 text-primary",
   },
   stale: {
     icon: <BellRing className="size-4" />,

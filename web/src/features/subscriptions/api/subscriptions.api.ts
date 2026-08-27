@@ -5,7 +5,6 @@ export interface RenewInput {
   date_debut: string;
   date_fin: string;
   montant: number;
-  essai?: boolean;
   tier?: string;
 }
 

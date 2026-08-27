@@ -17,7 +17,10 @@ export class JwtAuthGuard implements CanActivate {
       fail(401, "UNAUTHORIZED", "يجب تسجيل الدخول");
     }
     try {
-      const payload = await this.jwtService.verifyAsync<{ sub: string; role: string }>(token);
+      const payload = await this.jwtService.verifyAsync<{ sub: string; role: string; type?: string }>(token);
+      if (payload.type && payload.type !== "access") {
+        fail(401, "UNAUTHORIZED", "يجب تسجيل الدخول");
+      }
       req.user = { userId: payload.sub, role: payload.role as AuthUser["role"] };
       return true;
     } catch {

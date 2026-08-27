@@ -72,6 +72,9 @@ import type { WorkoutExerciseInput, WorkoutPlan } from "@/features/workout-plans
 import { useLocalExercises } from "@/features/exercises/hooks/useExercises";
 import type { Exercise } from "@/features/exercises/api/exercises.api";
 import { fallbackForCategory } from "@/shared/lib/exercise-fallbacks";
+import { getGuideExercise, getGuideImageUrl, getGuideImageUrls } from "@/shared/lib/exercise-guide-map";
+import { getExerciseInstruction } from "@/shared/lib/exercise-instructions";
+import { AnimatedExerciseImage } from "@/shared/components/animated-exercise-image";
 import { formatDateShort } from "@/lib/utils";
 
 type DraftExercise = WorkoutExerciseInput & { key: string };
@@ -171,7 +174,11 @@ function ExerciseFormDialog({
         | { imageUrl: string | null; category: string | null }
         | undefined)
     : null;
-  const displayImage = data.image_url ?? curatedHit?.imageUrl ?? fallbackForCategory(curatedHit?.category ?? null) ?? null;
+  const guideExercise = data.nom ? getGuideExercise(data.nom) : null;
+  const guideImageUrl = data.nom ? getGuideImageUrl(data.nom, 1) : null;
+  const guideImageUrls = data.nom ? getGuideImageUrls(data.nom) : [];
+  const instruction = data.nom ? getExerciseInstruction(data.nom) : null;
+  const displayImage = guideImageUrl ?? data.image_url ?? curatedHit?.imageUrl ?? fallbackForCategory(curatedHit?.category ?? null) ?? null;
 
   const filteredByCategory = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -229,15 +236,33 @@ function ExerciseFormDialog({
                   .find((c: Exercise) => c.name === v) as unknown as
                   | { name: string; imageUrl: string | null; category: string | null }
                   | undefined;
+                const gUrl = getGuideImageUrl(v, 1);
                 onChange({
                   nom: v,
-                  image_url: hit?.imageUrl ?? fallbackForCategory(hit?.category ?? null) ?? null,
+                  image_url: gUrl ?? hit?.imageUrl ?? fallbackForCategory(hit?.category ?? null) ?? null,
                 });
                 setSearch("");
               }}
             >
               <SelectTrigger>
-                <SelectValue placeholder="أو اختر من القائمة" />
+                {data.nom ? (
+                  <span className="flex items-center gap-2">
+                    <span className="flex size-5 shrink-0 items-center justify-center overflow-hidden rounded bg-white border">
+                      {guideImageUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={guideImageUrl} alt="" className="size-4 object-contain invert" />
+                      ) : curatedHit?.imageUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={curatedHit.imageUrl} alt="" className="size-4 object-contain" />
+                      ) : (
+                        <ImageIcon className="size-3 text-muted-foreground" />
+                      )}
+                    </span>
+                    <span className="truncate">{data.nom}</span>
+                  </span>
+                ) : (
+                  <SelectValue placeholder="أو اختر من القائمة" />
+                )}
               </SelectTrigger>
               <SelectContent className="max-h-80">
                 {Object.keys(filteredByCategory).length === 0 && (
@@ -248,26 +273,70 @@ function ExerciseFormDialog({
                     <SelectLabel className="text-xs font-bold text-primary">
                       {CATEGORY_LABEL[cat]} ({list.length})
                     </SelectLabel>
-                    {list.map((ex) => (
-                      <SelectItem key={ex.id} value={ex.name}>
-                        {ex.name}
-                      </SelectItem>
-                    ))}
+                    {list.map((ex) => {
+                      const gUrl = getGuideImageUrl(ex.name, 1);
+                      const img = gUrl ?? ex.imageUrl ?? fallbackForCategory(ex.category);
+                      const isGuide = !!gUrl;
+                      return (
+                        <SelectItem key={ex.id} value={ex.name}>
+                          <span className="flex items-center gap-2">
+                            <span className="flex size-6 shrink-0 items-center justify-center overflow-hidden rounded bg-white border">
+                              {img ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img src={img} alt="" className={`size-5 object-contain ${isGuide ? "invert" : ""}`} />
+                              ) : (
+                                <ImageIcon className="size-3 text-muted-foreground" />
+                              )}
+                            </span>
+                            <span>{ex.name}</span>
+                          </span>
+                        </SelectItem>
+                      );
+                    })}
                   </SelectGroup>
                 ))}
               </SelectContent>
             </Select>
           </div>
 
-          <div className="flex justify-center">
-            <div className="flex size-28 items-center justify-center overflow-hidden rounded-xl border-2 border-border bg-muted shadow-sm">
-              {displayImage ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={displayImage} alt={data.nom || "exercice"} className="h-full w-full object-cover" />
-              ) : (
-                <ImageIcon className="size-8 text-muted-foreground" />
-              )}
-            </div>
+          <div className="flex flex-col items-center gap-3">
+            {guideImageUrls.length === 3 ? (
+              <div className="rounded-xl border-2 border-border bg-white p-1 shadow-sm">
+                <AnimatedExerciseImage urls={guideImageUrls} alt={data.nom || "exercice"} sizeClass="size-28" />
+              </div>
+            ) : (
+              <div className="flex size-28 items-center justify-center overflow-hidden rounded-xl border-2 border-border bg-white shadow-sm">
+                {displayImage ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={displayImage} alt={data.nom || "exercice"} className="h-full w-full object-contain p-1 invert" />
+                ) : (
+                  <ImageIcon className="size-8 text-muted-foreground" />
+                )}
+              </div>
+            )}
+            {guideExercise && (
+              <div className="flex flex-wrap items-center justify-center gap-1.5">
+                <Badge variant="secondary" className="text-[11px]">
+                  {guideExercise.primaryMuscle}
+                </Badge>
+                {guideExercise.secondaryMuscles.map((m) => (
+                  <Badge key={m} variant="outline" className="text-[11px]">
+                    {m}
+                  </Badge>
+                ))}
+                <Badge variant="outline" className="text-[11px]">
+                  {guideExercise.equipment}
+                </Badge>
+              </div>
+            )}
+            {instruction && (
+              <p className="max-w-[320px] rounded-lg bg-muted/50 px-3 py-2 text-center text-xs leading-relaxed text-muted-foreground">
+                {instruction}
+              </p>
+            )}
+            {!guideExercise && !instruction && data.nom && (
+              <p className="text-center text-xs text-muted-foreground">Image et description automatiques depuis la bibliothèque</p>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -400,7 +469,8 @@ export function WorkoutPlanEditor({ userId }: { userId: string }) {
       return;
     }
     const hit = findCuratedByName(formData.nom);
-    const finalImage = formData.image_url ?? hit?.imageUrl ?? fallbackForCategory(hit?.category ?? null) ?? null;
+    const guideUrl = getGuideImageUrl(formData.nom, 1);
+    const finalImage = guideUrl ?? formData.image_url ?? hit?.imageUrl ?? fallbackForCategory(hit?.category ?? null) ?? null;
     const toSave: DraftExercise = {
       ...formData,
       key: editingIdx !== null ? exercises[editingIdx].key : newKey(),
@@ -448,7 +518,7 @@ export function WorkoutPlanEditor({ userId }: { userId: string }) {
         repos: e.repos,
         groupe_musculaire: null,
         notes: e.notes,
-        image_url: e.image_url ?? findCuratedByName(e.nom)?.imageUrl ?? fallbackForCategory(findCuratedByName(e.nom)?.category) ?? null,
+        image_url: getGuideImageUrl(e.nom, 1) ?? e.image_url ?? findCuratedByName(e.nom)?.imageUrl ?? fallbackForCategory(findCuratedByName(e.nom)?.category) ?? null,
       })),
     };
     try {
@@ -618,23 +688,30 @@ export function WorkoutPlanEditor({ userId }: { userId: string }) {
                       <tbody>
                         {dayRows.map(({ e, idx }) => {
                           const curatedHit = findCuratedByName(e.nom);
-                          const displayImage = e.image_url ?? curatedHit?.imageUrl ?? fallbackForCategory(curatedHit?.category) ?? null;
+                          const guideUrl = getGuideImageUrl(e.nom, 1);
+                          const displayImage = guideUrl ?? e.image_url ?? curatedHit?.imageUrl ?? fallbackForCategory(curatedHit?.category) ?? null;
                           return (
                              <tr key={e.key} className="animate-fade-in align-top transition-colors hover:bg-primary/5">
-                               <td className={`${TD} font-semibold`}>
-                                 <div className="flex items-center gap-2">
-                                   <GripVertical className="size-4 cursor-grab text-muted-foreground/60" aria-hidden="true" />
-                                   {e.nom}
-                                 </div>
-                               </td>
-                              <td className={TD}>
-                                <div className="flex size-14 items-center justify-center overflow-hidden rounded-lg border bg-muted">
-                                  {displayImage ? (
-                                    // eslint-disable-next-line @next/next/no-img-element
-                                    <img src={displayImage} alt={e.nom} className="h-full w-full object-cover" />
-                                  ) : (
-                                    <ImageIcon className="size-5 text-muted-foreground" />
-                                  )}
+                                <td className={`${TD} font-semibold`}>
+                                  <div className="flex items-center gap-2">
+                                    <GripVertical className="size-4 cursor-grab text-muted-foreground/60" aria-hidden="true" />
+                                    {e.nom}
+                                  </div>
+                                </td>
+                               <td className={TD}>
+                                <div className="flex size-14 items-center justify-center overflow-hidden rounded-lg border bg-white p-1">
+                                  {(() => {
+                                    const urls = getGuideImageUrls(e.nom);
+                                    if (urls.length === 3) {
+                                      return <AnimatedExerciseImage urls={urls} alt={e.nom} sizeClass="size-12" intervalMs={600} />;
+                                    }
+                                    return displayImage ? (
+                                      // eslint-disable-next-line @next/next/no-img-element
+                                      <img src={displayImage} alt={e.nom} className="h-full w-full object-contain p-0.5 invert" />
+                                    ) : (
+                                      <ImageIcon className="size-5 text-muted-foreground" />
+                                    );
+                                  })()}
                                 </div>
                               </td>
                               <td className={`${TD} tabular-nums`}>{e.charge ?? "—"}</td>
@@ -666,14 +743,25 @@ export function WorkoutPlanEditor({ userId }: { userId: string }) {
                   <div className="space-y-3 md:hidden">
                     {dayRows.map(({ e, idx }) => {
                       const curatedHit = findCuratedByName(e.nom);
-                      const displayImage = e.image_url ?? curatedHit?.imageUrl ?? fallbackForCategory(curatedHit?.category) ?? null;
+                      const guideUrl = getGuideImageUrl(e.nom, 1);
+                      const displayImage = guideUrl ?? e.image_url ?? curatedHit?.imageUrl ?? fallbackForCategory(curatedHit?.category) ?? null;
+                      const guideEx = getGuideExercise(e.nom);
+                      const instruction = getExerciseInstruction(e.nom);
                       return (
                          <div key={e.key} className="space-y-3 rounded-xl border p-3 shadow-sm transition-shadow hover:shadow-md">
                           <div className="flex items-start justify-between gap-2">
-                             <div className="flex items-center gap-2 font-bold">
-                               <GripVertical className="size-4 text-muted-foreground/60" aria-hidden="true" />
-                               {e.nom}
-                             </div>
+                             <div className="flex flex-col gap-1">
+                                <div className="flex items-center gap-2 font-bold">
+                                  <GripVertical className="size-4 text-muted-foreground/60" aria-hidden="true" />
+                                  {e.nom}
+                                </div>
+                                {guideEx && (
+                                  <div className="flex flex-wrap gap-1">
+                                    <Badge variant="secondary" className="text-[10px]">{guideEx.primaryMuscle}</Badge>
+                                    <Badge variant="outline" className="text-[10px]">{guideEx.equipment}</Badge>
+                                  </div>
+                                )}
+                              </div>
                             <div className="flex shrink-0 items-center gap-1">
                               <Button variant="ghost" size="icon" className="size-8" onClick={() => openEditForm(idx)}>
                                 <Pencil className="size-4" />
@@ -687,15 +775,24 @@ export function WorkoutPlanEditor({ userId }: { userId: string }) {
                             </div>
                           </div>
                           <div className="flex justify-center">
-                            <div className="flex size-20 items-center justify-center overflow-hidden rounded-xl border bg-muted">
-                              {displayImage ? (
-                                // eslint-disable-next-line @next/next/no-img-element
-                                <img src={displayImage} alt={e.nom} className="h-full w-full object-cover" />
-                              ) : (
-                                <ImageIcon className="size-6 text-muted-foreground" />
-                              )}
+                            <div className="flex size-24 items-center justify-center overflow-hidden rounded-xl border bg-white p-1">
+                              {(() => {
+                                const urls = getGuideImageUrls(e.nom);
+                                if (urls.length === 3) {
+                                  return <AnimatedExerciseImage urls={urls} alt={e.nom} sizeClass="size-20" intervalMs={600} />;
+                                }
+                                return displayImage ? (
+                                  // eslint-disable-next-line @next/next/no-img-element
+                                  <img src={displayImage} alt={e.nom} className="h-full w-full object-contain p-1 invert" />
+                                ) : (
+                                  <ImageIcon className="size-6 text-muted-foreground" />
+                                );
+                              })()}
                             </div>
                           </div>
+                          {instruction && (
+                            <p className="rounded-lg bg-muted/50 px-3 py-2 text-xs leading-relaxed text-muted-foreground">{instruction}</p>
+                          )}
                           <div className="grid grid-cols-2 gap-2 text-sm">
                             <div className="rounded-lg bg-muted/50 p-2">
                               <div className="text-xs text-muted-foreground">charge</div>
@@ -726,6 +823,12 @@ export function WorkoutPlanEditor({ userId }: { userId: string }) {
               )}
             </TabsContent>
           </Tabs>
+          <div className="flex justify-center border-t pt-4">
+            <Button size="lg" onClick={handleSave} disabled={saving} className="w-full sm:w-auto min-w-[200px] gap-2 text-base">
+              {saving ? <Loader2 className="animate-spin" /> : <Save />}
+              {plan ? "حفظ التعديلات" : "إنشاء الخطة"}
+            </Button>
+          </div>
         </CardContent>
       </Card>
 

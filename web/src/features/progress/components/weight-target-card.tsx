@@ -126,7 +126,7 @@ export function WeightTargetCard({
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
                 <span className="text-2xl font-extrabold tabular-nums">{progress}%</span>
-                <span className="text-[10px] text-muted-foreground">المسار</span>
+                <span className="text-xs text-muted-foreground">المسار</span>
               </div>
             </div>
             <div className="space-y-2 text-sm">

@@ -4,11 +4,14 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "node scripts/copy-guide-assets.mjs || echo \"copy-guide-assets skipped\" && next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "postinstall": "node scripts/copy-guide-assets.mjs || echo \"copy-guide-assets skipped (deps stage)\"",
+    "copy:assets": "node scripts/copy-guide-assets.mjs"
   },
   "dependencies": {
+    "@bryllim/workout-guide": "^1.0.0",
     "@hookform/resolvers": "^5.9.1",
     "@tanstack/react-query": "^5.101.4",
     "class-variance-authority": "^0.7.1",

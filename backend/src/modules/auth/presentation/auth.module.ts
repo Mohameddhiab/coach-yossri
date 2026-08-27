@@ -19,7 +19,7 @@ import { TOKEN_SERVICE } from "@/shared/domain/token-service.port";
   imports: [
     JwtModule.register({
       global: true,
-      secret: process.env.JWT_SECRET ?? "dev-secret-change-me",
+      secret: process.env.JWT_SECRET ?? (() => { throw new Error("JWT_SECRET env var is required"); })(),
       signOptions: { expiresIn: "15m" },
     }),
   ],

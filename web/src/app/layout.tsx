@@ -23,7 +23,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html
       lang="ar"
       dir="rtl"
-      className={`${cairo.variable} dark h-full antialiased`}
+      className={`${cairo.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <body className="min-h-full">

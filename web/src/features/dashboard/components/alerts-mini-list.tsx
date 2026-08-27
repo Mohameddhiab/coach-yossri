@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { AlertTriangle, BellRing, ChevronLeft, Flame, UserX } from "lucide-react";
+import { AlertTriangle, BellRing, ChevronLeft, UserX } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { UserWithSubscription } from "@/shared/lib/domain";
 import { computeAlerts, type AlertKind } from "@/shared/lib/insights";
@@ -9,14 +9,12 @@ import { computeAlerts, type AlertKind } from "@/shared/lib/insights";
 const KIND_ICONS: Record<AlertKind, React.ReactNode> = {
   expired: <UserX className="size-3.5" />,
   expiring: <AlertTriangle className="size-3.5" />,
-  trial: <Flame className="size-3.5" />,
   stale: <BellRing className="size-3.5" />,
 };
 
 const KIND_CLASSES: Record<AlertKind, string> = {
   expired: "bg-destructive/12 text-destructive",
   expiring: "bg-amber-500/15 text-amber-500",
-  trial: "bg-primary/12 text-primary",
   stale: "bg-muted text-muted-foreground",
 };
 
@@ -30,7 +28,7 @@ export function AlertsMiniList({ users }: { users: UserWithSubscription[] }) {
           <BellRing className="size-4 text-primary" />
           يحتاج متابعة
           {alerts.length > 0 && (
-            <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-[11px] font-bold text-amber-600 tabular-nums dark:text-amber-400">
+            <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-xs font-bold text-amber-600 tabular-nums dark:text-amber-400">
               {computeAlerts(users).length}
             </span>
           )}

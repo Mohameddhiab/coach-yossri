@@ -65,10 +65,7 @@ export function MemberTimeline({ userId }: { userId: string }) {
       id: `s-${s.id}`,
       date: s.created_at,
       type: "subscription" as const,
-      text:
-        s.mode_paiement === "ESSAI"
-          ? "فترة تجريبية 7 أيام"
-          : `اشتراك جديد: ${s.montant} د.ت`,
+      text: `اشتراك جديد: ${s.montant} د.ت`,
       detail: `${formatDate(s.date_debut)} → ${formatDate(s.date_fin)}`,
     })),
     ...(notes ?? []).map((n) => ({

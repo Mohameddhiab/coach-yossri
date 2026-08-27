@@ -12,6 +12,7 @@ import { IsOptional, IsString } from "class-validator";
 import { JwtAuthGuard } from "@/shared/common/guards/jwt-auth.guard";
 import { RolesGuard } from "@/shared/common/guards/roles.guard";
 import { SubscriptionGuard } from "@/shared/common/guards/subscription.guard";
+import { CoachOwnershipGuard } from "@/shared/common/guards/coach-ownership.guard";
 import { TierGuard } from "@/shared/common/guards/tier.guard";
 import { Roles } from "@/shared/common/decorators/roles.decorator";
 import { RequireTier } from "@/shared/common/decorators/require-tier.decorator";
@@ -59,7 +60,7 @@ export class ChatController {
   }
 
   @Get("me/conversation")
-  @RequireTier("ELITE")
+  @RequireTier("PREMIUM_COACH")
   @UseGuards(SubscriptionGuard, TierGuard)
   async my(@CurrentUser() auth: AuthUser) {
     const conv = await this.myConversation.execute(auth.userId);
@@ -67,7 +68,7 @@ export class ChatController {
   }
 
   @Post("me/conversation/messages")
-  @RequireTier("ELITE")
+  @RequireTier("PREMIUM_COACH")
   @UseGuards(SubscriptionGuard, TierGuard)
   async postToCoach(@CurrentUser() auth: AuthUser, @Body() dto: SendMessageDto) {
     const msg = await this.sendToCoach.execute(auth.userId, dto.contenu);
@@ -82,7 +83,7 @@ export class ChatController {
 
   @Post("users/:userId/messages")
   @Roles("COACH")
-  @UseGuards(RolesGuard)
+  @UseGuards(RolesGuard, CoachOwnershipGuard)
   async postToMember(
     @CurrentUser() auth: AuthUser,
     @Param("userId") userId: string,
@@ -99,7 +100,7 @@ export class ChatController {
   }
 
   @Get("conversations/:id/messages")
-  @RequireTier("ELITE")
+  @RequireTier("PREMIUM_COACH")
   @UseGuards(SubscriptionGuard, TierGuard)
   async messages(
     @CurrentUser() auth: AuthUser,
@@ -119,7 +120,7 @@ export class ChatController {
   }
 
   @Post("conversations/:id/messages")
-  @RequireTier("ELITE")
+  @RequireTier("PREMIUM_COACH")
   @UseGuards(SubscriptionGuard, TierGuard)
   async post(
     @CurrentUser() auth: AuthUser,

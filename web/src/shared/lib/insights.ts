@@ -10,7 +10,6 @@ import {
   daysLeft,
   getActiveTier,
   getSubscriptionStatus,
-  isTrial,
 } from "@/shared/lib/domain";
 
 export type FidelityLevel = "BRONZE" | "SILVER" | "GOLD";
@@ -310,7 +309,6 @@ export function computeEngagement(u: UserWithSubscription): EngagementScore {
 
   const status = getSubscriptionStatus(u.subscription);
   if (status === "ACTIF") score += 30;
-  else if (status === "ESSAI") score += 25;
   else if (status === "EXPIRE_BIENTOT") score += 20;
   else score += 0;
 
@@ -325,7 +323,7 @@ export function computeEngagement(u: UserWithSubscription): EngagementScore {
 
 /* ------------------------------ Alertes coach ----------------------------- */
 
-export type AlertKind = "expired" | "expiring" | "trial" | "stale";
+export type AlertKind = "expired" | "expiring" | "stale";
 
 export interface CoachAlert {
   key: string;
@@ -367,16 +365,6 @@ export function computeAlerts(users: UserWithSubscription[]): CoachAlert[] {
         description: "ذكّره بالتجديد",
         badge: "أوشك على الانتهاء",
       });
-    } else if (isTrial(user.subscription) && remaining <= 3) {
-      alerts.push({
-        key: `trial-${user.id}`,
-        kind: "trial",
-        userId: user.id,
-        userName: name,
-        title: `${name} — الفترة التجريبية تنتهي في ${remaining} أيام`,
-        description: "شجعه على الاشتراك الكامل",
-        badge: "تجريبي",
-      });
     }
 
     const stale =
@@ -403,7 +391,7 @@ export function computeAlerts(users: UserWithSubscription[]): CoachAlert[] {
 export function tierDistribution(
   users: UserWithSubscription[],
 ): { tier: SubscriptionTier; count: number; revenue: number }[] {
-  const tiers: SubscriptionTier[] = ["ELITE", "PREMIUM", "BASIC"];
+  const tiers: SubscriptionTier[] = ["PREMIUM_COACH", "ONLINE"];
   return tiers.map((tier) => {
     const rows = users.filter((u) => getActiveTier(u.subscription) === tier);
     return {
@@ -420,7 +408,7 @@ export function payingRevenue(users: UserWithSubscription[]): {
 } {
   const payers = users.filter((u) => {
     const st = getSubscriptionStatus(u.subscription);
-    return st === "ACTIF" || st === "ESSAI" || st === "EXPIRE_BIENTOT";
+    return st === "ACTIF" || st === "EXPIRE_BIENTOT";
   });
   return {
     total: payers.reduce((sum, u) => sum + (u.subscription?.montant ?? 0), 0),

@@ -14,11 +14,6 @@ import { Input } from "@/components/ui/input";
 import { Logo } from "@/shared/components/logo";
 import { useAuth } from "@/shared/lib/auth-context";
 
-const DEMO_CREDENTIALS = {
-  coach: { email: "coach@9awi.tn", password: "coach1234" },
-  user: { email: "youssef@demo.tn", password: "123456" },
-} as const;
-
 const schema = z.object({
   email: z.string().email("أدخل بريدًا إلكترونيًا صحيحًا"),
   password: z.string().min(1, "اكتب كلمة السر"),
@@ -57,7 +52,7 @@ export function LoginForm() {
       <CardHeader className="items-center text-center">
         <Logo className="mb-2" />
         <CardTitle className="text-xl">تسجيل الدخول</CardTitle>
-        <CardDescription>أهلاً بك في منصة Coach Yosri 💪</CardDescription>
+        <CardDescription>أهلاً بك في منصة Coach Yosri</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -127,33 +122,6 @@ export function LoginForm() {
             </Button>
           </form>
         </Form>
-        {process.env.NODE_ENV !== "production" && (
-          <div className="mt-6 rounded-lg border border-dashed p-3 text-xs text-muted-foreground">
-            <div className="mb-1.5 font-semibold text-foreground">بيانات تجريبية (سيرفور محلي)</div>
-            <div className="flex flex-wrap justify-between gap-2">
-              <button
-                type="button"
-                className="hover:text-primary"
-                onClick={() => {
-                  form.setValue("email", DEMO_CREDENTIALS.coach.email);
-                  form.setValue("password", DEMO_CREDENTIALS.coach.password);
-                }}
-              >
-                المدرب: {DEMO_CREDENTIALS.coach.email} / {DEMO_CREDENTIALS.coach.password}
-              </button>
-              <button
-                type="button"
-                className="hover:text-primary"
-                onClick={() => {
-                  form.setValue("email", DEMO_CREDENTIALS.user.email);
-                  form.setValue("password", DEMO_CREDENTIALS.user.password);
-                }}
-              >
-                عضو: {DEMO_CREDENTIALS.user.email} / {DEMO_CREDENTIALS.user.password}
-              </button>
-            </div>
-          </div>
-        )}
       </CardContent>
     </Card>
   );

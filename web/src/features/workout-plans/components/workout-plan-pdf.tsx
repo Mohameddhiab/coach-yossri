@@ -5,6 +5,7 @@ import type { WeekDay } from "@/shared/lib/domain";
 import { OBJECTIVE_LABELS, WEEK_DAYS, WEEK_DAY_LABELS } from "@/shared/lib/domain";
 import type { WorkoutPlan } from "@/features/workout-plans/api/workoutPlans.api";
 import { formatDateShort } from "@/lib/utils";
+import { getGuideImageUrl, getGuideImageUrls } from "@/shared/lib/exercise-guide-map";
 
 export async function downloadWorkoutPdf(element: HTMLElement, filename: string) {
   const doc = new jsPDF({ unit: "px", format: "a4", compress: true });
@@ -23,6 +24,7 @@ export async function downloadWorkoutPdf(element: HTMLElement, filename: string)
 
 export function WorkoutPlanPdfDocument({ plan }: { plan: WorkoutPlan }) {
   const hasWgerImages = plan.exercises.some((e) => !!e.image_url);
+  const hasGuideImages = plan.exercises.some((e) => !!getGuideImageUrl(e.nom, 1));
 
   return (
     <div
@@ -64,24 +66,34 @@ export function WorkoutPlanPdfDocument({ plan }: { plan: WorkoutPlan }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {dayExercises.map((ex) => (
-                    <tr key={ex.id} className="border-b border-neutral-100 last:border-b-0">
-                      <td className="border border-neutral-200 px-2 py-1.5 text-start font-semibold text-neutral-900">
-                        {ex.nom}
-                      </td>
-                      <td className="border border-neutral-200 px-2 py-1.5">
-                        {ex.image_url ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={ex.image_url}
-                            alt=""
-                            className="mx-auto h-10 w-10 object-cover"
-                            crossOrigin="anonymous"
-                          />
-                        ) : (
-                          "—"
-                        )}
-                      </td>
+                  {dayExercises.map((ex) => {
+                    const displayUrl = ex.image_url ?? getGuideImageUrl(ex.nom, 1) ?? null;
+                    const guideUrls = getGuideImageUrls(ex.nom);
+                    const displayUrls = guideUrls.length === 3 ? guideUrls : displayUrl ? [displayUrl] : [];
+                    return (
+                      <tr key={ex.id} className="border-b border-neutral-100 last:border-b-0">
+                        <td className="border border-neutral-200 px-2 py-1.5 text-start font-semibold text-neutral-900">
+                          {ex.nom}
+                        </td>
+                        <td className="border border-neutral-200 px-2 py-1.5">
+                          {displayUrls.length ? (
+                            <span className="flex items-center justify-center gap-1">
+                              {displayUrls.map((u) => (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img
+                                  key={u}
+                                  src={u}
+                                  alt=""
+                                  className="h-10 w-10 bg-white object-contain"
+                                  style={{ filter: "invert(1)" }}
+                                  crossOrigin="anonymous"
+                                />
+                              ))}
+                            </span>
+                          ) : (
+                            "—"
+                          )}
+                        </td>
                       <td className="border border-neutral-200 px-2 py-1.5 font-semibold">{ex.charge ?? "—"}</td>
                       <td className="border border-neutral-200 px-2 py-1.5 whitespace-pre-line text-start leading-4">
                         {ex.repetitions ?? "—"}
@@ -90,7 +102,8 @@ export function WorkoutPlanPdfDocument({ plan }: { plan: WorkoutPlan }) {
                       <td className="border border-neutral-200 px-2 py-1.5 font-mono">{ex.tempo ?? "—"}</td>
                       <td className="border border-neutral-200 px-2 py-1.5">{ex.repos ?? "—"}</td>
                     </tr>
-                  ))}
+                      );
+                    })}
                 </tbody>
               </table>
             )}
@@ -100,9 +113,8 @@ export function WorkoutPlanPdfDocument({ plan }: { plan: WorkoutPlan }) {
 
       <footer className="mt-8 border-t border-neutral-200 pt-3 text-center text-xs text-neutral-500">
         <div>بالصحة والقوة مع مدربك — Coach Yosri</div>
-        {hasWgerImages ? (
-          <div className="mt-1">صور التمارين : wger.de — licence CC-BY-SA (attribution : wger.de)</div>
-        ) : null}
+        {hasGuideImages && <div className="mt-1">صور التمارين : @bryllim/workout-guide — CC BY-SA 4.0 (Bryl Lim / Everkinetic)</div>}
+        {hasWgerImages && <div className="mt-1">wger.de — CC-BY-SA (attribution : wger.de)</div>}
       </footer>
     </div>
   );

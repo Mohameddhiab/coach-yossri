@@ -4,15 +4,15 @@ services:
     container_name: 9awi-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: 9awi
-      POSTGRES_PASSWORD: 9awi_dev_pw
-      POSTGRES_DB: 9awi
+      POSTGRES_USER: ${POSTGRES_USER:-9awi}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-9awi_dev_pw}
+      POSTGRES_DB: ${POSTGRES_DB:-9awi}
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U 9awi -d 9awi"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-9awi} -d ${POSTGRES_DB:-9awi}"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -38,7 +38,7 @@ services:
     env_file:
       - ./backend/.env
     environment:
-      DATABASE_URL: postgresql://9awi:9awi_dev_pw@postgres:5432/9awi?schema=public
+      DATABASE_URL: postgresql://${POSTGRES_USER:-9awi}:${POSTGRES_PASSWORD:-9awi_dev_pw}@postgres:5432/${POSTGRES_DB:-9awi}?schema=public
       REDIS_URL: redis://redis:6379
       PORT: 3001
     ports:

@@ -8,10 +8,10 @@ export interface CreateUserInput {
   email: string;
   telephone: string;
   date_naissance?: string | null;
+  tier?: string;
   date_debut?: string;
   date_fin?: string;
   montant?: number;
-  essai?: boolean;
   referred_by?: string | null;
 }
 

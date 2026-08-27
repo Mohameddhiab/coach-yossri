@@ -6,7 +6,6 @@ import {
   AlertTriangle,
   BellRing,
   ChevronLeft,
-  Flame,
   UserX,
   X,
 } from "lucide-react";
@@ -39,11 +38,6 @@ const KIND_META: Record<
     icon: <AlertTriangle className="size-4" />,
     iconClass: "bg-amber-500/15 text-amber-500",
   },
-  trial: {
-    label: "فترات تجريبية",
-    icon: <Flame className="size-4" />,
-    iconClass: "bg-primary/12 text-primary",
-  },
   stale: {
     label: "متأخرون في تسجيل الوزن",
     icon: <BellRing className="size-4" />,
@@ -51,7 +45,7 @@ const KIND_META: Record<
   },
 };
 
-const KIND_ORDER: AlertKind[] = ["expired", "expiring", "trial", "stale"];
+const KIND_ORDER: AlertKind[] = ["expired", "expiring", "stale"];
 
 export default function NotificationsPage() {
   const { data: users, isLoading, isError, refetch, isRefetching } = useUsers("", "TOUS");

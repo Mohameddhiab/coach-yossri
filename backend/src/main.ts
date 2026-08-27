@@ -2,9 +2,14 @@ import { NestFactory } from "@nestjs/core";
 import { NestExpressApplication } from "@nestjs/platform-express";
 import { ValidationPipe } from "@nestjs/common";
 import express from "express";
+import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import { AppModule } from "./app.module";
 import { GlobalExceptionFilter } from "./shared/common/errors/global-exception.filter";
+
+const CORS_ORIGINS = (process.env.CORS_ORIGINS ?? "http://localhost:3000")
+  .split(",")
+  .map((s) => s.trim());
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -12,17 +17,23 @@ async function bootstrap() {
   app.use(express.urlencoded({ limit: "10mb", extended: true }));
   app.setGlobalPrefix("api");
   app.use(cookieParser());
+  const helmetOpts: Record<string, unknown> = {};
+  if (process.env.HELMET_REPORT_ONLY === "true") {
+    helmetOpts.contentSecurityPolicy = false;
+    helmetOpts.crossOriginEmbedderPolicy = false;
+  }
+  app.use(helmet(helmetOpts));
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
-      forbidNonWhitelisted: false,
+      forbidNonWhitelisted: true,
       transform: true,
       transformOptions: { enableImplicitConversion: false },
     }),
   );
   app.useGlobalFilters(new GlobalExceptionFilter());
   app.enableCors({
-    origin: true,
+    origin: CORS_ORIGINS,
     credentials: true,
   });
   const port = Number(process.env.PORT ?? 3000);

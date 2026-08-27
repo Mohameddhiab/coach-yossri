@@ -14,32 +14,25 @@ export interface SubscriptionLike {
 export type TierFeature = "meal-plan" | "workout-plan" | "chat" | "follow-up";
 
 export const TIER_RANK: Record<SubscriptionTier, number> = {
-  BASIC: 1,
-  PREMIUM: 2,
-  ELITE: 3,
+  ONLINE: 1,
+  PREMIUM_COACH: 2,
 };
 
 export const OFFRES: Record<
   SubscriptionTier,
   { prix: number; nom: string; features: string[] }
 > = {
-  BASIC: {
-    prix: 30,
-    nom: "Basic",
-    features: ["Accès salle", "Pointage QR"],
+  ONLINE: {
+    prix: 60,
+    nom: "Online",
+    features: ["Plan alimentaire", "Plan d\'exercices"],
   },
-  PREMIUM: {
-    prix: 50,
-    nom: "Premium",
-    features: ["Accès salle + pointage", "Plan alimentaire", "Plan d'exercices"],
-  },
-  ELITE: {
-    prix: 90,
-    nom: "Elite",
+  PREMIUM_COACH: {
+    prix: 150,
+    nom: "Premium Coach",
     features: [
-      "Accès salle + pointage",
       "Plan alimentaire",
-      "Plan d'exercices",
+      "Plan d\'exercices",
       "Suivi personnalisé",
       "Chat direct avec le coach",
     ],
@@ -47,7 +40,7 @@ export const OFFRES: Record<
 };
 
 export function isSubscriptionTier(value: unknown): value is SubscriptionTier {
-  return value === "BASIC" || value === "PREMIUM" || value === "ELITE";
+  return value === "ONLINE" || value === "PREMIUM_COACH";
 }
 
 export function getActiveTier(sub: SubscriptionLike | null): SubscriptionTier | null {
@@ -55,14 +48,14 @@ export function getActiveTier(sub: SubscriptionLike | null): SubscriptionTier | 
   if (getSubscriptionStatus(sub) === "EXPIRE") {
     return null;
   }
-  return isSubscriptionTier(sub.tier) ? sub.tier : "BASIC";
+  return isSubscriptionTier(sub.tier) ? sub.tier : "ONLINE";
 }
 
 const FEATURE_MIN_TIER: Record<TierFeature, SubscriptionTier> = {
-  "meal-plan": "PREMIUM",
-  "workout-plan": "PREMIUM",
-  chat: "ELITE",
-  "follow-up": "ELITE",
+  "meal-plan": "ONLINE",
+  "workout-plan": "ONLINE",
+  chat: "PREMIUM_COACH",
+  "follow-up": "PREMIUM_COACH",
 };
 
 export function tierAllows(tier: SubscriptionTier | null, feature: TierFeature): boolean {

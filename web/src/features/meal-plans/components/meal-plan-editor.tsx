@@ -282,7 +282,7 @@ function PlanEditorInner({ plan, userId }: { plan: MealPlan | null; userId: stri
         </div>
         <Button onClick={save} disabled={saving}>
           {saving ? <Loader2 className="animate-spin" /> : <Save />}
-          حفظ الخطة
+          {plan ? "حفظ التعديلات" : "إنشاء الخطة"}
         </Button>
       </div>
 
@@ -476,6 +476,12 @@ function PlanEditorInner({ plan, userId }: { plan: MealPlan | null; userId: stri
               </div>
             </TabsContent>
           </Tabs>
+          <div className="flex justify-center border-t pt-4">
+            <Button size="lg" onClick={save} disabled={saving} className="w-full sm:w-auto min-w-[200px] gap-2 text-base">
+              {saving ? <Loader2 className="animate-spin" /> : <Save />}
+              {plan ? "حفظ التعديلات" : "إنشاء الخطة"}
+            </Button>
+          </div>
         </CardContent>
       </Card>
 

@@ -6,6 +6,9 @@ import { SUBSCRIPTION_REPOSITORY, type SubscriptionRepository } from "@/shared/d
 import { EmailService } from "@/shared/email/email.service";
 import type { User } from "@/shared/domain/entities";
 
+import { isSubscriptionTier, OFFRES } from "@/shared/domain/subscription-tier";
+import type { SubscriptionTier } from "@/shared/domain/domain-types";
+
 export interface CreateUserInput {
   email: string;
   nom: string;
@@ -13,7 +16,7 @@ export interface CreateUserInput {
   telephone: string;
   dateNaissance: Date | null;
   referredBy: string | null;
-  essai: boolean;
+  tier?: string;
   dateDebut?: string;
   dateFin?: string;
   montant: number;
@@ -57,30 +60,26 @@ export class CreateUserUseCase {
       createdAt: new Date(),
     });
 
-    if (input.essai) {
-      const now = new Date();
-      await this.subs.create({
-        userId: user.id,
-        dateDebut: now,
-        dateFin: new Date(now.getTime() + 7 * 86400000),
-        montant: 0,
-        modePaiement: "ESSAI",
-        statut: "ESSAI",
-        createdBy: input.coachId,
-      });
-    } else if (input.dateDebut && input.dateFin) {
+    if (input.dateDebut && input.dateFin) {
+      const tier: SubscriptionTier = isSubscriptionTier(input.tier) ? input.tier : "ONLINE";
       await this.subs.create({
         userId: user.id,
         dateDebut: new Date(input.dateDebut),
         dateFin: new Date(input.dateFin),
         montant: input.montant,
+        tier,
         modePaiement: "ESPECE",
         statut: "ACTIF",
         createdBy: input.coachId,
       });
     }
 
-    await this.email.sendWelcome(user.email, password);
+    try {
+      await this.email.sendWelcome(user.email, password);
+    } catch (e) {
+      // L'email ne doit pas faire échouer la création utilisateur
+      console.warn("[CreateUser] sendWelcome failed:", e instanceof Error ? e.message : String(e));
+    }
 
     return { user, password };
   }

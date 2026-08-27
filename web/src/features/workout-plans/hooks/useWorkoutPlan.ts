@@ -29,7 +29,11 @@ export function useCreateWorkoutPlan(userId: string) {
     mutationFn: (input: WorkoutPlanInput) => createWorkoutPlan(userId, input),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["workout-plan", userId] });
+      qc.invalidateQueries({ queryKey: ["workout-plan", "me"] });
+      qc.invalidateQueries({ queryKey: ["me", "plan"] });
       qc.invalidateQueries({ queryKey: ["users", userId] });
+      qc.invalidateQueries({ queryKey: ["users"] });
+      qc.invalidateQueries({ queryKey: ["me"] });
       qc.invalidateQueries({ queryKey: ["workout-plan-templates"] });
     },
   });
@@ -41,7 +45,10 @@ export function useUpdateWorkoutPlan(userId: string) {
     mutationFn: (input: WorkoutPlanInput) => updateWorkoutPlan(userId, input),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["workout-plan", userId] });
+      qc.invalidateQueries({ queryKey: ["workout-plan", "me"] });
+      qc.invalidateQueries({ queryKey: ["me", "plan"] });
       qc.invalidateQueries({ queryKey: ["users", userId] });
+      qc.invalidateQueries({ queryKey: ["me"] });
     },
   });
 }
@@ -52,6 +59,7 @@ export function useDuplicateWorkoutPlan(userId: string) {
     mutationFn: (sourcePlanId: string) => duplicateWorkoutPlan(userId, sourcePlanId),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["workout-plan", userId] });
+      qc.invalidateQueries({ queryKey: ["workout-plan", "me"] });
       qc.invalidateQueries({ queryKey: ["users", userId] });
     },
   });

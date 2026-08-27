@@ -1,5 +1,11 @@
-import { Card, CardContent } from "@/components/ui/card";
 import { Flame, Drumstick, Wheat, Droplet } from "lucide-react";
+
+const ITEMS = [
+  { key: "cal", label: "السعرات", unit: "سعرة", icon: Flame, color: "text-amber-500", ring: "ring-amber-500/20", bg: "bg-gradient-to-br from-amber-500/10 to-amber-500/5" },
+  { key: "pro", label: "بروتين", unit: "غ", icon: Drumstick, color: "text-emerald-600", ring: "ring-emerald-500/20", bg: "bg-gradient-to-br from-emerald-500/10 to-emerald-500/5" },
+  { key: "glu", label: "كارب", unit: "غ", icon: Wheat, color: "text-sky-600", ring: "ring-sky-500/20", bg: "bg-gradient-to-br from-sky-500/10 to-sky-500/5" },
+  { key: "lip", label: "دهون", unit: "غ", icon: Droplet, color: "text-orange-500", ring: "ring-orange-500/20", bg: "bg-gradient-to-br from-orange-500/10 to-orange-500/5" },
+] as const;
 
 export function MacrosCards({
   calories,
@@ -12,29 +18,34 @@ export function MacrosCards({
   glucides: number;
   lipides: number;
 }) {
-  const items = [
-    { label: "السعرات", value: calories, unit: "سعرة", icon: Flame, color: "text-amber-500", bg: "border-amber-500/20 bg-amber-500/5" },
-    { label: "بروتين", value: proteines, unit: "غ", icon: Drumstick, color: "text-emerald-600", bg: "border-emerald-500/20 bg-emerald-500/5" },
-    { label: "كربوهيدرات", value: glucides, unit: "غ", icon: Wheat, color: "text-sky-600", bg: "border-sky-500/20 bg-sky-500/5" },
-    { label: "دهون", value: lipides, unit: "غ", icon: Droplet, color: "text-orange-500", bg: "border-orange-500/20 bg-orange-500/5" },
-  ] as const;
+  const values: Record<string, number> = { cal: calories, pro: proteines, glu: glucides, lip: lipides };
+
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-      {items.map((item) => (
-        <Card key={item.label} className={item.bg}>
-          <CardContent className="flex items-center gap-3 p-3">
-            <item.icon className={`size-5 shrink-0 ${item.color}`} />
-            <div className="leading-tight">
-              <div className="text-lg font-extrabold tabular-nums">
-                {item.value}
-                <span className="ms-1 text-xs font-medium text-muted-foreground">
+    <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+      {ITEMS.map((item) => (
+        <div
+          key={item.key}
+          className={`animate-scale-in group relative overflow-hidden rounded-xl border ${item.bg} p-3.5 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5`}
+        >
+          <div className="flex items-start justify-between">
+            <div>
+              <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                {item.label}
+              </div>
+              <div className="mt-1 flex items-baseline gap-1">
+                <span className="text-2xl font-black tabular-nums leading-none">
+                  {values[item.key]}
+                </span>
+                <span className="text-xs font-medium text-muted-foreground">
                   {item.unit}
                 </span>
               </div>
-              <div className="text-xs text-muted-foreground">{item.label}</div>
             </div>
-          </CardContent>
-        </Card>
+            <div className={`flex size-8 shrink-0 items-center justify-center rounded-lg ring-1 ${item.ring} ${item.bg}`}>
+              <item.icon className={`size-4 ${item.color}`} />
+            </div>
+          </div>
+        </div>
       ))}
     </div>
   );

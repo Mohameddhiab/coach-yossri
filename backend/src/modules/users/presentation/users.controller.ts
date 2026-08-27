@@ -13,6 +13,7 @@ import { IsEmail, IsNumber, IsOptional, IsString, Max, Min } from "class-validat
 import { JwtAuthGuard } from "@/shared/common/guards/jwt-auth.guard";
 import { RolesGuard } from "@/shared/common/guards/roles.guard";
 import { SubscriptionGuard } from "@/shared/common/guards/subscription.guard";
+import { CoachOwnershipGuard } from "@/shared/common/guards/coach-ownership.guard";
 import { Roles } from "@/shared/common/decorators/roles.decorator";
 import { CurrentUser, type AuthUser } from "@/shared/common/decorators/current-user.decorator";
 import { ListCoachUsersUseCase } from "../application/use-cases/list-coach-users.use-case";
@@ -33,7 +34,7 @@ export class CreateUserDto {
   @IsOptional() @IsString() telephone?: string;
   @IsOptional() @IsString() date_naissance?: string;
   @IsOptional() @IsString() referred_by?: string;
-  @IsOptional() essai?: boolean;
+  @IsOptional() @IsString() tier?: string;
   @IsOptional() @IsString() date_debut?: string;
   @IsOptional() @IsString() date_fin?: string;
   @IsOptional() @IsNumber() montant?: number;
@@ -64,7 +65,7 @@ export class UsersController {
   @Get()
   @Roles("COACH")
   list(@Query("search") search?: string, @Query("status") status?: string) {
-    const s = (status ?? "TOUS") as "TOUS" | "ACTIF" | "ESSAI" | "EXPIRE" | "EXPIRE_BIENTOT";
+    const s = (status ?? "TOUS") as "TOUS" | "ACTIF" | "EXPIRE" | "EXPIRE_BIENTOT";
     return this.listUseCase.execute(search ?? "", s);
   }
 
@@ -78,7 +79,7 @@ export class UsersController {
       telephone: dto.telephone ?? "",
       dateNaissance: dto.date_naissance ? new Date(dto.date_naissance) : null,
       referredBy: dto.referred_by ?? null,
-      essai: dto.essai ?? false,
+      tier: dto.tier,
       dateDebut: dto.date_debut,
       dateFin: dto.date_fin,
       montant: dto.montant ?? 0,
@@ -95,6 +96,7 @@ export class UsersController {
 
   @Patch(":userId")
   @Roles("COACH")
+  @UseGuards(CoachOwnershipGuard)
   async update(@Param("userId") userId: string, @Body() dto: UpdateUserDto) {
     const user = await this.updateUseCase.execute(userId, {
       nom: dto.nom,
@@ -110,6 +112,7 @@ export class UsersController {
 
   @Get(":userId/calorie-needs")
   @Roles("COACH")
+  @UseGuards(CoachOwnershipGuard)
   calorieNeeds(
     @Param("userId") userId: string,
     @Query("activite") activite?: string,
@@ -119,6 +122,7 @@ export class UsersController {
 
   @Delete(":userId")
   @Roles("COACH")
+  @UseGuards(CoachOwnershipGuard)
   async remove(@Param("userId") userId: string) {
     await this.deleteUseCase.execute(userId);
     return { ok: true };
@@ -126,6 +130,7 @@ export class UsersController {
 
   @Post(":userId/reset-password")
   @Roles("COACH")
+  @UseGuards(CoachOwnershipGuard)
   resetPassword(@Param("userId") userId: string) {
     return this.resetUseCase.execute(userId);
   }

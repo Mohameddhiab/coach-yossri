@@ -24,7 +24,7 @@ export function toSubscriptionApi(s: Subscription): SubscriptionApi {
     date_debut: s.dateDebut.toISOString(),
     date_fin: s.dateFin.toISOString(),
     montant: s.montant,
-    tier: s.tier ?? "BASIC",
+    tier: s.tier ?? "ONLINE",
     mode_paiement: s.modePaiement ?? "ESPECE",
     statut: getSubscriptionStatus(s),
     created_by: s.createdBy,

@@ -14,7 +14,6 @@ import {
   getActiveTier,
   getSubscriptionStatus,
   daysLeft,
-  isTrial,
   OFFRES,
 } from "@/shared/lib/domain";
 import { formatDate } from "@/lib/utils";
@@ -53,7 +52,7 @@ export default function MySubscriptionPage() {
       <Card className="overflow-hidden">
         <div
           className={
-            status === "EXPIRE_BIENTOT" || status === "ESSAI"
+            status === "EXPIRE_BIENTOT"
               ? "h-1.5 bg-gradient-to-l from-amber-400 via-amber-500 to-amber-600"
               : "h-1.5 bg-gradient-to-l from-emerald-400 via-emerald-500 to-emerald-600"
           }
@@ -63,12 +62,12 @@ export default function MySubscriptionPage() {
             <Badge
               variant="outline"
               className={
-                status === "EXPIRE_BIENTOT" || status === "ESSAI"
+                status === "EXPIRE_BIENTOT"
                   ? "border-amber-500/40 text-amber-600 dark:text-amber-400"
                   : undefined
               }
             >
-              {isTrial(subscription) ? "فترة تجريبية بالمجان" : "اشتراكك نشط"}
+              اشتراكك نشط
             </Badge>
             {tierNom && <Badge variant="secondary">{tierNom}</Badge>}
           </div>
@@ -80,16 +79,14 @@ export default function MySubscriptionPage() {
 
           <div className="space-y-1.5">
             <Progress value={elapsedPct} />
-            <p className="text-[11px] text-muted-foreground tabular-nums">
+            <p className="text-xs text-muted-foreground tabular-nums">
               {Math.round(elapsedPct)}% من الفترة انقضى
             </p>
           </div>
 
           <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
             <Wallet className="size-4" />
-            {isTrial(subscription)
-              ? "تجربة مجانية — واصل الالتزام ثم جدد مع مدربك"
-              : `الدفع نقدًا مع مدربك — ${subscription?.montant} د.ت / فترة`}
+            الدفع نقدًا مع مدربك — {subscription?.montant} د.ت / فترة
           </div>
 
           <div className="grid grid-cols-2 gap-3 text-sm">

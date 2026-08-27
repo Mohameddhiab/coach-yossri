@@ -270,7 +270,7 @@ function MiniPlanTable() {
     <div className="overflow-x-auto rounded-xl border border-primary/20 bg-background/60">
       <table className="w-full min-w-[520px] border-collapse text-xs">
         <thead>
-          <tr className="bg-primary/10 text-[10px] font-bold text-muted-foreground">
+          <tr className="bg-primary/10 text-xs font-bold text-muted-foreground">
             <th className="border-b px-2.5 py-2 text-start">Nom exercice</th>
             <th className="border-b px-2.5 py-2">image</th>
             <th className="border-b px-2.5 py-2">charge</th>
@@ -324,7 +324,7 @@ function MiniMacrosPreview() {
       {macros.map((m) => (
         <div key={m.label} className="rounded-lg bg-muted/50 px-3 py-3 text-center">
           <div className="amber-gradient-text text-xl font-black tabular-nums">{m.value}</div>
-          <div className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+          <div className="mt-0.5 text-xs font-bold uppercase tracking-wider text-muted-foreground">
             {m.label}
           </div>
         </div>
@@ -353,7 +353,7 @@ function MiniChatPreview() {
           </span>
         </div>
       ))}
-      <div className="pt-1 text-center text-[10px] text-muted-foreground">
+      <div className="pt-1 text-center text-xs text-muted-foreground">
         ردّ سريع داخل التطبيق — بدون واتساب
       </div>
     </div>
@@ -397,7 +397,7 @@ function FeaturesSection() {
             <Card className="overflow-hidden transition-all duration-300 hover:border-primary/40">
               <CardContent className="grid gap-5 p-6 lg:grid-cols-[1fr_1.2fr] lg:items-center">
                 <div className="space-y-2">
-                  <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/70">
+                  <span className="text-xs font-black uppercase tracking-[0.3em] text-primary/70">
                     {p.label} {p.num}
                   </span>
                   <h3 className="text-xl font-black">{p.title}</h3>
@@ -446,7 +446,7 @@ function ResultsSection() {
                       className="relative flex aspect-[3/4] items-center justify-center overflow-hidden rounded-lg border border-border/60 bg-muted/40"
                     >
                       <ImageIcon className="size-8 text-muted-foreground/40" />
-                      <span className="absolute bottom-1.5 start-1.5 rounded bg-background/80 px-1.5 py-0.5 text-[10px] font-bold">
+                      <span className="absolute bottom-1.5 start-1.5 rounded bg-background/80 px-1.5 py-0.5 text-xs font-bold">
                         {label}
                       </span>
                     </div>
@@ -476,7 +476,7 @@ function B2BSection() {
         <Card className="overflow-hidden border-primary/25 bg-gradient-to-l from-primary/10 to-transparent">
           <CardContent className="grid gap-6 p-6 lg:grid-cols-2 lg:items-center">
             <div className="space-y-3">
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/70">
+              <span className="text-xs font-black uppercase tracking-[0.3em] text-primary/70">
                 B2B / لأصحاب القاعات
               </span>
               <h3 className="text-2xl font-black">أدِر قاعتك بنظام متكامل</h3>
@@ -514,12 +514,9 @@ function B2BSection() {
 }
 
 function PricingSection({ whatsappUrl }: { whatsappUrl: string }) {
-  const [duration, setDuration] = useState<"m3" | "m6" | "m12">("m3");
-  const durationLabel = { m3: "3 شهور", m6: "6 شهور", m12: "12 شهر" } as const;
-
   const waFor = (plan: LandingPlan) =>
     `${whatsappUrl}?text=${encodeURIComponent(
-      `أهلاً مدرب، أرغب في الاستفسار عن باقة ${plan.name} (${durationLabel[duration]})`,
+      `أهلاً مدرب، أرغب في الاستفسار عن باقة ${plan.name}`,
     )}`;
 
   return (
@@ -529,26 +526,7 @@ function PricingSection({ whatsappUrl }: { whatsappUrl: string }) {
         اختر مستوى المتابعة الذي يناسبك
       </SectionTitle>
 
-      <Reveal className="flex justify-center">
-        <div className="inline-flex items-center gap-1 rounded-full border bg-muted p-1">
-          {(["m3", "m6", "m12"] as const).map((d) => (
-            <button
-              key={d}
-              type="button"
-              onClick={() => setDuration(d)}
-              className={`rounded-full px-4 py-1.5 text-sm font-bold transition-colors ${
-                duration === d
-                  ? "bg-primary text-primary-foreground shadow"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {durationLabel[d]}
-            </button>
-          ))}
-        </div>
-      </Reveal>
-
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid gap-4 lg:grid-cols-2 max-w-2xl mx-auto">
         {LANDING_PLANS.map((plan, index) => (
           <Reveal key={plan.id} delay={index * 100} variant="start">
             <Card
@@ -559,7 +537,7 @@ function PricingSection({ whatsappUrl }: { whatsappUrl: string }) {
               }`}
             >
               {plan.highlight && (
-                <span className="absolute -top-3 start-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 text-[10px] font-black text-primary-foreground">
+                <span className="absolute -top-3 start-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 text-xs font-black text-primary-foreground">
                   الأكثر طلباً
                 </span>
               )}
@@ -569,19 +547,19 @@ function PricingSection({ whatsappUrl }: { whatsappUrl: string }) {
                   <p className="text-xs text-muted-foreground">{plan.tagline}</p>
                 </div>
                 <div className="flex flex-wrap gap-1.5">
-                  <Badge variant="secondary" className="text-[10px]">
+                  <Badge variant="secondary" className="text-xs">
                     {plan.places}
                   </Badge>
-                  <Badge variant="outline" className="text-[10px]">
+                  <Badge variant="outline" className="text-xs">
                     {plan.delivery}
                   </Badge>
                 </div>
                 <div className="flex items-end gap-1.5">
                   <span className="amber-gradient-text text-4xl font-black tabular-nums">
-                    {plan.prices[duration]}
+                    {plan.price}
                   </span>
                   <span className="pb-1 text-sm font-bold text-muted-foreground">
-                    DT / {durationLabel[duration]}
+                    DT / شهرياً
                   </span>
                 </div>
                 <ul className="flex-1 space-y-2 text-sm">
@@ -607,13 +585,14 @@ function PricingSection({ whatsappUrl }: { whatsappUrl: string }) {
   );
 }
 
-const COMPARISON_ROWS: { label: string; basic: boolean; premium: boolean; elite: boolean }[] = [
-  { label: "دخول القاعة", basic: true, premium: true, elite: true },
-  { label: "خطة غذائية محسوبة", basic: false, premium: true, elite: true },
-  { label: "جدول تمارين بالصور", basic: false, premium: true, elite: true },
-  { label: "تتبع وزن وصور وتصدير PDF", basic: false, premium: true, elite: true },
-  { label: "محادثة مباشرة مع المدرب", basic: false, premium: false, elite: true },
-  { label: "متابعة شخصية يوماً بيوم", basic: false, premium: false, elite: true },
+const COMPARISON_ROWS: { label: string; online: boolean; premiumCoach: boolean }[] = [
+  { label: "خطة غذائية محسوبة", online: true, premiumCoach: true },
+  { label: "جدول تمارين بالصور", online: true, premiumCoach: true },
+  { label: "تتبع وزن وصور وتصدير PDF", online: true, premiumCoach: true },
+  { label: "هدف شهري وتحديات", online: true, premiumCoach: true },
+  { label: "محادثة مباشرة مع المدرب", online: false, premiumCoach: true },
+  { label: "متابعة شخصية يوماً بيوم", online: false, premiumCoach: true },
+  { label: "تعديلات أسبوعية", online: false, premiumCoach: true },
 ];
 
 function ComparisonSection() {
@@ -627,20 +606,19 @@ function ComparisonSection() {
             </AccordionTrigger>
             <AccordionContent>
               <div className="overflow-x-auto rounded-xl border">
-                <table className="w-full min-w-[560px] border-collapse text-sm">
+                <table className="w-full border-collapse text-sm">
                   <thead>
                     <tr className="bg-muted/60 text-xs font-bold text-muted-foreground">
                       <th className="border-b px-3 py-3 text-start">الميزة</th>
-                      <th className="border-b px-3 py-3">باسيك</th>
-                      <th className="border-b px-3 py-3 text-primary">بريميوم</th>
-                      <th className="border-b px-3 py-3">إيليت</th>
+                      <th className="border-b px-3 py-3">أونلاين</th>
+                      <th className="border-b px-3 py-3 text-primary">بريميوم كوش</th>
                     </tr>
                   </thead>
                   <tbody>
                     {COMPARISON_ROWS.map((row) => (
                       <tr key={row.label} className="hover:bg-muted/20">
                         <td className="border-b px-3 py-2.5 font-medium">{row.label}</td>
-                        {[row.basic, row.premium, row.elite].map((on, i) => (
+                        {[row.online, row.premiumCoach].map((on, i) => (
                           <td key={i} className="border-b px-3 py-2.5 text-center">
                             {on ? (
                               <Check className="mx-auto size-4 text-primary" />
@@ -696,7 +674,7 @@ function FinalCta({ whatsappUrl }: { whatsappUrl: string }) {
             aria-hidden
             className="pointer-events-none absolute -top-16 start-1/2 h-48 w-96 -translate-x-1/2 rounded-full bg-primary/20 blur-3xl"
           />
-          <span className="text-[10px] font-black uppercase tracking-[0.4em] text-primary/80">
+          <span className="text-xs font-black uppercase tracking-[0.4em] text-primary/80">
             START
           </span>
           <h2 className="mt-3 text-3xl font-black sm:text-4xl">

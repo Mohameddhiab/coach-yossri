@@ -1,20 +1,18 @@
 export type Role = "COACH" | "USER";
 
-export type SubscriptionStatus = "ACTIF" | "EXPIRE" | "EXPIRE_BIENTOT" | "ESSAI";
+export type SubscriptionStatus = "ACTIF" | "EXPIRE" | "EXPIRE_BIENTOT";
 
-export type PaymentMode = "ESPECE" | "ESSAI";
+export type PaymentMode = "ESPECE";
 
 export const PAYMENT_MODE_LABELS: Record<PaymentMode, string> = {
   ESPECE: "نقداً",
-  ESSAI: "فترة تجريبية",
 };
 
-export type SubscriptionTier = "BASIC" | "PREMIUM" | "ELITE";
+export type SubscriptionTier = "ONLINE" | "PREMIUM_COACH";
 
 export const TIER_RANK: Record<SubscriptionTier, number> = {
-  BASIC: 1,
-  PREMIUM: 2,
-  ELITE: 3,
+  ONLINE: 1,
+  PREMIUM_COACH: 2,
 };
 
 export interface Offre {
@@ -26,38 +24,32 @@ export interface Offre {
 
 export const OFFRES: Offre[] = [
   {
-    tier: "BASIC",
-    prix: 30,
-    nom: "باسيك",
-    features: ["دخول القاعة", "تسجيل الحضور"],
+    tier: "ONLINE",
+    prix: 60,
+    nom: "أونلاين",
+    features: ["خطة غذائية", "خطة تمارين"],
   },
   {
-    tier: "PREMIUM",
-    prix: 50,
-    nom: "بريميوم",
-    features: ["دخول القاعة + حضور", "خطة غذائية", "خطة تمارين"],
-  },
-  {
-    tier: "ELITE",
-    prix: 90,
-    nom: "إيليت",
-    features: ["دخول القاعة + حضور", "خطة غذائية", "خطة تمارين", "متابعة شخصية", "شات مباشر مع المدرب"],
+    tier: "PREMIUM_COACH",
+    prix: 150,
+    nom: "بريميوم كوش",
+    features: ["خطة غذائية", "خطة تمارين", "متابعة شخصية", "شات مباشر مع المدرب"],
   },
 ];
 
 export type TierFeature = "meal-plan" | "workout-plan" | "chat" | "follow-up";
 
 const FEATURE_MIN_TIER: Record<TierFeature, SubscriptionTier> = {
-  "meal-plan": "PREMIUM",
-  "workout-plan": "PREMIUM",
-  chat: "ELITE",
-  "follow-up": "ELITE",
+  "meal-plan": "ONLINE",
+  "workout-plan": "ONLINE",
+  chat: "PREMIUM_COACH",
+  "follow-up": "PREMIUM_COACH",
 };
 
 export function getActiveTier(sub: Subscription | null): SubscriptionTier | null {
   if (!sub) return null;
   if (getSubscriptionStatus(sub) === "EXPIRE") return null;
-  return sub.tier ?? "BASIC";
+  return sub.tier ?? "ONLINE";
 }
 
 export function tierAllows(tier: SubscriptionTier | null, feature: TierFeature): boolean {
@@ -257,9 +249,6 @@ export function isPaused(sub: Subscription | null): boolean {
 
 export function getSubscriptionStatus(sub: Subscription | null): SubscriptionStatus {
   if (!sub) return "EXPIRE";
-  if (sub.statut === "ESSAI" || sub.mode_paiement === "ESSAI") {
-    return effectiveDateFin(sub).getTime() < Date.now() ? "EXPIRE" : "ESSAI";
-  }
   const now = Date.now();
   const fin = effectiveDateFin(sub).getTime();
   const debut = new Date(sub.date_debut).getTime();
@@ -268,10 +257,6 @@ export function getSubscriptionStatus(sub: Subscription | null): SubscriptionSta
   const daysLeft = Math.ceil((fin - now) / 86400000);
   if (daysLeft <= 7) return "EXPIRE_BIENTOT";
   return "ACTIF";
-}
-
-export function isTrial(sub: Subscription | null): boolean {
-  return !!sub && (sub.statut === "ESSAI" || sub.mode_paiement === "ESSAI");
 }
 
 export function daysLeft(sub: Subscription | null): number {
@@ -286,7 +271,6 @@ export function todayWeekDay(): WeekDay {
 
 export const SUBSCRIPTION_STATUS_LABELS: Record<SubscriptionStatus, string> = {
   ACTIF: "نشط",
-  ESSAI: "تجريبي",
   EXPIRE_BIENTOT: "أوشك على الانتهاء",
   EXPIRE: "منتهي",
 };

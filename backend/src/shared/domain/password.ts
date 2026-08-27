@@ -1,3 +1,5 @@
+import { randomBytes } from "node:crypto";
+
 export const PASSWORD_HASHER = Symbol("PasswordHasher");
 
 export interface PasswordHasher {
@@ -7,12 +9,11 @@ export interface PasswordHasher {
 
 export const PASSWORD_GENERATOR_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
 
-export function generatePassword(length = 10): string {
+export function generatePassword(length = 12): string {
+  const bytes = randomBytes(length);
   let out = "";
   for (let i = 0; i < length; i++) {
-    out += PASSWORD_GENERATOR_ALPHABET.charAt(
-      Math.floor(Math.random() * PASSWORD_GENERATOR_ALPHABET.length),
-    );
+    out += PASSWORD_GENERATOR_ALPHABET.charAt(bytes[i]! % PASSWORD_GENERATOR_ALPHABET.length);
   }
   return out;
 }

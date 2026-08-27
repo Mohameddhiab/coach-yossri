@@ -1,7 +1,7 @@
 export type Role = "COACH" | "USER";
-export type SubscriptionStatus = "ACTIF" | "EXPIRE" | "EXPIRE_BIENTOT" | "ESSAI";
-export type PaymentMode = "ESPECE" | "ESSAI";
-export type SubscriptionTier = "BASIC" | "PREMIUM" | "ELITE";
+export type SubscriptionStatus = "ACTIF" | "EXPIRE" | "EXPIRE_BIENTOT";
+export type PaymentMode = "ESPECE";
+export type SubscriptionTier = "ONLINE" | "PREMIUM_COACH";
 export type PlanObjective = "PRISE_DE_MASSE" | "SECHE" | "MAINTIEN";
 export type Sexe = "HOMME" | "FEMME";
 export type MealPlanStatus = "ACTIF" | "ARCHIVE";

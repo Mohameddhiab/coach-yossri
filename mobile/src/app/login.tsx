@@ -2,7 +2,6 @@ import {
   Image,
   KeyboardAvoidingView,
   Platform,
-  Pressable,
   StyleSheet,
   Text,
   View,
@@ -10,7 +9,6 @@ import {
 import { router } from "expo-router";
 import { useState } from "react";
 import { ApiError } from "@/shared/lib/api-client";
-import { DEMO_CREDENTIALS } from "@/shared/lib/storage";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,11 +24,11 @@ export default function LoginScreen() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const submit = async (e?: string, p?: string) => {
+  const submit = async () => {
     setError(null);
     setLoading(true);
     try {
-      const logged = await login(e ?? email, p ?? password);
+      const logged = await login(email, password);
       router.replace(logged.role === "COACH" ? "/dashboard" : "/(tabs)/plan");
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "خطأ غير متوقع");
@@ -83,24 +81,11 @@ export default function LoginScreen() {
           <Button
             size="lg"
             loading={loading}
-            onPress={() => submit()}
+            onPress={submit}
             disabled={!email || !password}
           >
             دخول
           </Button>
-
-          <View style={styles.demo}>
-            <Text style={[styles.demoTitle, { color: colors.muted }]}>حساب تجريبي:</Text>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="دخول بالحساب التجريبي"
-              onPress={() => submit(DEMO_CREDENTIALS.user.email, DEMO_CREDENTIALS.user.password)}
-            >
-              <Text style={[styles.demoText, { color: colors.primary }]}>
-                {DEMO_CREDENTIALS.user.email} — {DEMO_CREDENTIALS.user.password}
-              </Text>
-            </Pressable>
-          </View>
         </View>
       </KeyboardAvoidingView>
     </Screen>
@@ -116,7 +101,4 @@ const styles = StyleSheet.create({
   form: { width: "100%" },
   field: { marginBottom: 14 },
   error: { fontSize: 12, fontFamily: F.medium, marginTop: 4, marginBottom: 14 },
-  demo: { alignItems: "center", marginTop: 22 },
-  demoTitle: { fontSize: 12, fontFamily: F.medium, marginBottom: 4 },
-  demoText: { fontSize: 13, fontFamily: F.semibold },
 });

@@ -17,7 +17,7 @@ export function Logo({ className, compact = false }: { className?: string; compa
           <div className="text-lg font-extrabold tracking-tight">
             Coach Yosri
           </div>
-          <div className="text-[10px] text-muted-foreground">بالصحة والقوة مع مدربك</div>
+          <div className="text-xs text-muted-foreground">بالصحة والقوة مع مدربك</div>
         </div>
       )}
     </div>

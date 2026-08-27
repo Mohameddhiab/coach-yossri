@@ -4,8 +4,8 @@ export interface ResolveMember {
   id: string;
   nom: string;
   prenom: string;
-  tier: "BASIC" | "PREMIUM" | "ELITE" | null;
-  statut: "ACTIF" | "EXPIRE" | "EXPIRE_BIENTOT" | "ESSAI";
+  tier: "ONLINE" | "PREMIUM_COACH" | null;
+  statut: "ACTIF" | "EXPIRE" | "EXPIRE_BIENTOT";
   date_fin: string | null;
 }
 

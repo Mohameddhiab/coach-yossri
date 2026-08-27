@@ -29,7 +29,7 @@ describe("normalizeMeals", () => {
         jourSemaine: "MAR",
         typeRepas: "PETIT_DEJ",
         description: "Œufs",
-        calories: "350",
+        calories: 350,
         proteinesG: 20,
         alternatives: "   yaourt   ",
       },

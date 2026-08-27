@@ -58,7 +58,14 @@ export async function apiClient<T>(
     }
     throw new ApiError(res.status, message, code);
   }
-  return (await res.json()) as T;
+  // Backend renvoie parfois 200 avec body vide pour `null` (plan inexistant) → éviter crash JSON
+  const text = await res.text();
+  if (!text) return null as T;
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    return null as T;
+  }
 }
 
 export function isSubscriptionExpiredError(error: unknown): boolean {

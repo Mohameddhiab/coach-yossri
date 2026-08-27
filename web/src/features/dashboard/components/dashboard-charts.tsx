@@ -20,7 +20,6 @@ import { getSubscriptionStatus } from "@/shared/lib/domain";
 
 const STATUS_META: { key: string; label: string; color: string }[] = [
   { key: "ACTIF", label: "نشط", color: "#10b981" },
-  { key: "ESSAI", label: "تجريبي", color: "#0ea5e9" },
   { key: "EXPIRE_BIENTOT", label: "أوشك على الانتهاء", color: "#f59e0b" },
   { key: "EXPIRE", label: "منتهي", color: "#ef4444" },
 ];

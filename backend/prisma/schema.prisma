@@ -14,20 +14,17 @@ enum Role {
 
 enum SubscriptionStatus {
   ACTIF
-  ESSAI
   EXPIRE
   EXPIRE_BIENTOT
 }
 
 enum PaymentMode {
   ESPECE
-  ESSAI
 }
 
 enum SubscriptionTier {
-  BASIC
-  PREMIUM
-  ELITE
+  ONLINE
+  PREMIUM_COACH
 }
 
 enum PlanObjective {
@@ -132,7 +129,7 @@ model Subscription {
   dateDebut    DateTime
   dateFin      DateTime
   montant      Float              @default(0)
-  tier         SubscriptionTier   @default(BASIC)
+  tier         SubscriptionTier   @default(ONLINE)
   modePaiement PaymentMode        @default(ESPECE)
   statut       SubscriptionStatus @default(ACTIF)
   createdBy    String

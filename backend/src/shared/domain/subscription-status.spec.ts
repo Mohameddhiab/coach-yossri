@@ -36,16 +36,6 @@ describe("getSubscriptionStatus", () => {
     expect(effectiveDateFin(s).getTime()).toBe(now + 32 * DAY);
   });
 
-  it("retourne ESSAI tant que la fin d'essai n'est pas dépassée", () => {
-    expect(getSubscriptionStatus(sub({ statut: "ESSAI" }))).toBe("ESSAI");
-  });
-
-  it("retourne EXPIRE pour un essai dépassé", () => {
-    expect(
-      getSubscriptionStatus(sub({ statut: "ESSAI", dateFin: new Date(now - DAY) })),
-    ).toBe("EXPIRE");
-  });
-
   it("retourne EXPIRE si l'abonnement n'a pas encore commencé", () => {
     expect(getSubscriptionStatus(sub({ dateDebut: new Date(now + DAY) }))).toBe("EXPIRE");
   });

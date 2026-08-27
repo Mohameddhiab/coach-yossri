@@ -16,7 +16,7 @@ import { apiClient } from "@/shared/lib/api-client";
 
 const schema = z
   .object({
-    password: z.string().min(6, "كلمة السر قصيرة (6 أحرف على الأقل)"),
+    password: z.string().min(12, "كلمة السر قصيرة (12 حرفاً على الأقل)"),
     confirm: z.string().min(1, "أكّد كلمة السر"),
   })
   .refine((v) => v.password === v.confirm, {

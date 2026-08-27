@@ -22,7 +22,7 @@ export function TierGate({
   tier?: SubscriptionTier | null;
   children: React.ReactNode;
 }) {
-  const rank = { BASIC: 1, PREMIUM: 2, ELITE: 3 } as const;
+  const rank = { ONLINE: 1, PREMIUM_COACH: 2 } as const;
   if (tier && rank[tier] >= rank[require]) {
     return <>{children}</>;
   }

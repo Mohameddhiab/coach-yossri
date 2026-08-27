@@ -6,12 +6,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { toast } from "sonner";
-import { Copy, Loader2, Sparkles } from "lucide-react";
+import { Copy, Loader2, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 import {
   Select,
   SelectContent,
@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select";
 import { useCreateUser, useUsers } from "@/features/users/hooks/useUsers";
 import { useQueryClient } from "@tanstack/react-query";
+import { OFFRES, type SubscriptionTier } from "@/shared/lib/domain";
 
 const schema = z
   .object({
@@ -30,14 +31,13 @@ const schema = z
     telephone: z
       .string()
       .regex(/^[\d+\s]{8,}$/, "رقم الهاتف لازم يكون 8 أرقام على الأقل"),
-    essai: z.boolean(),
+    tier: z.string().optional(),
     date_debut: z.string().optional(),
     date_fin: z.string().optional(),
     montant: z.coerce.number().min(1, "المبلغ لازم يكون أكثر من 0").optional(),
     referred_by: z.string().optional(),
   })
   .superRefine((v, ctx) => {
-    if (v.essai) return;
     if (Boolean(v.date_debut) !== Boolean(v.date_fin)) {
       ctx.addIssue({
         code: "custom",
@@ -70,14 +70,20 @@ export function CreateUserForm({ onDone }: { onDone?: () => void }) {
       nom: "",
       email: "",
       telephone: "",
-      essai: false,
+      tier: "ONLINE",
       date_debut: "",
       date_fin: "",
       montant: 60,
     },
   });
 
-  const trial = form.watch("essai");
+  const pickedTier = form.watch("tier") as SubscriptionTier | undefined;
+
+  const pickTier = (t: SubscriptionTier) => {
+    form.setValue("tier", t);
+    const o = OFFRES.find((x) => x.tier === t)!;
+    form.setValue("montant", o.prix);
+  };
 
   const onSubmit = async (values: FormValues) => {
     try {
@@ -88,10 +94,10 @@ export function CreateUserForm({ onDone }: { onDone?: () => void }) {
         telephone: values.telephone,
         referred_by:
           values.referred_by && values.referred_by !== "none" ? values.referred_by : null,
-        date_debut: values.essai || !values.date_debut ? undefined : values.date_debut,
-        date_fin: values.essai || !values.date_fin ? undefined : values.date_fin,
-        montant: values.essai ? undefined : values.montant,
-        essai: values.essai,
+        tier: values.tier,
+        date_debut: !values.date_debut ? undefined : values.date_debut,
+        date_fin: !values.date_fin ? undefined : values.date_fin,
+        montant: values.montant,
         date_naissance: null,
       });
       setCreatedUserId(res.user.id);
@@ -233,25 +239,41 @@ export function CreateUserForm({ onDone }: { onDone?: () => void }) {
         </div>
         <div className="rounded-xl border border-dashed p-3">
           <div className="mb-2 flex items-center justify-between">
+            <span className="text-sm font-medium">الباقة</span>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {OFFRES.map((o) => (
+              <button
+                key={o.tier}
+                type="button"
+                onClick={() => pickTier(o.tier)}
+                className={cn(
+                  "relative rounded-xl border p-3 text-right transition-colors",
+                  pickedTier === o.tier
+                    ? "border-primary bg-primary/5 ring-1 ring-primary"
+                    : "hover:border-primary/40",
+                )}
+              >
+                {pickedTier === o.tier ? (
+                  <Check className="absolute left-2 top-2 size-4 text-primary" />
+                ) : null}
+                <div className="text-sm font-bold">{o.nom}</div>
+                <div className="text-lg font-extrabold">{o.prix} د.ت</div>
+                <ul className="mt-1 space-y-0.5 text-xs leading-tight text-muted-foreground">
+                  {o.features.map((f) => (
+                    <li key={f}>• {f}</li>
+                  ))}
+                </ul>
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="rounded-xl border border-dashed p-3">
+          <div className="mb-2 flex items-center justify-between">
             <span className="text-sm font-medium">اشتراك أولي (اختياري)</span>
-            <Badge variant="outline" className="text-[10px]">
+            <Badge variant="outline" className="text-xs">
               نقداً — برّا التطبيق
             </Badge>
-          </div>
-          <div className="mb-3 flex items-center justify-between gap-4 rounded-lg border border-primary/25 bg-primary/5 p-3">
-            <div className="flex items-center gap-2 text-sm">
-              <Sparkles className="size-4 text-primary" />
-              <div>
-                <div className="font-semibold">فترة تجريبية مجانًا</div>
-                <div className="text-xs text-muted-foreground">
-                  7 أيام مجانًا — تنتهي تلقائيًا
-                </div>
-              </div>
-            </div>
-            <Switch
-              checked={trial}
-              onCheckedChange={(v: boolean) => form.setValue("essai", v)}
-            />
           </div>
           <div className="grid gap-3 sm:grid-cols-3">
             <FormField
@@ -261,7 +283,7 @@ export function CreateUserForm({ onDone }: { onDone?: () => void }) {
                 <FormItem>
                   <FormLabel className="text-xs">تاريخ البداية</FormLabel>
                   <FormControl>
-                    <Input type="date" dir="ltr" disabled={trial} {...field} />
+                    <Input type="date" dir="ltr" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -274,7 +296,7 @@ export function CreateUserForm({ onDone }: { onDone?: () => void }) {
                 <FormItem>
                   <FormLabel className="text-xs">تاريخ النهاية</FormLabel>
                   <FormControl>
-                    <Input type="date" dir="ltr" disabled={trial} {...field} />
+                    <Input type="date" dir="ltr" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -287,7 +309,7 @@ export function CreateUserForm({ onDone }: { onDone?: () => void }) {
                 <FormItem>
                   <FormLabel className="text-xs">المبلغ (د.ت)</FormLabel>
                   <FormControl>
-                    <Input type="number" dir="ltr" min={0} disabled={trial} {...field} />
+                    <Input type="number" dir="ltr" min={0} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

@@ -11,6 +11,7 @@ import { IsNumber, IsOptional, IsString } from "class-validator";
 import { JwtAuthGuard } from "@/shared/common/guards/jwt-auth.guard";
 import { RolesGuard } from "@/shared/common/guards/roles.guard";
 import { SubscriptionGuard } from "@/shared/common/guards/subscription.guard";
+import { CoachOwnershipGuard } from "@/shared/common/guards/coach-ownership.guard";
 import { TierGuard } from "@/shared/common/guards/tier.guard";
 import { RequireTier } from "@/shared/common/decorators/require-tier.decorator";
 import { Roles } from "@/shared/common/decorators/roles.decorator";
@@ -72,7 +73,7 @@ export class MealPlansController {
   ) {}
 
   @Get("users/:userId/plan")
-  @RequireTier("PREMIUM")
+  @RequireTier("ONLINE")
   @UseGuards(SubscriptionGuard, TierGuard)
   async get(@CurrentUser() auth: AuthUser, @Param("userId") userId: string) {
     const resolved = userId === "me" ? auth.userId : userId;
@@ -105,7 +106,7 @@ export class MealPlansController {
 
   @Put("users/:userId/plan")
   @Roles("COACH")
-  @UseGuards(RolesGuard)
+  @UseGuards(RolesGuard, CoachOwnershipGuard)
   async update(
     @Param("userId") userId: string,
     @Body() dto: PlanDto,
@@ -136,7 +137,7 @@ export class MealPlansController {
 
   @Get("users/:userId/plan/versions")
   @Roles("COACH")
-  @UseGuards(RolesGuard)
+  @UseGuards(RolesGuard, CoachOwnershipGuard)
   async versions(@Param("userId") userId: string) {
     const versions = await this.versionsUseCase.execute(userId);
     return versions.map((v) => ({

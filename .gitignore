@@ -29,3 +29,6 @@ Thumbs.db
 
 # Prisma (generated client is in node_modules)
 prisma/migrations/dev.db*
+
+# Workout guide assets (copied from node_modules via postinstall)
+web/public/guide-assets/

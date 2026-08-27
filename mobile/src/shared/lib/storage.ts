@@ -24,11 +24,6 @@ export async function storageRemove(key: string): Promise<void> {
   }
 }
 
-export const DEMO_CREDENTIALS = {
-  coach: { email: "coach@9awi.tn", password: "coach1234" },
-  user: { email: "youssef@demo.tn", password: "123456" },
-};
-
 export function formatDate(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "—";

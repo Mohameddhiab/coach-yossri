@@ -22,7 +22,7 @@ export function CoachInbox() {
       <EmptyState
         icon={<MessagesSquare className="size-5" />}
         title="لا يوجد محادثات"
-        description="يمكن لأعضاء باقة إيليت إرسال الرسائل إليك من هنا."
+        description="يمكن لأعضاء باقة بريميوم كوش إرسال الرسائل إليك من هنا."
       />
     );
   }
@@ -60,7 +60,7 @@ export function CoachInbox() {
                 {c.last_message ?? "—"}
               </p>
               {c.last_message_at ? (
-                <p className="mt-0.5 text-[10px] text-muted-foreground">
+                <p className="mt-0.5 text-xs text-muted-foreground">
                   {formatRelativeDate(c.last_message_at)}
                 </p>
               ) : null}

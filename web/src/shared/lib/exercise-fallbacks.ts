@@ -1,3 +1,5 @@
+import { getFallbackGuideImageUrl } from "./exercise-guide-map";
+
 export const FALLBACK_IMAGE_BY_CATEGORY: Record<string, string> = {
   Chest: "https://wger.de/media/exercise-images/192/Bench-press-1.png",
   Back: "https://wger.de/media/exercise-images/123/Lat-pulldown-1.png",
@@ -10,5 +12,8 @@ export const FALLBACK_IMAGE_BY_CATEGORY: Record<string, string> = {
 
 export function fallbackForCategory(category?: string | null): string | null {
   if (!category) return null;
+  // Priorité : illustration SVG workout-guide (transparente, locale)
+  const guide = getFallbackGuideImageUrl(category);
+  if (guide) return guide;
   return FALLBACK_IMAGE_BY_CATEGORY[category] ?? null;
 }

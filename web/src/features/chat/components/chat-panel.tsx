@@ -109,7 +109,7 @@ export function ChatPanel({
                   {m.contenu}
                   <span
                     className={cn(
-                       "mt-1 block w-fit rounded-full bg-black/5 px-1.5 py-0.5 text-[10px] tabular-nums dark:bg-white/10",
+                       "mt-1 block w-fit rounded-full bg-black/5 px-1.5 py-0.5 text-xs tabular-nums dark:bg-white/10",
                       mine ? "text-primary-foreground/70" : "text-muted-foreground",
                     )}
                     dir="ltr"
