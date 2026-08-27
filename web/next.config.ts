@@ -27,7 +27,7 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
-  output: process.env.DOCKER_BUILD ? "standalone" : undefined,
+  ...(process.env.DOCKER_BUILD ? { output: "standalone" } : {}),
   async headers() {
     return [
       {
