@@ -2,20 +2,31 @@ name: Keep Render Alive
 
 on:
   schedule:
-    - cron: '*/14 * * * *'  # toutes les 14 minutes (juste avant les 15 min de veille Render)
+    - cron: '*/14 * * * *'  # Every 14 minutes (before 15 min sleep)
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   ping:
+    name: Ping Backend
     runs-on: ubuntu-latest
+    timeout-minutes: 2
     steps:
-      - name: Ping backend health
+      - name: Ping health endpoint
         run: |
           URL="${{ secrets.RENDER_HEALTH_URL }}"
           if [ -z "$URL" ]; then
-            URL="https://ton-backend.onrender.com/api/health"
+            echo "::warning::RENDER_HEALTH_URL not set, using fallback"
+            URL="https://your-backend.onrender.com/api/health"
           fi
+          
           echo "Pinging $URL ..."
-          curl -s -o /dev/null -w "%{http_code} %{url_effective}\n" "$URL" || echo "ping failed"
-          # fallback ping sur /api
-          curl -s "https://ton-backend.onrender.com/api" || true
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "$URL" || echo "000")
+          
+          if [ "$HTTP_CODE" = "200" ]; then
+            echo "✓ Backend is alive (HTTP $HTTP_CODE)"
+          else
+            echo "::warning::Backend returned HTTP $HTTP_CODE"
+          fi

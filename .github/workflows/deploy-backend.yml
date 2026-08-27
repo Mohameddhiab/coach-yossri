@@ -1,0 +1,66 @@
+name: Deploy Backend (Render)
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/deploy-backend.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-backend
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to Render
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Trigger Render deploy
+        run: |
+          if [ -z "${{ secrets.RENDER_DEPLOY_HOOK }}" ]; then
+            echo "::error::RENDER_DEPLOY_HOOK secret not set. Go to Render Dashboard → Service → Settings → Deploy Hooks and add the hook URL."
+            exit 1
+          fi
+          echo "Triggering Render deploy..."
+          curl -s -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}" \
+            -H "Content-Type: application/json" \
+            -d '{}' \
+            -w "\nHTTP Status: %{http_code}\n"
+          echo "Deploy triggered successfully"
+
+  verify:
+    name: Verify deployment
+    needs: deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Wait for Render to start
+        run: sleep 60
+
+      - name: Check health endpoint
+        run: |
+          if [ -z "${{ secrets.RENDER_HEALTH_URL }}" ]; then
+            echo "::warning::RENDER_HEALTH_URL not set, skipping health check"
+            exit 0
+          fi
+          echo "Checking ${{ secrets.RENDER_HEALTH_URL }}..."
+          for i in 1 2 3 4 5; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${{ secrets.RENDER_HEALTH_URL }}" || echo "000")
+            if [ "$STATUS" = "200" ]; then
+              echo "✓ Backend is healthy (HTTP $STATUS)"
+              exit 0
+            fi
+            echo "Attempt $i: HTTP $STATUS - waiting 30s..."
+            sleep 30
+          done
+          echo "::error::Backend health check failed after 5 attempts"
+          exit 1
