@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "postinstall": "node scripts/copy-guide-assets.mjs || echo \"copy-guide-assets skipped (deps stage)\"",
-    "copy:assets": "node scripts/copy-guide-assets.mjs"
+    "copy:assets": "node scripts/copy-guide-assets.mjs",
+    "vercel-build": "node scripts/copy-guide-assets.mjs && next build"
   },
   "dependencies": {
     "@bryllim/workout-guide": "^1.0.0",

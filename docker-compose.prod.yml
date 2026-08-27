@@ -1,0 +1,35 @@
+services:
+  backend:
+    build: ./backend
+    container_name: 9awi-backend-prod
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env.production
+    environment:
+      NODE_ENV: production
+      COOKIE_SECURE: "true"
+    ports:
+      - "3001:3001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  web:
+    build: ./web
+    container_name: 9awi-web-prod
+    restart: unless-stopped
+    env_file:
+      - ./web/.env.production
+    environment:
+      NODE_ENV: production
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
+  redisdata:
