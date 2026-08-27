@@ -3,7 +3,8 @@ import type { Role } from "@/shared/lib/domain";
 
 const ACCESS_COOKIE = "9awi_access";
 const isProd = process.env.NODE_ENV === "production";
-const backendUrl = process.env.SERVER_API_URL || "http://localhost:3001";
+const serverApiUrl = process.env.SERVER_API_URL || "http://localhost:3001/api";
+const backendOrigin = serverApiUrl.replace(/\/api\/?$/, "");
 
 const COACH_PATHS = ["/dashboard", "/users", "/settings", "/pointage", "/notifications", "/classification", "/messages"];
 const USER_PATHS = ["/plan", "/progression", "/abonnement", "/reglages"];
@@ -21,7 +22,7 @@ const SECURITY_HEADERS: Record<string, string> = {
     "style-src 'self' 'unsafe-inline'",
     `img-src 'self' data: blob: https://wger.de https://*.supabase.co https://cdn.jsdelivr.net https://raw.githubusercontent.com http://localhost:* http://127.0.0.1:*`,
     "font-src 'self' data:",
-    `connect-src 'self' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* wss://localhost:* wss://127.0.0.1:* https://*.supabase.co https://*.supabase.in http://backend:* http://backend:3001 ${isProd ? backendUrl : ""}`,
+    `connect-src 'self' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* wss://localhost:* wss://127.0.0.1:* https://*.supabase.co https://*.supabase.in http://backend:* http://backend:3001 ${backendOrigin}`,
     "frame-ancestors 'none'",
   ].join("; "),
 };
