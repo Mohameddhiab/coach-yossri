@@ -90,11 +90,13 @@ export class AuthController {
   ) {}
 
   private setTokens(res: Response, accessToken: string, refreshToken: string) {
-    // En dev local (http://localhost) Secure doit être false sinon le navigateur refuse le cookie sur http
-    // En prod https, mettre COOKIE_SECURE=true dans l'env
-    const secure = process.env.COOKIE_SECURE === 'true';
-    // Lax permet l'envoi cross-port (3000 -> 3001) qui sont same-site mais pas same-origin
-    const sameSite = 'lax' as const;
+    // En dev local (http://localhost) Secure=false + Lax (same-site cross-port OK)
+    // En prod cross-domain (vercel.app -> onrender.com) → Secure=true + SameSite=None obligatoire
+    const secure =
+      process.env.COOKIE_SECURE != null
+        ? process.env.COOKIE_SECURE === 'true'
+        : process.env.NODE_ENV === 'production';
+    const sameSite: 'none' | 'lax' = secure ? 'none' : 'lax';
     res.cookie(ACCESS_COOKIE, accessToken, {
       httpOnly: true,
       sameSite,
@@ -148,8 +150,14 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Post('logout')
   logout(@Res({ passthrough: true }) res: Response) {
-    res.clearCookie(ACCESS_COOKIE);
-    res.clearCookie(REFRESH_COOKIE);
+    const secure =
+      process.env.COOKIE_SECURE != null
+        ? process.env.COOKIE_SECURE === 'true'
+        : process.env.NODE_ENV === 'production';
+    const sameSite: 'none' | 'lax' = secure ? 'none' : 'lax';
+    const opts = { httpOnly: true, secure, sameSite, path: '/' } as const;
+    res.clearCookie(ACCESS_COOKIE, opts);
+    res.clearCookie(REFRESH_COOKIE, opts);
     return { ok: true };
   }
 
