@@ -142,11 +142,11 @@ export const COACH_INFO = {
     { name: "ريم", role: "تغذية وإعداد البرامج", emoji: "🥗" },
   ] satisfies CoachTeamMember[],
   contact: {
-    phone: "+216 00 000 000",
-    whatsapp: "+21600000000",
+    phone: "+216 21 636 922",
+    whatsapp: "+21621636922",
     address: "الشارع الرئيسي — وسط المدينة",
     hours: "الاثنين — السبت: 9:00 — 22:00",
-    instagram: "https://www.instagram.com/coach.yosri",
-    facebook: "https://www.facebook.com/coach.yosri",
+    instagram: "https://www.instagram.com/stories/coach_yosri/",
+    facebook: "https://www.facebook.com/Yosri.messadi1?locale=fr_FR",
   },
 } as const;
