@@ -114,7 +114,7 @@ export class PrismaChatRepository implements ChatRepository {
     const coachId = conv?.coachId ?? '';
     return rows.map((r) => ({
       ...this.mapMessage(r),
-      senderRole: r.senderId === coachId ? 'COACH' : 'USER',
+      senderRole: (r.senderId === coachId ? 'COACH' : 'USER') as 'COACH' | 'USER',
     }));
   }
 
