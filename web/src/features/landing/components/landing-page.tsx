@@ -414,6 +414,97 @@ function FeaturesSection() {
   );
 }
 
+const CERTIFICATES = [
+  {
+    file: "fitness trainer.jpeg",
+    title: "Fitness Trainer",
+    desc: "شهادة مدرب لياقة بدنية معتمد — تخصص القوة والتحمل وبناء الأجسام وفق معايير دولية.",
+  },
+  {
+    file: "floor coach.jpeg",
+    title: "Floor Coach",
+    desc: "شهادة مدرب أرضي — خبرة ميدانية في توجيه الحصص، تصحيح الحركة وضمان السلامة.",
+  },
+  {
+    file: "personal trainer.jpeg",
+    title: "Personal Trainer",
+    desc: "شهادة مدرب شخصي — متابعة فردية، برمجة أحمال وتغذية مخصصة لكل عضو.",
+  },
+  {
+    file: "ifbb-certificate.jpeg",
+    title: "IFBB Certificate",
+    desc: "شهادة IFBB الدولية — أعلى اعتماد في كمال الأجسام واللياقة البدنية.",
+  },
+] as const;
+
+function CertificatesGallery() {
+  const [selected, setSelected] = useState<string | null>(null);
+  return (
+    <section id="certificates" className="scroll-mt-20 space-y-6 py-14">
+      <SectionLabel>05 / الشهادات المصورة</SectionLabel>
+      <SectionTitle icon={<Award className="size-5" />}>شهادات موثّقة — بالصور</SectionTitle>
+      <Reveal>
+        <p className="max-w-2xl text-sm text-muted-foreground">
+          كل شهادة باسمها الأصلي (اسم الملف) مع شرح — اضغط للتكبير. الصور من <code className="rounded bg-muted px-1 py-0.5 text-xs">public/certifacte</code> (git).
+        </p>
+      </Reveal>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {CERTIFICATES.map((c, index) => (
+          <Reveal key={c.file} delay={index * 100} variant="zoom">
+            <Card
+              className="group cursor-pointer overflow-hidden transition-all duration-500 hover:-translate-y-1.5 hover:scale-[1.02] hover:border-primary/40 hover:shadow-[0_16px_48px_-16px] hover:shadow-primary/30"
+              onClick={() => setSelected(`/certifacte/${encodeURIComponent(c.file)}`)}
+            >
+              <div className="relative aspect-[4/3] overflow-hidden bg-muted">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={`/certifacte/${encodeURIComponent(c.file)}`}
+                  alt={c.title}
+                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  loading="lazy"
+                />
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                <span className="pointer-events-none absolute bottom-2 start-2 rounded-full bg-background/90 px-2.5 py-1 text-xs font-bold shadow-sm transition-transform duration-300 group-hover:scale-105">
+                  {c.title}
+                </span>
+              </div>
+              <CardContent className="space-y-1 p-4">
+                <div className="font-bold leading-tight">{c.title}</div>
+                <p className="text-xs leading-relaxed text-muted-foreground">{c.desc}</p>
+                <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary">
+                  <ImageIcon className="size-3" /> {c.file}
+                </span>
+              </CardContent>
+            </Card>
+          </Reveal>
+        ))}
+      </div>
+      {selected && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+          onClick={() => setSelected(null)}
+          role="dialog"
+          aria-modal="true"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={selected}
+            alt="شهادة مكبرة"
+            className="max-h-[90vh] max-w-[90vw] animate-[zoom-in_0.3s_ease] rounded-xl border border-white/10 object-contain shadow-2xl"
+          />
+          <button
+            aria-label="إغلاق"
+            onClick={() => setSelected(null)}
+            className="absolute right-4 top-4 rounded-full bg-white/10 p-2 text-white backdrop-blur transition hover:bg-white/20"
+          >
+            <X className="size-5" />
+          </button>
+        </div>
+      )}
+    </section>
+  );
+}
+
 const SHOW_RESULTS = false;
 
 function ResultsSection() {
@@ -685,6 +776,7 @@ export function LandingPage() {
   const navLinks = [
     { href: "#about", label: "من أنا" },
     { href: "#certifications", label: "الشهادات" },
+    { href: "#certificates", label: "الشهادات المصورة" },
     { href: "#experience", label: "الخبرة" },
     { href: "#method", label: "الطريقة" },
     { href: "#features", label: "المميزات" },
@@ -885,6 +977,9 @@ export function LandingPage() {
             ))}
           </div>
         </section>
+
+        {/* CERTIFICATES GALLERY — images git public/certifacte */}
+        <CertificatesGallery />
 
         {/* EXPERIENCE */}
         <section id="experience" className="scroll-mt-20 space-y-6 py-14">
