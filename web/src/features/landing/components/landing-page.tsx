@@ -9,6 +9,7 @@ import {
   ChevronDown,
   Dumbbell,
   Image as ImageIcon,
+  LogIn,
   Menu,
   MessageCircle,
   Sparkles,
@@ -709,6 +710,12 @@ export function LandingPage() {
             ))}
           </nav>
           <div className="flex items-center gap-2">
+            <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
+              <a href="/login">
+                <LogIn className="size-4" />
+                تسجيل الدخول
+              </a>
+            </Button>
             <Button asChild size="sm" className="hidden sm:inline-flex">
               <a href="#plans">ابدأ الآن</a>
             </Button>
@@ -740,6 +747,12 @@ export function LandingPage() {
               <Button asChild className="mt-3 w-full">
                 <a href="#plans" onClick={() => setMobileOpen(false)}>
                   ابدأ الآن
+                </a>
+              </Button>
+              <Button asChild variant="outline" className="mt-2 w-full">
+                <a href="/login" onClick={() => setMobileOpen(false)}>
+                  <LogIn className="size-4" />
+                  تسجيل الدخول
                 </a>
               </Button>
             </nav>
