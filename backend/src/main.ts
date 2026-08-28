@@ -7,13 +7,16 @@ import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import { GlobalExceptionFilter } from './shared/common/errors/global-exception.filter';
 
-const CORS_ORIGINS = (
-  process.env.CORS_ORIGINS ??
-  'http://localhost:3000,https://coach-yossri.vercel.app,http://localhost:3001'
-)
+const DEFAULT_ORIGINS = [
+  'http://localhost:3000',
+  'https://coach-yossri.vercel.app',
+  'http://localhost:3001',
+];
+const ENV_ORIGINS = (process.env.CORS_ORIGINS ?? '')
   .split(',')
   .map((s) => s.trim())
   .filter(Boolean);
+const CORS_ORIGINS = [...new Set([...DEFAULT_ORIGINS, ...ENV_ORIGINS])];
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -38,6 +41,7 @@ async function bootstrap() {
     }),
   );
   app.useGlobalFilters(new GlobalExceptionFilter());
+  console.log('[CORS] allowed origins:', CORS_ORIGINS.join(', '));
   app.enableCors({
     origin: CORS_ORIGINS,
     credentials: true,
