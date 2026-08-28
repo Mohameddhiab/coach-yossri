@@ -17,10 +17,12 @@ async function bootstrap() {
   app.use(express.urlencoded({ limit: "10mb", extended: true }));
   app.setGlobalPrefix("api");
   app.use(cookieParser());
-  const helmetOpts: Record<string, unknown> = {};
+  const helmetOpts: Record<string, unknown> = {
+    crossOriginResourcePolicy: false,
+    crossOriginEmbedderPolicy: false,
+  };
   if (process.env.HELMET_REPORT_ONLY === "true") {
     helmetOpts.contentSecurityPolicy = false;
-    helmetOpts.crossOriginEmbedderPolicy = false;
   }
   app.use(helmet(helmetOpts));
   app.useGlobalPipes(
