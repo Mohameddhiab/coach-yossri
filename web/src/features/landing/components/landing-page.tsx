@@ -10,7 +10,9 @@ import {
   ChevronDown,
   Clock,
   Dumbbell,
+  Facebook,
   Image as ImageIcon,
+  Instagram,
   LayoutDashboard,
   MapPin,
   Menu,
@@ -666,6 +668,7 @@ function FaqSection() {
 }
 
 function FinalCta({ whatsappUrl }: { whatsappUrl: string }) {
+  const { instagram, facebook } = COACH_INFO.contact;
   return (
     <section className="py-16">
       <Reveal variant="zoom">
@@ -695,6 +698,26 @@ function FinalCta({ whatsappUrl }: { whatsappUrl: string }) {
                 تحدث مع المدرب
               </a>
             </Button>
+          </div>
+          <div className="mt-6 flex items-center justify-center gap-4">
+            <a
+              href={instagram}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex size-10 items-center justify-center rounded-full border border-border/60 bg-background/60 text-muted-foreground transition-all duration-300 hover:border-primary/50 hover:text-primary hover:scale-110"
+              aria-label="Instagram"
+            >
+              <Instagram className="size-5" />
+            </a>
+            <a
+              href={facebook}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex size-10 items-center justify-center rounded-full border border-border/60 bg-background/60 text-muted-foreground transition-all duration-300 hover:border-primary/50 hover:text-primary hover:scale-110"
+              aria-label="Facebook"
+            >
+              <Facebook className="size-5" />
+            </a>
           </div>
         </div>
       </Reveal>

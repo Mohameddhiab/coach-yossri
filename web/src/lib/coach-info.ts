@@ -146,5 +146,7 @@ export const COACH_INFO = {
     whatsapp: "+21600000000",
     address: "الشارع الرئيسي — وسط المدينة",
     hours: "الاثنين — السبت: 9:00 — 22:00",
+    instagram: "https://www.instagram.com/coach.yosri",
+    facebook: "https://www.facebook.com/coach.yosri",
   },
 } as const;
