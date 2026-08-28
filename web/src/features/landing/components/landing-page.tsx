@@ -256,9 +256,9 @@ function StepsSection() {
 
 function MiniPlanTable() {
   const rows = [
-    { nom: "Bench press", img: true, charge: "15 kg", reps: "6-12 échec", serie: "4 3 2", tempo: "3-1-3-1", rest: "1 min" },
-    { nom: "Squat barre", img: true, charge: "40 kg", reps: "8-10", serie: "4 4", tempo: "2-0-2-0", rest: "90s" },
-    { nom: "Tractions", img: false, charge: "PDC", reps: "MAX", serie: "3", tempo: "1-1-1-1", rest: "2 min" },
+    { nom: "Bench press", slug: "bench-press", charge: "15 kg", reps: "6-12 échec", serie: "4 3 2", tempo: "3-1-3-1", rest: "1 min" },
+    { nom: "Squat barre", slug: "smith-machine-squat", charge: "40 kg", reps: "8-10", serie: "4 4", tempo: "2-0-2-0", rest: "90s" },
+    { nom: "Tractions", slug: "lat-pulldown", charge: "PDC", reps: "MAX", serie: "3", tempo: "1-1-1-1", rest: "2 min" },
   ];
   return (
     <div className="overflow-x-auto rounded-xl border border-primary/20 bg-background/60">
@@ -280,17 +280,17 @@ function MiniPlanTable() {
               <td className="border-b px-2.5 py-2 text-start font-semibold">{r.nom}</td>
               <td className="border-b px-2.5 py-2">
                 <span className="flex size-8 items-center justify-center overflow-hidden rounded bg-muted">
-                  {r.img ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src="https://wger.de/media/exercise-images/192/Bench-press-1.png"
-                      alt=""
-                      className="h-full w-full object-cover"
-                      loading="lazy"
-                    />
-                  ) : (
-                    <ImageIcon className="size-3.5 text-muted-foreground" />
-                  )}
+                  {/* image git locale via copy-guide-assets (public/guide-assets) — créé le dernier fois */}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={`/guide-assets/${r.slug}/frame-1.png`}
+                    alt={r.nom}
+                    className="h-full w-full object-contain p-0.5 invert dark:invert-0"
+                    loading="lazy"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = "none";
+                    }}
+                  />
                 </span>
               </td>
               <td className="border-b px-2.5 py-2 tabular-nums">{r.charge}</td>
