@@ -416,17 +416,17 @@ function FeaturesSection() {
 
 const CERTIFICATES = [
   {
-    file: "fitness trainer.jpeg",
+    file: "fitness-trainer.jpeg",
     title: "Fitness Trainer",
     desc: "شهادة مدرب لياقة بدنية معتمد — تخصص القوة والتحمل وبناء الأجسام وفق معايير دولية.",
   },
   {
-    file: "floor coach.jpeg",
+    file: "floor-coach.jpeg",
     title: "Floor Coach",
     desc: "شهادة مدرب أرضي — خبرة ميدانية في توجيه الحصص، تصحيح الحركة وضمان السلامة.",
   },
   {
-    file: "personal trainer.jpeg",
+    file: "personal-trainer.jpeg",
     title: "Personal Trainer",
     desc: "شهادة مدرب شخصي — متابعة فردية، برمجة أحمال وتغذية مخصصة لكل عضو.",
   },
