@@ -95,7 +95,10 @@ export class PrismaChatRepository implements ChatRepository {
     return row ? this.mapConversation(row) : null;
   }
 
-  async messagesAfter(conversationId: string, afterIso: string | null) {
+  async messagesAfter(
+    conversationId: string,
+    afterIso: string | null,
+  ): Promise<(ChatMessage & { senderRole: 'COACH' | 'USER' })[]> {
     const after = afterIso ? new Date(afterIso) : null;
     const rows = await this.prisma.chatMessage.findMany({
       where: {
@@ -114,7 +117,7 @@ export class PrismaChatRepository implements ChatRepository {
     const coachId = conv?.coachId ?? '';
     return rows.map((r) => ({
       ...this.mapMessage(r),
-      senderRole: (r.senderId === coachId ? 'COACH' : 'USER') as 'COACH' | 'USER',
+      senderRole: r.senderId === coachId ? 'COACH' : 'USER',
     }));
   }
 
