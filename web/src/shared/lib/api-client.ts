@@ -39,6 +39,14 @@ export async function apiClient<T>(
         credentials: "include",
       });
       if (refreshRes.ok) {
+        // Refresh a posé un nouveau cookie HttpOnly sur onrender.com → copie sur vercel.app pour le proxy
+        try {
+          const data = (await refreshRes.clone().json()) as { access_token?: string };
+          if (data?.access_token && typeof document !== "undefined") {
+            const secure = location.protocol === "https:" ? "; Secure" : "";
+            document.cookie = `9awi_access=${data.access_token}; Path=/; Max-Age=900; SameSite=Lax${secure}`;
+          }
+        } catch {}
         res = await doFetch();
       }
     } catch {

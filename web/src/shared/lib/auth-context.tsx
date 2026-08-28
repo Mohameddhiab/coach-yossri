@@ -45,7 +45,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {
-    const data = await apiClient<{ user: User }>("POST", "/auth/login", { email, password });
+    const data = await apiClient<{ user: User; access_token: string }>("POST", "/auth/login", { email, password });
+    // Backend pose un cookie HttpOnly sur onrender.com (cross-site). Le proxy Next.js
+    // sur vercel.app ne peut pas le lire → on pose une copie lisible sur vercel.app
+    // pour que proxy.ts (decodeAccess) autorise /dashboard et /plan.
+    if (data.access_token && typeof document !== "undefined") {
+      const secure = location.protocol === "https:" ? "; Secure" : "";
+      document.cookie = `9awi_access=${data.access_token}; Path=/; Max-Age=900; SameSite=Lax${secure}`;
+    }
     setUser(data.user);
     return data.user;
   }, []);
@@ -56,6 +63,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch {
       // serveur injoignable — on déconnecte quand même localement
     } finally {
+      if (typeof document !== "undefined") {
+        document.cookie = "9awi_access=; Path=/; Max-Age=0; SameSite=Lax";
+      }
       setUser(null);
       queryClient.clear();
     }
