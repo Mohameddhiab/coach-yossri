@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -8,17 +7,12 @@ import {
   Briefcase,
   Check,
   ChevronDown,
-  Clock,
   Dumbbell,
   Image as ImageIcon,
-  LayoutDashboard,
-  MapPin,
   Menu,
   MessageCircle,
-  Phone,
   Sparkles,
   Trophy,
-  Users,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";

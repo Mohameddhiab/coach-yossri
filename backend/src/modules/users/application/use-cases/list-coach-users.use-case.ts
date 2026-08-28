@@ -1,27 +1,43 @@
-import { Inject, Injectable } from "@nestjs/common";
-import { USER_REPOSITORY, type UserRepository } from "@/shared/domain/ports/user-repository.port";
-import { SUBSCRIPTION_REPOSITORY, type SubscriptionRepository } from "@/shared/domain/ports/subscription-repository.port";
-import { PROGRESS_REPOSITORY, type ProgressRepository } from "@/shared/domain/ports/progress-repository.port";
-import { COACH_REPOSITORY, type CoachRepository } from "@/shared/domain/ports/coach-repository.port";
-import { MEAL_PLAN_REPOSITORY, type MealPlanRepository } from "@/shared/domain/ports/meal-plan-repository.port";
-import { getSubscriptionStatus } from "@/shared/domain/subscription-status";
-import { toUserApi } from "@/shared/mapping/user.mapper";
-import { toUserWithSubscriptionApi } from "@/shared/mapping/api.mapper";
+import { Inject, Injectable } from '@nestjs/common';
+import {
+  USER_REPOSITORY,
+  type UserRepository,
+} from '@/shared/domain/ports/user-repository.port';
+import {
+  SUBSCRIPTION_REPOSITORY,
+  type SubscriptionRepository,
+} from '@/shared/domain/ports/subscription-repository.port';
+import {
+  PROGRESS_REPOSITORY,
+  type ProgressRepository,
+} from '@/shared/domain/ports/progress-repository.port';
+import {
+  COACH_REPOSITORY,
+  type CoachRepository,
+} from '@/shared/domain/ports/coach-repository.port';
+import {
+  MEAL_PLAN_REPOSITORY,
+  type MealPlanRepository,
+} from '@/shared/domain/ports/meal-plan-repository.port';
+import { getSubscriptionStatus } from '@/shared/domain/subscription-status';
+import { toUserApi } from '@/shared/mapping/user.mapper';
+import { toUserWithSubscriptionApi } from '@/shared/mapping/api.mapper';
 
-export type UserStatusFilter = "TOUS" | "ACTIF" | "EXPIRE" | "EXPIRE_BIENTOT";
+export type UserStatusFilter = 'TOUS' | 'ACTIF' | 'EXPIRE' | 'EXPIRE_BIENTOT';
 
 @Injectable()
 export class ListCoachUsersUseCase {
   constructor(
     @Inject(USER_REPOSITORY) private readonly users: UserRepository,
-    @Inject(SUBSCRIPTION_REPOSITORY) private readonly subs: SubscriptionRepository,
+    @Inject(SUBSCRIPTION_REPOSITORY)
+    private readonly subs: SubscriptionRepository,
     @Inject(PROGRESS_REPOSITORY) private readonly progress: ProgressRepository,
     @Inject(COACH_REPOSITORY) private readonly coach: CoachRepository,
     @Inject(MEAL_PLAN_REPOSITORY) private readonly plans: MealPlanRepository,
   ) {}
 
   async execute(search: string, status: UserStatusFilter) {
-    const rawUsers = await this.users.listByRole("USER");
+    const rawUsers = await this.users.listByRole('USER');
     const query = search.trim().toLowerCase();
 
     const enriched = await Promise.all(
@@ -46,10 +62,13 @@ export class ListCoachUsersUseCase {
     let rows = enriched;
     if (query) {
       rows = rows.filter(({ u }) =>
-        [u.nom, u.prenom, u.email, u.telephone].join(" ").toLowerCase().includes(query),
+        [u.nom, u.prenom, u.email, u.telephone]
+          .join(' ')
+          .toLowerCase()
+          .includes(query),
       );
     }
-    if (status !== "TOUS") {
+    if (status !== 'TOUS') {
       rows = rows.filter(({ api }) => {
         const s = getSubscriptionStatus(
           api.subscription
@@ -68,7 +87,10 @@ export class ListCoachUsersUseCase {
     }
 
     return rows
-      .sort((a, b) => new Date(b.u.createdAt).getTime() - new Date(a.u.createdAt).getTime())
+      .sort(
+        (a, b) =>
+          new Date(b.u.createdAt).getTime() - new Date(a.u.createdAt).getTime(),
+      )
       .map((r) => r.api);
   }
 }

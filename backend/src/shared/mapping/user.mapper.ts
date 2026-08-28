@@ -1,4 +1,4 @@
-import type { User } from "../domain/entities";
+import type { User } from '../domain/entities';
 
 export interface UserApi {
   id: string;

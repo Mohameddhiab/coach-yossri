@@ -1,15 +1,15 @@
-import { Inject, Injectable } from "@nestjs/common";
-import { fail } from "@/shared/common/errors/domain-exception";
+import { Inject, Injectable } from '@nestjs/common';
+import { fail } from '@/shared/common/errors/domain-exception';
 import {
   CHAT_REPOSITORY,
   type ChatRepository,
   type ConversationWithMeta,
-} from "@/shared/domain/ports/workout-plan-repository.port";
+} from '@/shared/domain/ports/workout-plan-repository.port';
 import {
   USER_REPOSITORY,
   type UserRepository,
-} from "@/shared/domain/ports/user-repository.port";
-import type { AuthUser } from "@/shared/common/decorators/current-user.decorator";
+} from '@/shared/domain/ports/user-repository.port';
+import type { AuthUser } from '@/shared/common/decorators/current-user.decorator';
 
 @Injectable()
 export class ListConversationsUseCase {
@@ -30,7 +30,7 @@ export class GetMyConversationUseCase {
   async execute(userId: string) {
     const user = await this.users.findById(userId);
     if (!user) {
-      fail(404, "NOT_FOUND", "المستخدم غير موجود");
+      fail(404, 'NOT_FOUND', 'المستخدم غير موجود');
     }
     if (!user.coachId) return null;
     const conv = await this.chat.findByUsers(user.coachId, userId);
@@ -47,10 +47,19 @@ export class GetMyConversationUseCase {
 export class GetMessagesUseCase {
   constructor(@Inject(CHAT_REPOSITORY) private readonly chat: ChatRepository) {}
 
-  async execute(auth: AuthUser, conversationId: string, afterIso: string | null) {
+  async execute(
+    auth: AuthUser,
+    conversationId: string,
+    afterIso: string | null,
+  ) {
     const conv = await this.chat.findById(conversationId);
-    if (!conv || (auth.role === "USER" ? conv.userId !== auth.userId : conv.coachId !== auth.userId)) {
-      fail(404, "NOT_FOUND", "المحادثة غير موجودة");
+    if (
+      !conv ||
+      (auth.role === 'USER'
+        ? conv.userId !== auth.userId
+        : conv.coachId !== auth.userId)
+    ) {
+      fail(404, 'NOT_FOUND', 'المحادثة غير موجودة');
     }
     return this.chat.messagesAfter(conversationId, afterIso);
   }
@@ -58,20 +67,27 @@ export class GetMessagesUseCase {
 
 @Injectable()
 export class SendMessageUseCase {
-  constructor(
-    @Inject(CHAT_REPOSITORY) private readonly chat: ChatRepository,
-  ) {}
+  constructor(@Inject(CHAT_REPOSITORY) private readonly chat: ChatRepository) {}
 
   async execute(auth: AuthUser, conversationId: string, contenu: string) {
-    const text = String(contenu ?? "").trim();
+    const text = String(contenu ?? '').trim();
     if (!text) {
-      fail(400, "VALIDATION", "الرسالة فارغة");
+      fail(400, 'VALIDATION', 'الرسالة فارغة');
     }
     const conv = await this.chat.findById(conversationId);
-    if (!conv || (auth.role === "USER" ? conv.userId !== auth.userId : conv.coachId !== auth.userId)) {
-      fail(404, "NOT_FOUND", "المحادثة غير موجودة");
+    if (
+      !conv ||
+      (auth.role === 'USER'
+        ? conv.userId !== auth.userId
+        : conv.coachId !== auth.userId)
+    ) {
+      fail(404, 'NOT_FOUND', 'المحادثة غير موجودة');
     }
-    return this.chat.addMessage(conversationId, auth.userId, text.slice(0, 4000));
+    return this.chat.addMessage(
+      conversationId,
+      auth.userId,
+      text.slice(0, 4000),
+    );
   }
 }
 
@@ -84,12 +100,23 @@ export class SendToMemberUseCase {
 
   async execute(coachId: string, userId: string, contenu: string) {
     const user = await this.users.findById(userId);
-    if (!user || user.role !== "USER" || (user.coachId && user.coachId !== coachId)) {
-      fail(404, "NOT_FOUND", "العضو غير موجود");
+    if (
+      !user ||
+      user.role !== 'USER' ||
+      (user.coachId && user.coachId !== coachId)
+    ) {
+      fail(404, 'NOT_FOUND', 'العضو غير موجود');
     }
     const conv = await this.chat.findByUsers(coachId, userId);
-    const conversation = conv ?? (await this.chat.findOrCreate(coachId, userId));
-    return this.chat.addMessage(conversation.id, coachId, String(contenu ?? "").trim().slice(0, 4000));
+    const conversation =
+      conv ?? (await this.chat.findOrCreate(coachId, userId));
+    return this.chat.addMessage(
+      conversation.id,
+      coachId,
+      String(contenu ?? '')
+        .trim()
+        .slice(0, 4000),
+    );
   }
 }
 
@@ -101,13 +128,13 @@ export class SendMessageToCoachUseCase {
   ) {}
 
   async execute(userId: string, contenu: string) {
-    const text = String(contenu ?? "").trim();
+    const text = String(contenu ?? '').trim();
     if (!text) {
-      fail(400, "VALIDATION", "الرسالة فارغة");
+      fail(400, 'VALIDATION', 'الرسالة فارغة');
     }
     const user = await this.users.findById(userId);
     if (!user?.coachId) {
-      fail(404, "NOT_FOUND", "لا يوجد مدرب مرتبط بحسابك");
+      fail(404, 'NOT_FOUND', 'لا يوجد مدرب مرتبط بحسابك');
     }
     const conv =
       (await this.chat.findByUsers(user.coachId, userId)) ??
@@ -122,8 +149,13 @@ export class MarkConversationReadUseCase {
 
   async execute(auth: AuthUser, conversationId: string) {
     const conv = await this.chat.findById(conversationId);
-    if (!conv || (auth.role === "USER" ? conv.userId !== auth.userId : conv.coachId !== auth.userId)) {
-      fail(404, "NOT_FOUND", "المحادثة غير موجودة");
+    if (
+      !conv ||
+      (auth.role === 'USER'
+        ? conv.userId !== auth.userId
+        : conv.coachId !== auth.userId)
+    ) {
+      fail(404, 'NOT_FOUND', 'المحادثة غير موجودة');
     }
     await this.chat.markRead(conversationId, auth.userId);
   }

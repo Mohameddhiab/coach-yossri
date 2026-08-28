@@ -1,8 +1,8 @@
-import { Module } from "@nestjs/common";
+import { Module } from '@nestjs/common';
 import {
   PrismaChatRepositoryProvider,
   PrismaFollowUpRepositoryProvider,
-} from "./infrastructure/prisma-chat.repository";
+} from './infrastructure/prisma-chat.repository';
 import {
   GetMessagesUseCase,
   GetMyConversationUseCase,
@@ -11,8 +11,8 @@ import {
   SendMessageToCoachUseCase,
   SendToMemberUseCase,
   SendMessageUseCase,
-} from "./application/use-cases/chat.use-cases";
-import { ChatController } from "./presentation/chat.controller";
+} from './application/use-cases/chat.use-cases';
+import { ChatController } from './presentation/chat.controller';
 
 @Module({
   controllers: [ChatController],

@@ -7,29 +7,32 @@ import {
   Post,
   Put,
   UseGuards,
-} from "@nestjs/common";
-import { IsOptional, IsString } from "class-validator";
-import { JwtAuthGuard } from "@/shared/common/guards/jwt-auth.guard";
-import { RolesGuard } from "@/shared/common/guards/roles.guard";
-import { SubscriptionGuard } from "@/shared/common/guards/subscription.guard";
-import { CoachOwnershipGuard } from "@/shared/common/guards/coach-ownership.guard";
-import { TierGuard } from "@/shared/common/guards/tier.guard";
-import { Roles } from "@/shared/common/decorators/roles.decorator";
-import { CurrentUser, type AuthUser } from "@/shared/common/decorators/current-user.decorator";
-import { RequireTier } from "@/shared/common/decorators/require-tier.decorator";
+} from '@nestjs/common';
+import { IsOptional, IsString } from 'class-validator';
+import { JwtAuthGuard } from '@/shared/common/guards/jwt-auth.guard';
+import { RolesGuard } from '@/shared/common/guards/roles.guard';
+import { SubscriptionGuard } from '@/shared/common/guards/subscription.guard';
+import { CoachOwnershipGuard } from '@/shared/common/guards/coach-ownership.guard';
+import { TierGuard } from '@/shared/common/guards/tier.guard';
+import { Roles } from '@/shared/common/decorators/roles.decorator';
+import {
+  CurrentUser,
+  type AuthUser,
+} from '@/shared/common/decorators/current-user.decorator';
+import { RequireTier } from '@/shared/common/decorators/require-tier.decorator';
 import {
   CreateWorkoutPlanUseCase,
   DuplicateWorkoutPlanUseCase,
   GetWorkoutPlanUseCase,
   UpdateWorkoutPlanUseCase,
   WorkoutVersionsUseCase,
-} from "../application/use-cases/workout-plans.use-cases";
+} from '../application/use-cases/workout-plans.use-cases';
 import {
   WORKOUT_PLAN_REPOSITORY,
   type WorkoutPlanRepository,
-} from "@/shared/domain/ports/workout-plan-repository.port";
-import { toWorkoutPlanApi } from "@/shared/mapping/workout.mapper";
-import { fail } from "@/shared/common/errors/domain-exception";
+} from '@/shared/domain/ports/workout-plan-repository.port';
+import { toWorkoutPlanApi } from '@/shared/mapping/workout.mapper';
+import { fail } from '@/shared/common/errors/domain-exception';
 
 export class WorkoutExerciseDto {
   @IsOptional() @IsString() jour_semaine?: string;
@@ -59,15 +62,12 @@ export class DuplicateWorkoutPlanDto {
 function toExerciseInput(e: WorkoutExerciseDto) {
   const legacyRepos =
     e.repos ??
-    (typeof (e as Record<string, unknown>).repos_sec === "number"
+    (typeof (e as Record<string, unknown>).repos_sec === 'number'
       ? String((e as Record<string, unknown>).repos_sec)
       : (e as Record<string, unknown>).repos_sec != null
         ? String((e as Record<string, unknown>).repos_sec)
         : null);
-  const legacySeries =
-    e.series != null
-      ? String(e.series)
-      : null;
+  const legacySeries = e.series != null ? String(e.series) : null;
   return {
     jourSemaine: e.jour_semaine,
     nom: e.nom,
@@ -78,7 +78,8 @@ function toExerciseInput(e: WorkoutExerciseDto) {
     repos: legacyRepos as string | null | undefined,
     groupeMusculaire: e.groupe_musculaire,
     notes: e.notes,
-    imageUrl: (e as Record<string, unknown>).image_url as string | null | undefined,
+    imageUrl: (e as Record<string, unknown>).image_url as
+      string | null | undefined,
   };
 }
 
@@ -86,7 +87,8 @@ function toExerciseInput(e: WorkoutExerciseDto) {
 @UseGuards(JwtAuthGuard)
 export class WorkoutPlansController {
   constructor(
-    @Inject(WORKOUT_PLAN_REPOSITORY) private readonly plans: WorkoutPlanRepository,
+    @Inject(WORKOUT_PLAN_REPOSITORY)
+    private readonly plans: WorkoutPlanRepository,
     private readonly getUseCase: GetWorkoutPlanUseCase,
     private readonly createUseCase: CreateWorkoutPlanUseCase,
     private readonly updateUseCase: UpdateWorkoutPlanUseCase,
@@ -94,24 +96,24 @@ export class WorkoutPlansController {
     private readonly versionsUseCase: WorkoutVersionsUseCase,
   ) {}
 
-  @Get("users/:userId/workout-plan")
-  @RequireTier("ONLINE")
+  @Get('users/:userId/workout-plan')
+  @RequireTier('ONLINE')
   @UseGuards(SubscriptionGuard, TierGuard)
-  async get(@CurrentUser() auth: AuthUser, @Param("userId") userId: string) {
-    const resolved = userId === "me" ? auth.userId : userId;
-    if (auth.role === "USER" && resolved !== auth.userId) {
-      fail(403, "FORBIDDEN", "غير مصرح به");
+  async get(@CurrentUser() auth: AuthUser, @Param('userId') userId: string) {
+    const resolved = userId === 'me' ? auth.userId : userId;
+    if (auth.role === 'USER' && resolved !== auth.userId) {
+      fail(403, 'FORBIDDEN', 'غير مصرح به');
     }
     const plan = await this.getUseCase.execute(resolved);
     return plan ? toWorkoutPlanApi(plan) : null;
   }
 
-  @Post("users/:userId/workout-plan")
-  @Roles("COACH")
+  @Post('users/:userId/workout-plan')
+  @Roles('COACH')
   @UseGuards(RolesGuard)
   async create(
     @CurrentUser() auth: AuthUser,
-    @Param("userId") userId: string,
+    @Param('userId') userId: string,
     @Body() dto: WorkoutPlanDto,
   ) {
     const plan = await this.createUseCase.execute(auth.userId, userId, {
@@ -122,10 +124,10 @@ export class WorkoutPlansController {
     return toWorkoutPlanApi(plan);
   }
 
-  @Put("users/:userId/workout-plan")
-  @Roles("COACH")
+  @Put('users/:userId/workout-plan')
+  @Roles('COACH')
   @UseGuards(RolesGuard, CoachOwnershipGuard)
-  async update(@Param("userId") userId: string, @Body() dto: WorkoutPlanDto) {
+  async update(@Param('userId') userId: string, @Body() dto: WorkoutPlanDto) {
     const plan = await this.updateUseCase.execute(userId, {
       titre: dto.titre,
       objectif: dto.objectif,
@@ -134,22 +136,26 @@ export class WorkoutPlansController {
     return toWorkoutPlanApi(plan);
   }
 
-  @Post("users/:userId/workout-plan/duplicate")
-  @Roles("COACH")
+  @Post('users/:userId/workout-plan/duplicate')
+  @Roles('COACH')
   @UseGuards(RolesGuard)
   async duplicate(
     @CurrentUser() auth: AuthUser,
-    @Param("userId") userId: string,
+    @Param('userId') userId: string,
     @Body() dto: DuplicateWorkoutPlanDto,
   ) {
-    const plan = await this.duplicateUseCase.execute(auth.userId, userId, dto.source_plan_id);
+    const plan = await this.duplicateUseCase.execute(
+      auth.userId,
+      userId,
+      dto.source_plan_id,
+    );
     return toWorkoutPlanApi(plan);
   }
 
-  @Get("users/:userId/workout-plan/versions")
-  @Roles("COACH")
+  @Get('users/:userId/workout-plan/versions')
+  @Roles('COACH')
   @UseGuards(RolesGuard, CoachOwnershipGuard)
-  async versions(@Param("userId") userId: string) {
+  async versions(@Param('userId') userId: string) {
     const versions = await this.versionsUseCase.execute(userId);
     return versions.map((v) => ({
       version: v.version,
@@ -158,8 +164,8 @@ export class WorkoutPlansController {
     }));
   }
 
-  @Get("workout-plan-templates")
-  @Roles("COACH")
+  @Get('workout-plan-templates')
+  @Roles('COACH')
   @UseGuards(RolesGuard)
   async templates() {
     const rows = await this.plans.templates();

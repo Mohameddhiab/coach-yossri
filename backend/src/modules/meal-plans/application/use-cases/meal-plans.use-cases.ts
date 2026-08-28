@@ -1,14 +1,16 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { Inject, Injectable } from '@nestjs/common';
 import {
   MEAL_PLAN_REPOSITORY,
   type MealPlanRepository,
   type MealPlanWithMeals,
-} from "@/shared/domain/ports/meal-plan-repository.port";
-import { fail } from "@/shared/common/errors/domain-exception";
+} from '@/shared/domain/ports/meal-plan-repository.port';
+import { fail } from '@/shared/common/errors/domain-exception';
 
 @Injectable()
 export class GetPlanUseCase {
-  constructor(@Inject(MEAL_PLAN_REPOSITORY) private readonly plans: MealPlanRepository) {}
+  constructor(
+    @Inject(MEAL_PLAN_REPOSITORY) private readonly plans: MealPlanRepository,
+  ) {}
 
   async execute(userId: string): Promise<MealPlanWithMeals | null> {
     return this.plans.findActive(userId);
@@ -49,8 +51,10 @@ export class CreatePlanUseCase {
       {
         userId,
         coachId,
-        titre: String(input.titre ?? "").trim() || "خطة غذائية",
-        objectif: (input.objectif as "PRISE_DE_MASSE" | "SECHE" | "MAINTIEN") ?? "PRISE_DE_MASSE",
+        titre: String(input.titre ?? '').trim() || 'خطة غذائية',
+        objectif:
+          (input.objectif as 'PRISE_DE_MASSE' | 'SECHE' | 'MAINTIEN') ??
+          'PRISE_DE_MASSE',
         caloriesCible: Number(input.caloriesCible ?? 0),
         proteinesG: Number(input.proteinesG ?? 0),
         glucidesG: Number(input.glucidesG ?? 0),
@@ -90,7 +94,7 @@ export class UpdatePlanUseCase {
   ) {
     const plan = await this.plans.findActive(userId);
     if (!plan) {
-      fail(404, "NO_PLAN", "لا توجد خطة نشطة لهذا المستخدم");
+      fail(404, 'NO_PLAN', 'لا توجد خطة نشطة لهذا المستخدم');
     }
     const snapshot = toSnapshot(plan);
     const meals = normalizeMeals(input.meals);
@@ -101,14 +105,21 @@ export class UpdatePlanUseCase {
           input.titre !== undefined && String(input.titre).trim()
             ? String(input.titre).trim()
             : plan.titre,
-        objectif: (input.objectif as "PRISE_DE_MASSE" | "SECHE" | "MAINTIEN") ?? plan.objectif,
+        objectif: input.objectif ?? plan.objectif,
         caloriesCible:
           input.caloriesCible !== undefined
             ? Number(input.caloriesCible)
             : plan.caloriesCible,
-        proteinesG: input.proteinesG !== undefined ? Number(input.proteinesG) : plan.proteinesG,
-        glucidesG: input.glucidesG !== undefined ? Number(input.glucidesG) : plan.glucidesG,
-        lipidesG: input.lipidesG !== undefined ? Number(input.lipidesG) : plan.lipidesG,
+        proteinesG:
+          input.proteinesG !== undefined
+            ? Number(input.proteinesG)
+            : plan.proteinesG,
+        glucidesG:
+          input.glucidesG !== undefined
+            ? Number(input.glucidesG)
+            : plan.glucidesG,
+        lipidesG:
+          input.lipidesG !== undefined ? Number(input.lipidesG) : plan.lipidesG,
       },
       meals,
     );
@@ -126,7 +137,7 @@ export class DuplicatePlanUseCase {
   async execute(coachId: string, userId: string, sourcePlanId: string) {
     const source = await this.plans.findById(sourcePlanId);
     if (!source) {
-      fail(404, "NOT_FOUND", "الخطة المصدر غير موجودة");
+      fail(404, 'NOT_FOUND', 'الخطة المصدر غير موجودة');
     }
     await this.plans.archiveActive(userId);
     return this.plans.create(
@@ -147,7 +158,9 @@ export class DuplicatePlanUseCase {
 
 @Injectable()
 export class VersionsUseCase {
-  constructor(@Inject(MEAL_PLAN_REPOSITORY) private readonly plans: MealPlanRepository) {}
+  constructor(
+    @Inject(MEAL_PLAN_REPOSITORY) private readonly plans: MealPlanRepository,
+  ) {}
 
   async execute(userId: string) {
     const plan = await this.plans.findActive(userId);
@@ -158,7 +171,7 @@ export class VersionsUseCase {
 
 export function toSnapshot(
   plan: MealPlanWithMeals,
-): import("@/shared/domain/ports/meal-plan-repository.port").MealPlanSnapshot {
+): import('@/shared/domain/ports/meal-plan-repository.port').MealPlanSnapshot {
   return {
     id: plan.id,
     userId: plan.userId,
@@ -186,8 +199,17 @@ export function toSnapshot(
   };
 }
 
-const MEAL_TYPES = ["PETIT_DEJ", "DEJEUNER", "DINER", "COLLATION"] as const;
-const WEEK_DAYS = ["SAM", "DIM", "LUN", "MAR", "MER", "JEU", "VEN", "TOUS_LES_JOURS"] as const;
+const MEAL_TYPES = ['PETIT_DEJ', 'DEJEUNER', 'DINER', 'COLLATION'] as const;
+const WEEK_DAYS = [
+  'SAM',
+  'DIM',
+  'LUN',
+  'MAR',
+  'MER',
+  'JEU',
+  'VEN',
+  'TOUS_LES_JOURS',
+] as const;
 
 export function normalizeMeals(
   input: {
@@ -200,37 +222,48 @@ export function normalizeMeals(
     lipidesG?: number | null;
     alternatives?: string | null;
   }[],
-): import("@/shared/domain/entities").Meal[] {
+): import('@/shared/domain/entities').Meal[] {
   const todayWeekDay = (): string =>
-    ["DIM", "LUN", "MAR", "MER", "JEU", "VEN", "SAM"][new Date().getDay()];
+    ['DIM', 'LUN', 'MAR', 'MER', 'JEU', 'VEN', 'SAM'][new Date().getDay()];
   if (!Array.isArray(input)) return [];
   const num = (v: number | null | undefined): number | null =>
-    typeof v === "number" ? v : v !== null && v !== undefined ? Number(v) : null;
+    typeof v === 'number'
+      ? v
+      : v !== null && v !== undefined
+        ? Number(v)
+        : null;
   const seen = new Set<string>();
-  const out: import("@/shared/domain/entities").Meal[] = [];
+  const out: import('@/shared/domain/entities').Meal[] = [];
   for (const m of input) {
-    if (!m || typeof m.description !== "string" || m.description.trim().length === 0) continue;
-    const jour = (WEEK_DAYS as readonly string[]).includes(m.jourSemaine ?? "")
+    if (
+      !m ||
+      typeof m.description !== 'string' ||
+      m.description.trim().length === 0
+    )
+      continue;
+    const jour = (WEEK_DAYS as readonly string[]).includes(m.jourSemaine ?? '')
       ? m.jourSemaine!
       : todayWeekDay();
-    const type = (MEAL_TYPES as readonly string[]).includes(m.typeRepas ?? "")
+    const type = (MEAL_TYPES as readonly string[]).includes(m.typeRepas ?? '')
       ? m.typeRepas!
-      : "DEJEUNER";
-    const key = `${jour}|${type}|${String(m.description ?? "").trim().toLowerCase()}`;
+      : 'DEJEUNER';
+    const key = `${jour}|${type}|${String(m.description ?? '')
+      .trim()
+      .toLowerCase()}`;
     if (seen.has(key)) continue;
     seen.add(key);
     out.push({
       id: `m-${Math.random().toString(36).slice(2, 10)}`,
-      mealPlanId: "",
-      jourSemaine: jour as import("@/shared/domain/domain-types").WeekDay,
-      typeRepas: type as import("@/shared/domain/domain-types").MealType,
-      description: String(m.description ?? "").trim(),
+      mealPlanId: '',
+      jourSemaine: jour as import('@/shared/domain/domain-types').WeekDay,
+      typeRepas: type as import('@/shared/domain/domain-types').MealType,
+      description: String(m.description ?? '').trim(),
       calories: num(m.calories),
       proteinesG: num(m.proteinesG),
       glucidesG: num(m.glucidesG),
       lipidesG: num(m.lipidesG),
       alternatives:
-        typeof m.alternatives === "string" && m.alternatives.trim()
+        typeof m.alternatives === 'string' && m.alternatives.trim()
           ? m.alternatives.trim()
           : null,
     });

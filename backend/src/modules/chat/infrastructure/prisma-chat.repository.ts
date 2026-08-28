@@ -1,13 +1,17 @@
-import { Injectable } from "@nestjs/common";
-import { PrismaService } from "@/shared/database/prisma.service";
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '@/shared/database/prisma.service';
 import {
   CHAT_REPOSITORY,
   FOLLOWUP_REPOSITORY,
   type ChatRepository,
   type ConversationWithMeta,
   type FollowUpRepository,
-} from "@/shared/domain/ports/workout-plan-repository.port";
-import type { ChatMessage, Conversation, FollowUp } from "@/shared/domain/entities";
+} from '@/shared/domain/ports/workout-plan-repository.port';
+import type {
+  ChatMessage,
+  Conversation,
+  FollowUp,
+} from '@/shared/domain/entities';
 
 @Injectable()
 export class PrismaChatRepository implements ChatRepository {
@@ -50,7 +54,9 @@ export class PrismaChatRepository implements ChatRepository {
       where: { coachId_userId: { coachId, userId } },
     });
     if (existing) return this.mapConversation(existing);
-    const row = await this.prisma.conversation.create({ data: { coachId, userId } });
+    const row = await this.prisma.conversation.create({
+      data: { coachId, userId },
+    });
     return this.mapConversation(row);
   }
 
@@ -59,9 +65,9 @@ export class PrismaChatRepository implements ChatRepository {
       where: { coachId },
       include: {
         member: { select: { nom: true, prenom: true } },
-        messages: { orderBy: { createdAt: "desc" }, take: 1 },
+        messages: { orderBy: { createdAt: 'desc' }, take: 1 },
       },
-      orderBy: { lastMessageAt: "desc" },
+      orderBy: { lastMessageAt: 'desc' },
     });
     return Promise.all(
       rows.map(async (r) => ({
@@ -74,7 +80,10 @@ export class PrismaChatRepository implements ChatRepository {
     );
   }
 
-  async findByUsers(coachId: string, userId: string): Promise<Conversation | null> {
+  async findByUsers(
+    coachId: string,
+    userId: string,
+  ): Promise<Conversation | null> {
     const row = await this.prisma.conversation.findUnique({
       where: { coachId_userId: { coachId, userId } },
     });
@@ -95,21 +104,25 @@ export class PrismaChatRepository implements ChatRepository {
           ? { createdAt: { gt: after } }
           : {}),
       },
-      orderBy: { createdAt: "asc" },
+      orderBy: { createdAt: 'asc' },
       take: 200,
     });
     const conv = await this.prisma.conversation.findUnique({
       where: { id: conversationId },
       select: { coachId: true },
     });
-    const coachId = conv?.coachId ?? "";
+    const coachId = conv?.coachId ?? '';
     return rows.map((r) => ({
       ...this.mapMessage(r),
-      senderRole: (r.senderId === coachId ? "COACH" : "USER") as "COACH" | "USER",
+      senderRole: r.senderId === coachId ? 'COACH' : 'USER',
     }));
   }
 
-  async addMessage(conversationId: string, senderId: string, contenu: string): Promise<ChatMessage> {
+  async addMessage(
+    conversationId: string,
+    senderId: string,
+    contenu: string,
+  ): Promise<ChatMessage> {
     const row = await this.prisma.$transaction(async (tx) => {
       const msg = await tx.chatMessage.create({
         data: { conversationId, senderId, contenu },
@@ -135,7 +148,7 @@ export class PrismaChatRepository implements ChatRepository {
   }
 
   async unreadCount(conversationId: string, ownerId: string): Promise<number> {
-    return this.prisma.chatMessage.count({
+    return await this.prisma.chatMessage.count({
       where: {
         conversationId,
         lu: false,
@@ -163,10 +176,13 @@ export class PrismaFollowUpRepository implements FollowUpRepository {
     return this.map(row);
   }
 
-  async listByUser(userId: string, limit = 50): Promise<(FollowUp & { coachName: string })[]> {
+  async listByUser(
+    userId: string,
+    limit = 50,
+  ): Promise<(FollowUp & { coachName: string })[]> {
     const rows = await this.prisma.followUp.findMany({
       where: { userId },
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: 'desc' },
       take: limit,
       include: { coach: { select: { nom: true, prenom: true } } },
     });
@@ -191,12 +207,14 @@ export class PrismaFollowUpRepository implements FollowUpRepository {
       bilan: row.bilan,
       ajustements: row.ajustements,
       createdAt: row.createdAt,
-      coachName: row.coach ? `${row.coach.prenom} ${row.coach.nom}` : "",
+      coachName: row.coach ? `${row.coach.prenom} ${row.coach.nom}` : '',
     };
   }
 
   async delete(id: string, coachId: string): Promise<boolean> {
-    const res = await this.prisma.followUp.deleteMany({ where: { id, coachId } });
+    const res = await this.prisma.followUp.deleteMany({
+      where: { id, coachId },
+    });
     return res.count > 0;
   }
 }

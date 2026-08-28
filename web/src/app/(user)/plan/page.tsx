@@ -6,7 +6,7 @@ import { CalendarDays, Dumbbell, FileDown, UtensilsCrossed, Flame, Trophy } from
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs } from "@/components/ui/tabs";
 import { PageHeader } from "@/shared/components/page-header";
 import { PageLoader } from "@/shared/components/page-loader";
 import { EmptyState } from "@/shared/components/empty-state";
@@ -38,6 +38,7 @@ import {
   getActiveTier,
   tierAllows,
   todayWeekDay,
+  type WeekDay,
 } from "@/shared/lib/domain";
 
 export default function MyPlanPage() {
@@ -333,7 +334,7 @@ export default function MyPlanPage() {
                       <ErrorState onRetry={() => planQuery.refetch()} retrying={planQuery.isRefetching} />
                     </div>
                   ) : plan ? (
-                    <MealPlanDayView plan={plan} day={day as any} highlightToday={day === today} accent />
+                    <MealPlanDayView plan={plan} day={day as WeekDay} highlightToday={day === today} accent />
                   ) : (
                     <EmptyState title="لا وجبات" description="لم يحدد المدرب وجبات لهذا اليوم" icon={<UtensilsCrossed className="size-5" />} />
                   )
@@ -342,7 +343,7 @@ export default function MyPlanPage() {
                     <ErrorState onRetry={() => workoutQuery.refetch()} retrying={workoutQuery.isRefetching} />
                   </div>
                 ) : workout ? (
-                  <WorkoutPlanDayView day={day as any} exercises={workout.exercises} />
+                  <WorkoutPlanDayView day={day as WeekDay} exercises={workout.exercises} />
                 ) : (
                   <EmptyState title="لا تمارين" description="يوم راحة — استشفِ جيداً" icon={<Dumbbell className="size-5" />} />
                 )}
@@ -365,7 +366,7 @@ export default function MyPlanPage() {
                       <ErrorState onRetry={() => workoutQuery.refetch()} retrying={workoutQuery.isRefetching} />
                     </div>
                   ) : workout ? (
-                    <WorkoutPlanDayView day={day as any} exercises={workout.exercises} />
+                    <WorkoutPlanDayView day={day as WeekDay} exercises={workout.exercises} />
                   ) : (
                     <div className="rounded-xl border border-dashed bg-card/50 p-6 text-center text-sm text-muted-foreground">لا تمارين مبرمجة</div>
                   )}
@@ -386,7 +387,7 @@ export default function MyPlanPage() {
                       <ErrorState onRetry={() => planQuery.refetch()} retrying={planQuery.isRefetching} />
                     </div>
                   ) : plan ? (
-                    <MealPlanDayView plan={plan} day={day as any} highlightToday={day === today} accent />
+                    <MealPlanDayView plan={plan} day={day as WeekDay} highlightToday={day === today} accent />
                   ) : (
                     <div className="rounded-xl border border-dashed bg-card/50 p-6 text-center text-sm text-muted-foreground">لا وجبات مبرمجة</div>
                   )}

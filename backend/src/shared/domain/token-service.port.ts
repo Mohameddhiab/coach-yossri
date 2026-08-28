@@ -1,6 +1,6 @@
-import type { AuthUser } from "@/shared/common/decorators/current-user.decorator";
+import type { AuthUser } from '@/shared/common/decorators/current-user.decorator';
 
-export const TOKEN_SERVICE = Symbol("TokenService");
+export const TOKEN_SERVICE = Symbol('TokenService');
 
 export interface TokenService {
   signAccess(user: AuthUser): Promise<string>;

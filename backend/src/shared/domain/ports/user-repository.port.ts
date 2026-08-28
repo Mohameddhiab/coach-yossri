@@ -1,11 +1,11 @@
-import type { NotificationPrefs, User } from "../entities";
+import type { NotificationPrefs, User } from '../entities';
 
-export const USER_REPOSITORY = Symbol("UserRepository");
+export const USER_REPOSITORY = Symbol('UserRepository');
 
 export interface UserRepository {
   findByEmail(email: string): Promise<(User & { passwordHash: string }) | null>;
   findById(id: string): Promise<User | null>;
-  listByRole(role: "USER"): Promise<User[]>;
+  listByRole(role: 'USER'): Promise<User[]>;
   create(data: {
     email: string;
     nom: string;
@@ -20,11 +20,17 @@ export interface UserRepository {
   update(
     id: string,
     patch: Partial<
-      Pick<User, "nom" | "prenom" | "telephone" | "dateNaissance" | "sexe" | "tailleCm">
+      Pick<
+        User,
+        'nom' | 'prenom' | 'telephone' | 'dateNaissance' | 'sexe' | 'tailleCm'
+      >
     >,
   ): Promise<User>;
   updatePassword(id: string, passwordHash: string): Promise<void>;
   delete(id: string): Promise<void>;
   prefsOf(userId: string): Promise<NotificationPrefs | null>;
-  savePrefs(userId: string, prefs: Partial<NotificationPrefs>): Promise<NotificationPrefs>;
+  savePrefs(
+    userId: string,
+    prefs: Partial<NotificationPrefs>,
+  ): Promise<NotificationPrefs>;
 }

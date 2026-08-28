@@ -5,9 +5,9 @@ import type {
   WorkoutExercise,
   WorkoutPlan,
   WorkoutPlanVersion,
-} from "../entities";
+} from '../entities';
 
-export const WORKOUT_PLAN_REPOSITORY = Symbol("WorkoutPlanRepository");
+export const WORKOUT_PLAN_REPOSITORY = Symbol('WorkoutPlanRepository');
 
 export interface WorkoutPlanWithExercises extends WorkoutPlan {
   exercises: WorkoutExercise[];
@@ -57,7 +57,10 @@ export interface WorkoutPlanTemplateRow {
 export interface WorkoutPlanRepository {
   findActive(userId: string): Promise<WorkoutPlanWithExercises | null>;
   archiveActive(userId: string): Promise<void>;
-  create(input: CreateWorkoutPlanInput, exercises: WorkoutExercise[]): Promise<WorkoutPlanWithExercises>;
+  create(
+    input: CreateWorkoutPlanInput,
+    exercises: WorkoutExercise[],
+  ): Promise<WorkoutPlanWithExercises>;
   updatePlanAndExercises(
     planId: string,
     patch: Partial<CreateWorkoutPlanInput>,
@@ -69,7 +72,7 @@ export interface WorkoutPlanRepository {
   versions(planId: string): Promise<WorkoutPlanVersion[]>;
 }
 
-export const CHAT_REPOSITORY = Symbol("ChatRepository");
+export const CHAT_REPOSITORY = Symbol('ChatRepository');
 
 export interface ConversationWithMeta extends Conversation {
   userName: string;
@@ -83,9 +86,10 @@ export interface ChatRepository {
   findForCoach(coachId: string): Promise<ConversationWithMeta[]>;
   findByUsers(coachId: string, userId: string): Promise<Conversation | null>;
   findById(id: string): Promise<Conversation | null>;
-  messagesAfter(conversationId: string, afterIso: string | null): Promise<
-    (ChatMessage & { senderRole: "COACH" | "USER" })[]
-  >;
+  messagesAfter(
+    conversationId: string,
+    afterIso: string | null,
+  ): Promise<(ChatMessage & { senderRole: 'COACH' | 'USER' })[]>;
   addMessage(
     conversationId: string,
     senderId: string,
@@ -95,10 +99,19 @@ export interface ChatRepository {
   unreadCount(conversationId: string, ownerId: string): Promise<number>;
 }
 
-export const FOLLOWUP_REPOSITORY = Symbol("FollowUpRepository");
+export const FOLLOWUP_REPOSITORY = Symbol('FollowUpRepository');
 
 export interface FollowUpRepository {
-  create(userId: string, coachId: string, periode: string, bilan: string, ajustements: string | null): Promise<FollowUp>;
-  listByUser(userId: string, limit?: number): Promise<(FollowUp & { coachName: string })[]>;
+  create(
+    userId: string,
+    coachId: string,
+    periode: string,
+    bilan: string,
+    ajustements: string | null,
+  ): Promise<FollowUp>;
+  listByUser(
+    userId: string,
+    limit?: number,
+  ): Promise<(FollowUp & { coachName: string })[]>;
   delete(id: string, coachId: string): Promise<boolean>;
 }

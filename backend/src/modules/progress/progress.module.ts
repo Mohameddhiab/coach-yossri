@@ -1,6 +1,6 @@
-import { Global, Module } from "@nestjs/common";
-import { PrismaProgressRepositoryProvider } from "./infrastructure/prisma-progress.repository";
-import { ProgressController } from "./presentation/progress.controller";
+import { Global, Module } from '@nestjs/common';
+import { PrismaProgressRepositoryProvider } from './infrastructure/prisma-progress.repository';
+import { ProgressController } from './presentation/progress.controller';
 
 @Global()
 @Module({

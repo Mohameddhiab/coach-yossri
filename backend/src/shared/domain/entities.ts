@@ -8,7 +8,7 @@ import type {
   SubscriptionStatus,
   SubscriptionTier,
   WeekDay,
-} from "./domain-types";
+} from './domain-types';
 
 export interface User {
   id: string;
@@ -200,7 +200,7 @@ export interface NotificationPrefs {
   nouveauPlan: boolean;
 }
 
-export const DEFAULT_PREFS: Omit<NotificationPrefs, "userId"> = {
+export const DEFAULT_PREFS: Omit<NotificationPrefs, 'userId'> = {
   rappelPoids: true,
   motivation: true,
   expirationProche: true,

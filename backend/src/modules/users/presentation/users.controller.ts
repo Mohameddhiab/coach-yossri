@@ -8,25 +8,28 @@ import {
   Post,
   Query,
   UseGuards,
-} from "@nestjs/common";
-import { IsEmail, IsNumber, IsOptional, IsString, Max, Min } from "class-validator";
-import { JwtAuthGuard } from "@/shared/common/guards/jwt-auth.guard";
-import { RolesGuard } from "@/shared/common/guards/roles.guard";
-import { SubscriptionGuard } from "@/shared/common/guards/subscription.guard";
-import { CoachOwnershipGuard } from "@/shared/common/guards/coach-ownership.guard";
-import { Roles } from "@/shared/common/decorators/roles.decorator";
-import { CurrentUser, type AuthUser } from "@/shared/common/decorators/current-user.decorator";
-import { ListCoachUsersUseCase } from "../application/use-cases/list-coach-users.use-case";
-import { CreateUserUseCase } from "../application/use-cases/create-user.use-case";
-import { GetUserUseCase } from "../application/use-cases/get-user.use-case";
-import { UpdateUserUseCase } from "../application/use-cases/update-user.use-case";
-import { DeleteUserUseCase } from "../application/use-cases/delete-user.use-case";
-import { ResetPasswordUseCase } from "../application/use-cases/reset-password.use-case";
-import { GetCalorieNeedsUseCase } from "../application/use-cases/get-calorie-needs.use-case";
-import { toUserApi } from "@/shared/mapping/user.mapper";
+} from '@nestjs/common';
+import { IsEmail, IsNumber, IsOptional, IsString } from 'class-validator';
+import { JwtAuthGuard } from '@/shared/common/guards/jwt-auth.guard';
+import { RolesGuard } from '@/shared/common/guards/roles.guard';
+import { SubscriptionGuard } from '@/shared/common/guards/subscription.guard';
+import { CoachOwnershipGuard } from '@/shared/common/guards/coach-ownership.guard';
+import { Roles } from '@/shared/common/decorators/roles.decorator';
+import {
+  CurrentUser,
+  type AuthUser,
+} from '@/shared/common/decorators/current-user.decorator';
+import { ListCoachUsersUseCase } from '../application/use-cases/list-coach-users.use-case';
+import { CreateUserUseCase } from '../application/use-cases/create-user.use-case';
+import { GetUserUseCase } from '../application/use-cases/get-user.use-case';
+import { UpdateUserUseCase } from '../application/use-cases/update-user.use-case';
+import { DeleteUserUseCase } from '../application/use-cases/delete-user.use-case';
+import { ResetPasswordUseCase } from '../application/use-cases/reset-password.use-case';
+import { GetCalorieNeedsUseCase } from '../application/use-cases/get-calorie-needs.use-case';
+import { toUserApi } from '@/shared/mapping/user.mapper';
 
 export class CreateUserDto {
-  @IsEmail({}, { message: "بريد إلكتروني غير صحيح" })
+  @IsEmail({}, { message: 'بريد إلكتروني غير صحيح' })
   email!: string;
 
   @IsOptional() @IsString() nom?: string;
@@ -49,7 +52,7 @@ export class UpdateUserDto {
   @IsOptional() @IsNumber() taille_cm?: number | null;
 }
 
-@Controller("users")
+@Controller('users')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class UsersController {
   constructor(
@@ -63,20 +66,21 @@ export class UsersController {
   ) {}
 
   @Get()
-  @Roles("COACH")
-  list(@Query("search") search?: string, @Query("status") status?: string) {
-    const s = (status ?? "TOUS") as "TOUS" | "ACTIF" | "EXPIRE" | "EXPIRE_BIENTOT";
-    return this.listUseCase.execute(search ?? "", s);
+  @Roles('COACH')
+  list(@Query('search') search?: string, @Query('status') status?: string) {
+    const s = (status ?? 'TOUS') as
+      'TOUS' | 'ACTIF' | 'EXPIRE' | 'EXPIRE_BIENTOT';
+    return this.listUseCase.execute(search ?? '', s);
   }
 
   @Post()
-  @Roles("COACH")
+  @Roles('COACH')
   async create(@CurrentUser() auth: AuthUser, @Body() dto: CreateUserDto) {
     const result = await this.createUseCase.execute({
       email: dto.email,
-      nom: dto.nom ?? "",
-      prenom: dto.prenom ?? "",
-      telephone: dto.telephone ?? "",
+      nom: dto.nom ?? '',
+      prenom: dto.prenom ?? '',
+      telephone: dto.telephone ?? '',
       dateNaissance: dto.date_naissance ? new Date(dto.date_naissance) : null,
       referredBy: dto.referred_by ?? null,
       tier: dto.tier,
@@ -88,50 +92,53 @@ export class UsersController {
     return { user: toUserApi(result.user), password: result.password };
   }
 
-  @Get(":userId")
+  @Get(':userId')
   @UseGuards(SubscriptionGuard)
-  get(@CurrentUser() auth: AuthUser, @Param("userId") userId: string) {
+  get(@CurrentUser() auth: AuthUser, @Param('userId') userId: string) {
     return this.getUseCase.execute(auth, userId);
   }
 
-  @Patch(":userId")
-  @Roles("COACH")
+  @Patch(':userId')
+  @Roles('COACH')
   @UseGuards(CoachOwnershipGuard)
-  async update(@Param("userId") userId: string, @Body() dto: UpdateUserDto) {
+  async update(@Param('userId') userId: string, @Body() dto: UpdateUserDto) {
     const user = await this.updateUseCase.execute(userId, {
       nom: dto.nom,
       prenom: dto.prenom,
       telephone: dto.telephone,
       dateNaissance:
-        dto.date_naissance === undefined ? undefined : dto.date_naissance ?? null,
-      sexe: dto.sexe === undefined ? undefined : dto.sexe ?? null,
-      tailleCm: dto.taille_cm === undefined ? undefined : dto.taille_cm ?? null,
+        dto.date_naissance === undefined
+          ? undefined
+          : (dto.date_naissance ?? null),
+      sexe: dto.sexe === undefined ? undefined : (dto.sexe ?? null),
+      tailleCm:
+        dto.taille_cm === undefined ? undefined : (dto.taille_cm ?? null),
     });
     return toUserApi(user);
   }
 
-  @Get(":userId/calorie-needs")
-  @Roles("COACH")
+  @Get(':userId/calorie-needs')
+  @Roles('COACH')
   @UseGuards(CoachOwnershipGuard)
   calorieNeeds(
-    @Param("userId") userId: string,
-    @Query("activite") activite?: string,
+    @Param('userId') userId: string,
+    @Query('activite') activite?: string,
   ) {
-    return this.calorieNeedsUseCase.execute(userId, activite ?? "MODERE");
+    return this.calorieNeedsUseCase.execute(userId, activite ?? 'MODERE');
   }
 
-  @Delete(":userId")
-  @Roles("COACH")
+  @Delete(':userId')
+  @Roles('COACH')
   @UseGuards(CoachOwnershipGuard)
-  async remove(@Param("userId") userId: string) {
+  async remove(@Param('userId') userId: string) {
     await this.deleteUseCase.execute(userId);
     return { ok: true };
   }
 
-  @Post(":userId/reset-password")
-  @Roles("COACH")
+  @Post(':userId/reset-password')
+  @Roles('COACH')
   @UseGuards(CoachOwnershipGuard)
-  resetPassword(@Param("userId") userId: string) {
+  resetPassword(@Param('userId') userId: string) {
     return this.resetUseCase.execute(userId);
   }
 }

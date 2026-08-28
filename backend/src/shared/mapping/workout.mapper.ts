@@ -1,4 +1,4 @@
-import type { WorkoutExercise, WorkoutPlan } from "../domain/entities";
+import type { WorkoutExercise, WorkoutPlan } from '../domain/entities';
 
 export interface WorkoutExerciseApi {
   id: string;

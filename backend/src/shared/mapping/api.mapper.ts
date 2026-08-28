@@ -1,6 +1,12 @@
-import type { Meal, MealPlan, Subscription, WeightLog, WeightTarget } from "../domain/entities";
-import { getSubscriptionStatus } from "../domain/subscription-status";
-import { toUserApi, type UserApi } from "./user.mapper";
+import type {
+  Meal,
+  MealPlan,
+  Subscription,
+  WeightLog,
+  WeightTarget,
+} from '../domain/entities';
+import { getSubscriptionStatus } from '../domain/subscription-status';
+import { toUserApi, type UserApi } from './user.mapper';
 
 export interface SubscriptionApi {
   id: string;
@@ -24,8 +30,8 @@ export function toSubscriptionApi(s: Subscription): SubscriptionApi {
     date_debut: s.dateDebut.toISOString(),
     date_fin: s.dateFin.toISOString(),
     montant: s.montant,
-    tier: s.tier ?? "ONLINE",
-    mode_paiement: s.modePaiement ?? "ESPECE",
+    tier: s.tier ?? 'ONLINE',
+    mode_paiement: s.modePaiement ?? 'ESPECE',
     statut: getSubscriptionStatus(s),
     created_by: s.createdBy,
     created_at: s.createdAt.toISOString(),
@@ -145,12 +151,16 @@ export function toUserWithSubscriptionApi(input: {
   const days = input.lastWeight
     ? Math.max(
         0,
-        Math.floor((Date.now() - new Date(input.lastWeight.date).getTime()) / 86400000),
+        Math.floor(
+          (Date.now() - new Date(input.lastWeight.date).getTime()) / 86400000,
+        ),
       )
     : null;
   return {
     ...input.user,
-    subscription: input.subscription ? toSubscriptionApi(input.subscription) : null,
+    subscription: input.subscription
+      ? toSubscriptionApi(input.subscription)
+      : null,
     last_weight: input.lastWeight ? toWeightLogApi(input.lastWeight) : null,
     days_since_last_weight: days,
     plan_version: input.planVersion,

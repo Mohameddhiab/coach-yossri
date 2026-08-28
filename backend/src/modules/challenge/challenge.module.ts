@@ -1,5 +1,5 @@
-import { Global, Module } from "@nestjs/common";
-import { ChallengeController } from "./presentation/challenge.controller";
+import { Global, Module } from '@nestjs/common';
+import { ChallengeController } from './presentation/challenge.controller';
 
 @Global()
 @Module({

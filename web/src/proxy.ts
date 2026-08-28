@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import type { Role } from "@/shared/lib/domain";
 
 const ACCESS_COOKIE = "9awi_access";
-const isProd = process.env.NODE_ENV === "production";
+const _isProd = process.env.NODE_ENV === "production";
 const serverApiUrl = process.env.SERVER_API_URL || "http://localhost:3001/api";
 const backendOrigin = serverApiUrl.replace(/\/api\/?$/, "");
 

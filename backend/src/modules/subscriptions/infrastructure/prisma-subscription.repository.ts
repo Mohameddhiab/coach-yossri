@@ -1,11 +1,11 @@
-import { Injectable } from "@nestjs/common";
-import { PrismaService } from "@/shared/database/prisma.service";
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '@/shared/database/prisma.service';
 import {
   SUBSCRIPTION_REPOSITORY,
   type CreateSubscriptionInput,
   type SubscriptionRepository,
-} from "@/shared/domain/ports/subscription-repository.port";
-import type { Subscription } from "@/shared/domain/entities";
+} from '@/shared/domain/ports/subscription-repository.port';
+import type { Subscription } from '@/shared/domain/entities';
 
 @Injectable()
 export class PrismaSubscriptionRepository implements SubscriptionRepository {
@@ -31,9 +31,9 @@ export class PrismaSubscriptionRepository implements SubscriptionRepository {
       dateDebut: row.dateDebut,
       dateFin: row.dateFin,
       montant: row.montant,
-      tier: row.tier as Subscription["tier"],
-      modePaiement: row.modePaiement as Subscription["modePaiement"],
-      statut: row.statut as Subscription["statut"],
+      tier: row.tier as Subscription['tier'],
+      modePaiement: row.modePaiement as Subscription['modePaiement'],
+      statut: row.statut as Subscription['statut'],
       createdBy: row.createdBy,
       pauseStart: row.pauseStart,
       pauseDays: row.pauseDays,
@@ -44,7 +44,7 @@ export class PrismaSubscriptionRepository implements SubscriptionRepository {
   async latest(userId: string): Promise<Subscription | null> {
     const row = await this.prisma.subscription.findFirst({
       where: { userId },
-      orderBy: { dateFin: "desc" },
+      orderBy: { dateFin: 'desc' },
     });
     return row ? this.map(row) : null;
   }
@@ -52,7 +52,7 @@ export class PrismaSubscriptionRepository implements SubscriptionRepository {
   async list(userId: string): Promise<Subscription[]> {
     const rows = await this.prisma.subscription.findMany({
       where: { userId },
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: 'desc' },
     });
     return rows.map((r) => this.map(r));
   }
@@ -61,7 +61,7 @@ export class PrismaSubscriptionRepository implements SubscriptionRepository {
     const row = await this.prisma.subscription.create({
       data: {
         ...input,
-        tier: input.tier as unknown as import("@prisma/client").$Enums.SubscriptionTier | undefined,
+        tier: input.tier as import('@prisma/client').$Enums.SubscriptionTier,
       },
     });
     return this.map(row);

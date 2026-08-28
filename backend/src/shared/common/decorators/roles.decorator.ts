@@ -1,5 +1,5 @@
-import { SetMetadata } from "@nestjs/common";
-import type { Role } from "@/shared/domain/domain-types";
+import { SetMetadata } from '@nestjs/common';
+import type { Role } from '@/shared/domain/domain-types';
 
-export const ROLES_KEY = "roles";
+export const ROLES_KEY = 'roles';
 export const Roles = (...roles: Role[]) => SetMetadata(ROLES_KEY, roles);

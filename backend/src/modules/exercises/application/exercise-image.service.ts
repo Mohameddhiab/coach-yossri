@@ -1,5 +1,5 @@
-import { Injectable, Logger } from "@nestjs/common";
-import { SupabaseService } from "@/shared/supabase/supabase.service";
+import { Injectable, Logger } from '@nestjs/common';
+import { SupabaseService } from '@/shared/supabase/supabase.service';
 
 @Injectable()
 export class ExerciseImageService {
@@ -7,7 +7,10 @@ export class ExerciseImageService {
 
   constructor(private readonly supabase: SupabaseService) {}
 
-  async rehostIfNeeded(wgerUuid: string, sourceUrl: string | null): Promise<{ url: string | null; thumbUrl: string | null }> {
+  async rehostIfNeeded(
+    wgerUuid: string,
+    sourceUrl: string | null,
+  ): Promise<{ url: string | null; thumbUrl: string | null }> {
     if (!sourceUrl) return { url: null, thumbUrl: null };
     if (!this.supabase.isEnabled()) {
       // dev local sans Supabase → garder l'URL wger telle quelle
@@ -27,13 +30,15 @@ export class ExerciseImageService {
       // conversion webp 800px max
       let out: Buffer;
       try {
-        const sharp = (await import("sharp")).default;
+        const sharp = (await import('sharp')).default;
         out = await sharp(input)
           .resize({ width: 800, withoutEnlargement: true })
           .webp({ quality: 82 })
           .toBuffer();
       } catch (e) {
-        this.logger.warn(`sharp conversion failed, using original buffer: ${e}`);
+        this.logger.warn(
+          `sharp conversion failed, using original buffer: ${e}`,
+        );
         out = input;
       }
       const key = `${wgerUuid}.webp`;

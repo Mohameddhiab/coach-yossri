@@ -1,5 +1,5 @@
-import { Injectable } from "@nestjs/common";
-import { PrismaService } from "@/shared/database/prisma.service";
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '@/shared/database/prisma.service';
 
 export interface CreateResetToken {
   userId: string;

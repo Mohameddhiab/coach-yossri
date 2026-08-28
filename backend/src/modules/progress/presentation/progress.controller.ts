@@ -1,12 +1,28 @@
-import { Body, Controller, Delete, Get, Inject, Param, Post, Put, UseGuards } from "@nestjs/common";
-import { IsNumber, IsOptional, IsString } from "class-validator";
-import { JwtAuthGuard } from "@/shared/common/guards/jwt-auth.guard";
-import { SubscriptionGuard } from "@/shared/common/guards/subscription.guard";
-import { CurrentUser, type AuthUser } from "@/shared/common/decorators/current-user.decorator";
-import { PROGRESS_REPOSITORY, type ProgressRepository } from "@/shared/domain/ports/progress-repository.port";
-import { fail } from "@/shared/common/errors/domain-exception";
-import { toWeightLogApi, toWeightTargetApi } from "@/shared/mapping/api.mapper";
-import type { ProgressPhoto } from "@/shared/domain/entities";
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Inject,
+  Param,
+  Post,
+  Put,
+  UseGuards,
+} from '@nestjs/common';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { JwtAuthGuard } from '@/shared/common/guards/jwt-auth.guard';
+import { SubscriptionGuard } from '@/shared/common/guards/subscription.guard';
+import {
+  CurrentUser,
+  type AuthUser,
+} from '@/shared/common/decorators/current-user.decorator';
+import {
+  PROGRESS_REPOSITORY,
+  type ProgressRepository,
+} from '@/shared/domain/ports/progress-repository.port';
+import { fail } from '@/shared/common/errors/domain-exception';
+import { toWeightLogApi, toWeightTargetApi } from '@/shared/mapping/api.mapper';
+import type { ProgressPhoto } from '@/shared/domain/entities';
 
 function toPhotoApi(p: ProgressPhoto) {
   return {
@@ -37,33 +53,42 @@ class TargetDto {
 @Controller()
 @UseGuards(JwtAuthGuard)
 export class ProgressController {
-  constructor(@Inject(PROGRESS_REPOSITORY) private readonly progress: ProgressRepository) {}
+  constructor(
+    @Inject(PROGRESS_REPOSITORY) private readonly progress: ProgressRepository,
+  ) {}
 
   private resolve(userId: string, auth: AuthUser): string {
-    const resolved = userId === "me" ? auth.userId : userId;
-    if (auth.role === "USER" && resolved !== auth.userId) {
-      fail(403, "FORBIDDEN", "غير مصرح به");
+    const resolved = userId === 'me' ? auth.userId : userId;
+    if (auth.role === 'USER' && resolved !== auth.userId) {
+      fail(403, 'FORBIDDEN', 'غير مصرح به');
     }
     return resolved;
   }
 
-  @Get("users/:userId/weight-logs")
+  @Get('users/:userId/weight-logs')
   @UseGuards(SubscriptionGuard)
-  async listWeights(@CurrentUser() auth: AuthUser, @Param("userId") userId: string) {
+  async listWeights(
+    @CurrentUser() auth: AuthUser,
+    @Param('userId') userId: string,
+  ) {
     const rows = await this.progress.listWeights(this.resolve(userId, auth));
     return rows.map(toWeightLogApi);
   }
 
-  @Post("users/:userId/weight-logs")
+  @Post('users/:userId/weight-logs')
   @UseGuards(SubscriptionGuard)
-  async addWeight(@CurrentUser() auth: AuthUser, @Param("userId") userId: string, @Body() dto: AddWeightDto) {
-    if (auth.role !== "USER") {
-      fail(403, "FORBIDDEN", "لا يمكن تسجيل الوزن إلا من قبل العضو نفسه");
+  async addWeight(
+    @CurrentUser() auth: AuthUser,
+    @Param('userId') userId: string,
+    @Body() dto: AddWeightDto,
+  ) {
+    if (auth.role !== 'USER') {
+      fail(403, 'FORBIDDEN', 'لا يمكن تسجيل الوزن إلا من قبل العضو نفسه');
     }
     const resolved = this.resolve(userId, auth);
     const poidsKg = Number(dto.poids_kg);
     if (!poidsKg || poidsKg < 20 || poidsKg > 300) {
-      fail(400, "VALIDATION", "قيمة الوزن غير صحيحة");
+      fail(400, 'VALIDATION', 'قيمة الوزن غير صحيحة');
     }
     const log = await this.progress.addWeight({
       userId: resolved,
@@ -74,67 +99,91 @@ export class ProgressController {
     return toWeightLogApi(log);
   }
 
-  @Delete("weight-logs/:logId")
-  async deleteWeight(@CurrentUser() auth: AuthUser, @Param("logId") logId: string) {
-    if (auth.role === "USER") {
+  @Delete('weight-logs/:logId')
+  async deleteWeight(
+    @CurrentUser() auth: AuthUser,
+    @Param('logId') logId: string,
+  ) {
+    if (auth.role === 'USER') {
       const own = await this.progress.listWeights(auth.userId);
       if (!own.some((w) => w.id === logId)) {
         const exists = await this.progress.findWeightById(logId);
         if (!exists) {
-          fail(404, "NOT_FOUND", "غير موجود");
+          fail(404, 'NOT_FOUND', 'غير موجود');
         }
-        fail(403, "FORBIDDEN", "غير مصرح به");
+        fail(403, 'FORBIDDEN', 'غير مصرح به');
       }
     }
     const log = await this.progress.deleteWeight(logId);
     if (!log) {
-      fail(404, "NOT_FOUND", "غير موجود");
+      fail(404, 'NOT_FOUND', 'غير موجود');
     }
     return { ok: true };
   }
 
-  @Get("users/:userId/weight-target")
+  @Get('users/:userId/weight-target')
   @UseGuards(SubscriptionGuard)
-  async getTarget(@CurrentUser() auth: AuthUser, @Param("userId") userId: string) {
+  async getTarget(
+    @CurrentUser() auth: AuthUser,
+    @Param('userId') userId: string,
+  ) {
     const target = await this.progress.targetOf(this.resolve(userId, auth));
     return target ? toWeightTargetApi(target) : null;
   }
 
-  @Put("users/:userId/weight-target")
-  async setTarget(@CurrentUser() auth: AuthUser, @Param("userId") userId: string, @Body() dto: TargetDto) {
+  @Put('users/:userId/weight-target')
+  async setTarget(
+    @CurrentUser() auth: AuthUser,
+    @Param('userId') userId: string,
+    @Body() dto: TargetDto,
+  ) {
     const resolved = this.resolve(userId, auth);
     const poidsKg = Number(dto.poids_kg);
-    const date = String(dto.date ?? "");
+    const date = String(dto.date ?? '');
     if (poidsKg <= 0 || !date) {
-      fail(400, "VALIDATION", "الهدف يحتاج وزناً وتاريخاً صحيحين");
+      fail(400, 'VALIDATION', 'الهدف يحتاج وزناً وتاريخاً صحيحين');
     }
-    const target = await this.progress.setTarget(resolved, poidsKg, new Date(date));
+    const target = await this.progress.setTarget(
+      resolved,
+      poidsKg,
+      new Date(date),
+    );
     return toWeightTargetApi(target);
   }
 
-  @Delete("users/:userId/weight-target")
-  async deleteTarget(@CurrentUser() auth: AuthUser, @Param("userId") userId: string) {
+  @Delete('users/:userId/weight-target')
+  async deleteTarget(
+    @CurrentUser() auth: AuthUser,
+    @Param('userId') userId: string,
+  ) {
     await this.progress.deleteTarget(this.resolve(userId, auth));
     return { ok: true };
   }
 
-  @Get("users/:userId/photos")
+  @Get('users/:userId/photos')
   @UseGuards(SubscriptionGuard)
-  async listPhotos(@CurrentUser() auth: AuthUser, @Param("userId") userId: string) {
+  async listPhotos(
+    @CurrentUser() auth: AuthUser,
+    @Param('userId') userId: string,
+  ) {
     const rows = await this.progress.listPhotos(this.resolve(userId, auth));
     return rows.map(toPhotoApi);
   }
 
-  @Post("users/:userId/photos")
+  @Post('users/:userId/photos')
   @UseGuards(SubscriptionGuard)
-  async addPhoto(@CurrentUser() auth: AuthUser, @Param("userId") userId: string, @Body() dto: PhotoDto) {
-    if (auth.role !== "USER") {
-      fail(403, "FORBIDDEN", "لا يمكن إضافة صور التقدم إلا من قبل العضو نفسه");
+  async addPhoto(
+    @CurrentUser() auth: AuthUser,
+    @Param('userId') userId: string,
+    @Body() dto: PhotoDto,
+  ) {
+    if (auth.role !== 'USER') {
+      fail(403, 'FORBIDDEN', 'لا يمكن إضافة صور التقدم إلا من قبل العضو نفسه');
     }
     const resolved = this.resolve(userId, auth);
-    const url = String(dto.url ?? "");
+    const url = String(dto.url ?? '');
     if (!url) {
-      fail(400, "VALIDATION", "الصورة مطلوبة");
+      fail(400, 'VALIDATION', 'الصورة مطلوبة');
     }
     const photo = await this.progress.addPhoto({
       userId: resolved,
@@ -144,21 +193,24 @@ export class ProgressController {
     return toPhotoApi(photo);
   }
 
-  @Delete("photos/:photoId")
-  async deletePhoto(@CurrentUser() auth: AuthUser, @Param("photoId") photoId: string) {
-    if (auth.role === "USER") {
+  @Delete('photos/:photoId')
+  async deletePhoto(
+    @CurrentUser() auth: AuthUser,
+    @Param('photoId') photoId: string,
+  ) {
+    if (auth.role === 'USER') {
       const own = await this.progress.listPhotos(auth.userId);
       if (!own.some((p) => p.id === photoId)) {
         const exists = await this.progress.findPhotoById(photoId);
         if (!exists) {
-          fail(404, "NOT_FOUND", "غير موجود");
+          fail(404, 'NOT_FOUND', 'غير موجود');
         }
-        fail(403, "FORBIDDEN", "غير مصرح به");
+        fail(403, 'FORBIDDEN', 'غير مصرح به');
       }
     }
     const photo = await this.progress.deletePhoto(photoId);
     if (!photo) {
-      fail(404, "NOT_FOUND", "غير موجود");
+      fail(404, 'NOT_FOUND', 'غير موجود');
     }
     return { ok: true };
   }

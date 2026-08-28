@@ -2,21 +2,23 @@ import {
   Body,
   Controller,
   Get,
-  Inject,
   Param,
   Post,
   Query,
   UseGuards,
-} from "@nestjs/common";
-import { IsOptional, IsString } from "class-validator";
-import { JwtAuthGuard } from "@/shared/common/guards/jwt-auth.guard";
-import { RolesGuard } from "@/shared/common/guards/roles.guard";
-import { SubscriptionGuard } from "@/shared/common/guards/subscription.guard";
-import { CoachOwnershipGuard } from "@/shared/common/guards/coach-ownership.guard";
-import { TierGuard } from "@/shared/common/guards/tier.guard";
-import { Roles } from "@/shared/common/decorators/roles.decorator";
-import { RequireTier } from "@/shared/common/decorators/require-tier.decorator";
-import { CurrentUser, type AuthUser } from "@/shared/common/decorators/current-user.decorator";
+} from '@nestjs/common';
+import { IsString } from 'class-validator';
+import { JwtAuthGuard } from '@/shared/common/guards/jwt-auth.guard';
+import { RolesGuard } from '@/shared/common/guards/roles.guard';
+import { SubscriptionGuard } from '@/shared/common/guards/subscription.guard';
+import { CoachOwnershipGuard } from '@/shared/common/guards/coach-ownership.guard';
+import { TierGuard } from '@/shared/common/guards/tier.guard';
+import { Roles } from '@/shared/common/decorators/roles.decorator';
+import { RequireTier } from '@/shared/common/decorators/require-tier.decorator';
+import {
+  CurrentUser,
+  type AuthUser,
+} from '@/shared/common/decorators/current-user.decorator';
 import {
   GetMessagesUseCase,
   GetMyConversationUseCase,
@@ -25,7 +27,7 @@ import {
   SendMessageToCoachUseCase,
   SendToMemberUseCase,
   SendMessageUseCase,
-} from "../application/use-cases/chat.use-cases";
+} from '../application/use-cases/chat.use-cases';
 
 export class SendMessageDto {
   @IsString() contenu!: string;
@@ -44,8 +46,8 @@ export class ChatController {
     private readonly markRead: MarkConversationReadUseCase,
   ) {}
 
-  @Get("conversations")
-  @Roles("COACH")
+  @Get('conversations')
+  @Roles('COACH')
   @UseGuards(RolesGuard)
   async list(@CurrentUser() auth: AuthUser) {
     const rows = await this.listConversations.execute(auth.userId);
@@ -59,18 +61,21 @@ export class ChatController {
     }));
   }
 
-  @Get("me/conversation")
-  @RequireTier("PREMIUM_COACH")
+  @Get('me/conversation')
+  @RequireTier('PREMIUM_COACH')
   @UseGuards(SubscriptionGuard, TierGuard)
   async my(@CurrentUser() auth: AuthUser) {
     const conv = await this.myConversation.execute(auth.userId);
     return conv ?? null;
   }
 
-  @Post("me/conversation/messages")
-  @RequireTier("PREMIUM_COACH")
+  @Post('me/conversation/messages')
+  @RequireTier('PREMIUM_COACH')
   @UseGuards(SubscriptionGuard, TierGuard)
-  async postToCoach(@CurrentUser() auth: AuthUser, @Body() dto: SendMessageDto) {
+  async postToCoach(
+    @CurrentUser() auth: AuthUser,
+    @Body() dto: SendMessageDto,
+  ) {
     const msg = await this.sendToCoach.execute(auth.userId, dto.contenu);
     return {
       id: msg.id,
@@ -81,15 +86,19 @@ export class ChatController {
     };
   }
 
-  @Post("users/:userId/messages")
-  @Roles("COACH")
+  @Post('users/:userId/messages')
+  @Roles('COACH')
   @UseGuards(RolesGuard, CoachOwnershipGuard)
   async postToMember(
     @CurrentUser() auth: AuthUser,
-    @Param("userId") userId: string,
+    @Param('userId') userId: string,
     @Body() dto: SendMessageDto,
   ) {
-    const msg = await this.sendToMember.execute(auth.userId, userId, dto.contenu);
+    const msg = await this.sendToMember.execute(
+      auth.userId,
+      userId,
+      dto.contenu,
+    );
     return {
       id: msg.id,
       conversation_id: msg.conversationId,
@@ -99,13 +108,13 @@ export class ChatController {
     };
   }
 
-  @Get("conversations/:id/messages")
-  @RequireTier("PREMIUM_COACH")
+  @Get('conversations/:id/messages')
+  @RequireTier('PREMIUM_COACH')
   @UseGuards(SubscriptionGuard, TierGuard)
   async messages(
     @CurrentUser() auth: AuthUser,
-    @Param("id") id: string,
-    @Query("after") after?: string,
+    @Param('id') id: string,
+    @Query('after') after?: string,
   ) {
     const rows = await this.getMessages.execute(auth, id, after ?? null);
     return rows.map((m) => ({
@@ -119,12 +128,12 @@ export class ChatController {
     }));
   }
 
-  @Post("conversations/:id/messages")
-  @RequireTier("PREMIUM_COACH")
+  @Post('conversations/:id/messages')
+  @RequireTier('PREMIUM_COACH')
   @UseGuards(SubscriptionGuard, TierGuard)
   async post(
     @CurrentUser() auth: AuthUser,
-    @Param("id") id: string,
+    @Param('id') id: string,
     @Body() dto: SendMessageDto,
   ) {
     const msg = await this.sendMessage.execute(auth, id, dto.contenu);
@@ -137,8 +146,8 @@ export class ChatController {
     };
   }
 
-  @Post("conversations/:id/read")
-  async read(@CurrentUser() auth: AuthUser, @Param("id") id: string) {
+  @Post('conversations/:id/read')
+  async read(@CurrentUser() auth: AuthUser, @Param('id') id: string) {
     await this.markRead.execute(auth, id);
     return { ok: true };
   }

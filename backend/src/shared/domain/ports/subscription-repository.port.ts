@@ -1,7 +1,7 @@
-import type { Subscription } from "../entities";
-import type { SubscriptionTier } from "../domain-types";
+import type { Subscription } from '../entities';
+import type { SubscriptionTier } from '../domain-types';
 
-export const SUBSCRIPTION_REPOSITORY = Symbol("SubscriptionRepository");
+export const SUBSCRIPTION_REPOSITORY = Symbol('SubscriptionRepository');
 
 export interface CreateSubscriptionInput {
   userId: string;
@@ -9,8 +9,8 @@ export interface CreateSubscriptionInput {
   dateFin: Date;
   montant: number;
   tier?: SubscriptionTier;
-  modePaiement: Subscription["modePaiement"];
-  statut: Subscription["statut"];
+  modePaiement: Subscription['modePaiement'];
+  statut: Subscription['statut'];
   createdBy: string;
 }
 

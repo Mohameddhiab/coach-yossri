@@ -1,10 +1,10 @@
-import { Injectable } from "@nestjs/common";
-import { PrismaService } from "@/shared/database/prisma.service";
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '@/shared/database/prisma.service';
 import {
   GOAL_REPOSITORY,
   type GoalRepository,
-} from "@/shared/domain/ports/goal-repository.port";
-import type { MonthlyGoal } from "@/shared/domain/entities";
+} from '@/shared/domain/ports/goal-repository.port';
+import type { MonthlyGoal } from '@/shared/domain/entities';
 
 @Injectable()
 export class PrismaGoalRepository implements GoalRepository {
@@ -37,7 +37,12 @@ export class PrismaGoalRepository implements GoalRepository {
     return row ? this.map(row) : null;
   }
 
-  async replace(userId: string, mois: string, titre: string, cible: number): Promise<MonthlyGoal> {
+  async replace(
+    userId: string,
+    mois: string,
+    titre: string,
+    cible: number,
+  ): Promise<MonthlyGoal> {
     const row = await this.prisma.monthlyGoal.upsert({
       where: { userId_mois: { userId, mois } },
       update: { titre, cible, checkins: [] },
@@ -50,7 +55,10 @@ export class PrismaGoalRepository implements GoalRepository {
     const existing = await this.prisma.monthlyGoal.findUnique({
       where: { userId_mois: { userId, mois } },
     });
-    const checkins = existing && Array.isArray(existing.checkins) ? (existing.checkins as string[]) : [];
+    const checkins =
+      existing && Array.isArray(existing.checkins)
+        ? (existing.checkins as string[])
+        : [];
     const row = await this.prisma.monthlyGoal.update({
       where: { userId_mois: { userId, mois } },
       data: { checkins: [...checkins, now.toISOString()] },
@@ -58,12 +66,18 @@ export class PrismaGoalRepository implements GoalRepository {
     return this.map(row);
   }
 
-  async recentCheckins(weekAgo: number): Promise<{ userId: string; count: number }[]> {
+  async recentCheckins(
+    weekAgo: number,
+  ): Promise<{ userId: string; count: number }[]> {
     const goals = await this.prisma.monthlyGoal.findMany();
     const weekIso = new Date(weekAgo).getTime();
     return goals.flatMap((g) => {
-      const checkins = Array.isArray(g.checkins) ? (g.checkins as string[]) : [];
-      const count = checkins.filter((c) => new Date(c).getTime() >= weekIso).length;
+      const checkins = Array.isArray(g.checkins)
+        ? (g.checkins as string[])
+        : [];
+      const count = checkins.filter(
+        (c) => new Date(c).getTime() >= weekIso,
+      ).length;
       return count > 0 ? [{ userId: g.userId, count }] : [];
     });
   }

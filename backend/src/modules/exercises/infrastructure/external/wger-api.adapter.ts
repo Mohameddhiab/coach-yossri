@@ -1,5 +1,5 @@
-import { Injectable, Logger } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
+import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
 export interface WgerSearchItem {
   wgerId: number;
@@ -42,12 +42,13 @@ export class WgerApiAdapter {
   private readonly ttlMs = 10 * 60 * 1000;
 
   constructor(private readonly config: ConfigService) {
-    this.baseUrl = this.config.get<string>("WGER_BASE_URL") ?? "https://wger.de/api/v2";
-    this.token = this.config.get<string>("WGER_API_TOKEN");
+    this.baseUrl =
+      this.config.get<string>('WGER_BASE_URL') ?? 'https://wger.de/api/v2';
+    this.token = this.config.get<string>('WGER_API_TOKEN');
   }
 
   private headers(): Record<string, string> {
-    const h: Record<string, string> = { Accept: "application/json" };
+    const h: Record<string, string> = { Accept: 'application/json' };
     if (this.token) h.Authorization = `Token ${this.token}`;
     return h;
   }
@@ -55,7 +56,7 @@ export class WgerApiAdapter {
   private readonly LANG_ID: Record<string, number> = { fr: 12, en: 2, de: 1 };
 
   private pickTranslation(
-    translations: ExerciseInfoRaw["translations"],
+    translations: ExerciseInfoRaw['translations'],
     prefer: string[],
     searchTerm?: string,
   ): { name: string; description: string | null } | null {
@@ -63,25 +64,34 @@ export class WgerApiAdapter {
     if (searchTerm) {
       const q = searchTerm.trim().toLowerCase();
       const exact = translations.find((t) => t.name.trim().toLowerCase() === q);
-      if (exact) return { name: exact.name, description: exact.description ?? null };
+      if (exact)
+        return { name: exact.name, description: exact.description ?? null };
     }
     for (const code of prefer) {
       const id = this.LANG_ID[code];
       if (id != null) {
         const hit = translations.find((t) => t.language === id);
-        if (hit) return { name: hit.name, description: hit.description ?? null };
+        if (hit)
+          return { name: hit.name, description: hit.description ?? null };
       }
     }
-    return { name: translations[0].name, description: translations[0].description ?? null };
+    return {
+      name: translations[0].name,
+      description: translations[0].description ?? null,
+    };
   }
 
-  private toItem(raw: ExerciseInfoRaw, searchTerm?: string): WgerSearchItem | null {
-    const t = this.pickTranslation(raw.translations, ["fr", "en"], searchTerm);
+  private toItem(
+    raw: ExerciseInfoRaw,
+    searchTerm?: string,
+  ): WgerSearchItem | null {
+    const t = this.pickTranslation(raw.translations, ['fr', 'en'], searchTerm);
     if (!t) return null;
     const mainImg =
       raw.images?.find((im) => im.is_main) ?? raw.images?.[0] ?? null;
     const imageUrl = mainImg?.image ?? null;
-    const imageThumbUrl = mainImg?.thumbnails?.medium ?? mainImg?.thumbnails?.small ?? null;
+    const imageThumbUrl =
+      mainImg?.thumbnails?.medium ?? mainImg?.thumbnails?.small ?? null;
     const cat = raw.category?.name ?? null;
     return {
       wgerId: raw.id,
@@ -96,26 +106,32 @@ export class WgerApiAdapter {
     };
   }
 
-  async search(term: string, language = "fr,en"): Promise<WgerSearchItem[]> {
+  async search(term: string, language = 'fr,en'): Promise<WgerSearchItem[]> {
     const key = `${term.toLowerCase()}|${language}`;
     const cached = this.cache.get(key);
     if (cached && Date.now() - cached.at < this.ttlMs) return cached.data;
 
-    const url = new URL(`${this.baseUrl.replace(/\/$/, "")}/exerciseinfo/`);
-    url.searchParams.set("name__search", term);
-    url.searchParams.set("language__code", language);
-    url.searchParams.set("limit", "10");
-    url.searchParams.set("ordering", "-id");
+    const url = new URL(`${this.baseUrl.replace(/\/$/, '')}/exerciseinfo/`);
+    url.searchParams.set('name__search', term);
+    url.searchParams.set('language__code', language);
+    url.searchParams.set('limit', '10');
+    url.searchParams.set('ordering', '-id');
 
     const ctrl = new AbortController();
     const to = setTimeout(() => ctrl.abort(), 6000);
     try {
-      const res = await fetch(url.toString(), { headers: this.headers(), signal: ctrl.signal });
+      const res = await fetch(url.toString(), {
+        headers: this.headers(),
+        signal: ctrl.signal,
+      });
       if (!res.ok) {
-        this.logger.warn(`wger search ${res.status} ${await res.text().catch(() => "")}`);
+        this.logger.warn(
+          `wger search ${res.status} ${await res.text().catch(() => '')}`,
+        );
         throw new Error(`WGER_${res.status}`);
       }
-      const data = (await res.json()) as { results?: ExerciseInfoRaw[] } | ExerciseInfoRaw[];
+      const data = (await res.json()) as
+        { results?: ExerciseInfoRaw[] } | ExerciseInfoRaw[];
       const list: ExerciseInfoRaw[] = Array.isArray(data)
         ? data
         : Array.isArray((data as { results?: unknown }).results)
@@ -132,15 +148,19 @@ export class WgerApiAdapter {
   }
 
   async fetchByUuid(uuid: string): Promise<WgerSearchItem | null> {
-    const url = new URL(`${this.baseUrl.replace(/\/$/, "")}/exerciseinfo/`);
-    url.searchParams.set("uuid", uuid);
-    url.searchParams.set("limit", "1");
+    const url = new URL(`${this.baseUrl.replace(/\/$/, '')}/exerciseinfo/`);
+    url.searchParams.set('uuid', uuid);
+    url.searchParams.set('limit', '1');
     const ctrl = new AbortController();
     const to = setTimeout(() => ctrl.abort(), 6000);
     try {
-      const res = await fetch(url.toString(), { headers: this.headers(), signal: ctrl.signal });
+      const res = await fetch(url.toString(), {
+        headers: this.headers(),
+        signal: ctrl.signal,
+      });
       if (!res.ok) throw new Error(`WGER_${res.status}`);
-      const data = (await res.json()) as { results?: ExerciseInfoRaw[] } | ExerciseInfoRaw[];
+      const data = (await res.json()) as
+        { results?: ExerciseInfoRaw[] } | ExerciseInfoRaw[];
       const list: ExerciseInfoRaw[] = Array.isArray(data)
         ? data
         : Array.isArray((data as { results?: unknown }).results)

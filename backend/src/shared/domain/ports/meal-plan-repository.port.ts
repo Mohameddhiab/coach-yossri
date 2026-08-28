@@ -1,6 +1,6 @@
-import type { Meal, MealPlan, MealPlanVersion } from "../entities";
+import type { Meal, MealPlan, MealPlanVersion } from '../entities';
 
-export const MEAL_PLAN_REPOSITORY = Symbol("MealPlanRepository");
+export const MEAL_PLAN_REPOSITORY = Symbol('MealPlanRepository');
 
 export interface MealPlanWithMeals extends MealPlan {
   meals: Meal[];
@@ -68,7 +68,7 @@ export interface MealPlanRepository {
   versions(planId: string): Promise<MealPlanVersion[]>;
 }
 
-export const MEAL_REPOSITORY = Symbol("MealRepository");
+export const MEAL_REPOSITORY = Symbol('MealRepository');
 
 export interface MealRepository {
   upsertMany(planId: string, meals: Meal[]): Promise<void>;

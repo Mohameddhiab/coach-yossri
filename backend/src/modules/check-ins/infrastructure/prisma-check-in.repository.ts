@@ -1,11 +1,11 @@
-import { Injectable } from "@nestjs/common";
-import { PrismaService } from "@/shared/database/prisma.service";
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '@/shared/database/prisma.service';
 import {
   CHECKIN_REPOSITORY,
   type CheckInRepository,
   type CheckInWithUser,
-} from "@/shared/domain/ports/checkin-repository.port";
-import type { CheckIn } from "@/shared/domain/entities";
+} from '@/shared/domain/ports/checkin-repository.port';
+import type { CheckIn } from '@/shared/domain/entities';
 
 @Injectable()
 export class PrismaCheckInRepository implements CheckInRepository {
@@ -19,7 +19,7 @@ export class PrismaCheckInRepository implements CheckInRepository {
   async listByUser(userId: string, limit = 50): Promise<CheckIn[]> {
     const rows = await this.prisma.checkIn.findMany({
       where: { userId },
-      orderBy: { checkedAt: "desc" },
+      orderBy: { checkedAt: 'desc' },
       take: limit,
     });
     return rows.map((r) => this.map(r));
@@ -30,7 +30,7 @@ export class PrismaCheckInRepository implements CheckInRepository {
     start.setHours(0, 0, 0, 0);
     const rows = await this.prisma.checkIn.findMany({
       where: { checkedAt: { gte: start } },
-      orderBy: { checkedAt: "desc" },
+      orderBy: { checkedAt: 'desc' },
       include: { user: { select: { nom: true, prenom: true } } },
     });
     return rows.map((r) => ({

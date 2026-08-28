@@ -5,9 +5,9 @@ import {
   HttpException,
   HttpStatus,
   Logger,
-} from "@nestjs/common";
-import { Response } from "express";
-import { DomainException } from "./domain-exception";
+} from '@nestjs/common';
+import { Response } from 'express';
+import { DomainException } from './domain-exception';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
@@ -29,23 +29,31 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       const status = exception.getStatus();
       const body = exception.getResponse();
       const message =
-        typeof body === "string"
+        typeof body === 'string'
           ? body
-          : (body as { message?: string | string[] }).message?.toString?.() ??
-            exception.message;
+          : ((body as { message?: string | string[] }).message?.toString?.() ??
+            exception.message);
       res.status(status).json({
         statusCode: status,
         message,
-        code: status === 401 ? "UNAUTHORIZED" : status === 403 ? "FORBIDDEN" : "VALIDATION",
+        code:
+          status === 401
+            ? 'UNAUTHORIZED'
+            : status === 403
+              ? 'FORBIDDEN'
+              : 'VALIDATION',
       });
       return;
     }
 
-    this.logger.error("Unhandled error", exception instanceof Error ? exception.stack : String(exception));
+    this.logger.error(
+      'Unhandled error',
+      exception instanceof Error ? exception.stack : String(exception),
+    );
     res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       statusCode: 500,
-      message: "خطأ غير متوقع",
-      code: "INTERNAL",
+      message: 'خطأ غير متوقع',
+      code: 'INTERNAL',
     });
   }
 }

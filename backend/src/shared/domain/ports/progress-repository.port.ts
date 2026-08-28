@@ -1,6 +1,6 @@
-import type { ProgressPhoto, WeightLog, WeightTarget } from "../entities";
+import type { ProgressPhoto, WeightLog, WeightTarget } from '../entities';
 
-export const PROGRESS_REPOSITORY = Symbol("ProgressRepository");
+export const PROGRESS_REPOSITORY = Symbol('ProgressRepository');
 
 export interface ProgressRepository {
   listWeights(userId: string): Promise<WeightLog[]>;

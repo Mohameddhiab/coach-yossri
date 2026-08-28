@@ -1,6 +1,6 @@
-import type { MonthlyGoal } from "../entities";
+import type { MonthlyGoal } from '../entities';
 
-export const GOAL_REPOSITORY = Symbol("GoalRepository");
+export const GOAL_REPOSITORY = Symbol('GoalRepository');
 
 export interface GoalRepository {
   ofMonth(userId: string, mois: string): Promise<MonthlyGoal | null>;

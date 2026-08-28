@@ -1,6 +1,6 @@
 import type { NextConfig } from "next";
 
-const isProd = process.env.NODE_ENV === "production";
+const _isProd = process.env.NODE_ENV === "production";
 const serverApiUrl = process.env.SERVER_API_URL || "http://localhost:3001/api";
 const backendOrigin = serverApiUrl.replace(/\/api\/?$/, "");
 

@@ -1,6 +1,6 @@
-import type { CheckIn } from "../entities";
+import type { CheckIn } from '../entities';
 
-export const CHECKIN_REPOSITORY = Symbol("CheckInRepository");
+export const CHECKIN_REPOSITORY = Symbol('CheckInRepository');
 
 export interface CheckInWithUser extends CheckIn {
   userName: string;

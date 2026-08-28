@@ -1,13 +1,13 @@
-import { Module } from "@nestjs/common";
-import { PrismaWorkoutPlanRepositoryProvider } from "./infrastructure/prisma-workout-plan.repository";
+import { Module } from '@nestjs/common';
+import { PrismaWorkoutPlanRepositoryProvider } from './infrastructure/prisma-workout-plan.repository';
 import {
   CreateWorkoutPlanUseCase,
   DuplicateWorkoutPlanUseCase,
   GetWorkoutPlanUseCase,
   UpdateWorkoutPlanUseCase,
   WorkoutVersionsUseCase,
-} from "./application/use-cases/workout-plans.use-cases";
-import { WorkoutPlansController } from "./presentation/workout-plans.controller";
+} from './application/use-cases/workout-plans.use-cases';
+import { WorkoutPlansController } from './presentation/workout-plans.controller';
 
 @Module({
   controllers: [WorkoutPlansController],

@@ -1,11 +1,11 @@
-import { generatePassword, PASSWORD_GENERATOR_ALPHABET } from "./password";
+import { generatePassword, PASSWORD_GENERATOR_ALPHABET } from './password';
 
-describe("generatePassword", () => {
-  it("génère un mot de passe de 10 caractères", () => {
+describe('generatePassword', () => {
+  it('génère un mot de passe de 10 caractères', () => {
     expect(generatePassword()).toHaveLength(10);
   });
 
-  it("génère des mots de passe différents", () => {
+  it('génère des mots de passe différents', () => {
     const a = generatePassword();
     const b = generatePassword();
     expect(a).not.toBe(b);

@@ -1,5 +1,5 @@
-import { Injectable } from "@nestjs/common";
-import { PrismaService } from "@/shared/database/prisma.service";
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '@/shared/database/prisma.service';
 import {
   WORKOUT_PLAN_REPOSITORY,
   type CreateWorkoutPlanInput,
@@ -7,11 +7,11 @@ import {
   type WorkoutPlanSnapshot,
   type WorkoutPlanTemplateRow,
   type WorkoutPlanWithExercises,
-} from "@/shared/domain/ports/workout-plan-repository.port";
+} from '@/shared/domain/ports/workout-plan-repository.port';
 import type {
   WorkoutExercise,
   WorkoutPlanVersion,
-} from "@/shared/domain/entities";
+} from '@/shared/domain/entities';
 
 @Injectable()
 export class PrismaWorkoutPlanRepository implements WorkoutPlanRepository {
@@ -35,8 +35,8 @@ export class PrismaWorkoutPlanRepository implements WorkoutPlanRepository {
       userId: row.userId,
       coachId: row.coachId,
       titre: row.titre,
-      objectif: row.objectif as WorkoutPlanWithExercises["objectif"],
-      statut: row.statut as WorkoutPlanWithExercises["statut"],
+      objectif: row.objectif as WorkoutPlanWithExercises['objectif'],
+      statut: row.statut as WorkoutPlanWithExercises['statut'],
       isTemplate: row.isTemplate,
       version: row.version,
       createdAt: row.createdAt,
@@ -48,13 +48,13 @@ export class PrismaWorkoutPlanRepository implements WorkoutPlanRepository {
   }
 
   private exercisesSelect = {
-    orderBy: [{ jourSemaine: "asc" as const }, { nom: "asc" as const }],
+    orderBy: [{ jourSemaine: 'asc' as const }, { nom: 'asc' as const }],
   };
 
   async findActive(userId: string): Promise<WorkoutPlanWithExercises | null> {
     const row = await this.prisma.workoutPlan.findFirst({
-      where: { userId, statut: "ACTIF" },
-      orderBy: { createdAt: "desc" },
+      where: { userId, statut: 'ACTIF' },
+      orderBy: { createdAt: 'desc' },
       include: { exercises: this.exercisesSelect },
     });
     return row ? this.mapPlan(row) : null;
@@ -62,8 +62,8 @@ export class PrismaWorkoutPlanRepository implements WorkoutPlanRepository {
 
   async archiveActive(userId: string): Promise<void> {
     await this.prisma.workoutPlan.updateMany({
-      where: { userId, statut: "ACTIF" },
-      data: { statut: "ARCHIVE" },
+      where: { userId, statut: 'ACTIF' },
+      data: { statut: 'ARCHIVE' },
     });
   }
 
@@ -76,8 +76,8 @@ export class PrismaWorkoutPlanRepository implements WorkoutPlanRepository {
         userId: input.userId,
         coachId: input.coachId,
         titre: input.titre,
-        objectif: input.objectif as import("@prisma/client").PlanObjective,
-        statut: "ACTIF",
+        objectif: input.objectif as import('@prisma/client').PlanObjective,
+        statut: 'ACTIF',
         version: 1,
         exercises: {
           create: exercises.map((e) => ({
@@ -107,13 +107,18 @@ export class PrismaWorkoutPlanRepository implements WorkoutPlanRepository {
     const data = {
       ...(patch.titre !== undefined ? { titre: patch.titre } : {}),
       ...(patch.objectif !== undefined
-        ? { objectif: patch.objectif as import("@prisma/client").PlanObjective }
+        ? { objectif: patch.objectif as import('@prisma/client').PlanObjective }
         : {}),
     };
     await this.prisma.$transaction([
-      this.prisma.workoutPlan.update({ where: { id: planId }, data: { ...data, updatedAt: new Date() } }),
-      this.prisma.workoutExercise.deleteMany({ where: { workoutPlanId: planId } }),
-        ...exercises.map((e) =>
+      this.prisma.workoutPlan.update({
+        where: { id: planId },
+        data: { ...data, updatedAt: new Date() },
+      }),
+      this.prisma.workoutExercise.deleteMany({
+        where: { workoutPlanId: planId },
+      }),
+      ...exercises.map((e) =>
         this.prisma.workoutExercise.create({
           data: {
             workoutPlanId: planId,
@@ -138,7 +143,10 @@ export class PrismaWorkoutPlanRepository implements WorkoutPlanRepository {
     return this.mapPlan(row);
   }
 
-  async bumpVersion(planId: string, oldSnapshot: WorkoutPlanSnapshot): Promise<void> {
+  async bumpVersion(
+    planId: string,
+    oldSnapshot: WorkoutPlanSnapshot,
+  ): Promise<void> {
     await this.prisma.$transaction([
       this.prisma.workoutPlanVersion.create({
         data: {
@@ -164,7 +172,7 @@ export class PrismaWorkoutPlanRepository implements WorkoutPlanRepository {
 
   async templates(): Promise<WorkoutPlanTemplateRow[]> {
     const rows = await this.prisma.workoutPlan.findMany({
-      orderBy: [{ isTemplate: "desc" }, { updatedAt: "desc" }],
+      orderBy: [{ isTemplate: 'desc' }, { updatedAt: 'desc' }],
       include: { user: { select: { nom: true, prenom: true } } },
     });
     return rows.map((r) => ({
@@ -181,11 +189,15 @@ export class PrismaWorkoutPlanRepository implements WorkoutPlanRepository {
   async versions(planId: string): Promise<WorkoutPlanVersion[]> {
     const rows = await this.prisma.workoutPlanVersion.findMany({
       where: { planId },
-      orderBy: { version: "desc" },
+      orderBy: { version: 'desc' },
     });
     return rows.map((r) => ({
       version: r.version,
-      snapshot: JSON.parse(String(r.snapshot)) as unknown,
+      snapshot: JSON.parse(
+        typeof r.snapshot === 'string'
+          ? r.snapshot
+          : JSON.stringify(r.snapshot),
+      ) as unknown,
       updatedAt: r.updatedAt,
     }));
   }

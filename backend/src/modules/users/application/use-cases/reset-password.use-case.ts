@@ -1,7 +1,14 @@
-import { Inject, Injectable } from "@nestjs/common";
-import { fail } from "@/shared/common/errors/domain-exception";
-import { generatePassword, PASSWORD_HASHER, type PasswordHasher } from "@/shared/domain/password";
-import { USER_REPOSITORY, type UserRepository } from "@/shared/domain/ports/user-repository.port";
+import { Inject, Injectable } from '@nestjs/common';
+import { fail } from '@/shared/common/errors/domain-exception';
+import {
+  generatePassword,
+  PASSWORD_HASHER,
+  type PasswordHasher,
+} from '@/shared/domain/password';
+import {
+  USER_REPOSITORY,
+  type UserRepository,
+} from '@/shared/domain/ports/user-repository.port';
 
 @Injectable()
 export class ResetPasswordUseCase {
@@ -13,7 +20,7 @@ export class ResetPasswordUseCase {
   async execute(userId: string): Promise<{ password: string }> {
     const user = await this.users.findById(userId);
     if (!user) {
-      fail(404, "NOT_FOUND", "المستخدم غير موجود");
+      fail(404, 'NOT_FOUND', 'المستخدم غير موجود');
     }
     const password = generatePassword();
     await this.users.updatePassword(userId, await this.hasher.hash(password));

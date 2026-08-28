@@ -5,7 +5,7 @@ export class DomainException extends Error {
     message: string,
   ) {
     super(message);
-    this.name = "DomainException";
+    this.name = 'DomainException';
   }
 }
 

@@ -1,5 +1,5 @@
-import { createParamDecorator, ExecutionContext } from "@nestjs/common";
-import type { Role } from "@/shared/domain/domain-types";
+import { createParamDecorator, ExecutionContext } from '@nestjs/common';
+import type { Role } from '@/shared/domain/domain-types';
 
 export interface AuthUser {
   userId: string;

@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button";
 
 export default function ErrorBoundary({
-  error: _error,
   reset,
 }: {
   error: Error & { digest?: string };

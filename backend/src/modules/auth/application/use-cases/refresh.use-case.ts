@@ -1,7 +1,13 @@
-import { Inject, Injectable } from "@nestjs/common";
-import { fail } from "@/shared/common/errors/domain-exception";
-import { TOKEN_SERVICE, type TokenService } from "@/shared/domain/token-service.port";
-import { USER_REPOSITORY, type UserRepository } from "@/shared/domain/ports/user-repository.port";
+import { Inject, Injectable } from '@nestjs/common';
+import { fail } from '@/shared/common/errors/domain-exception';
+import {
+  TOKEN_SERVICE,
+  type TokenService,
+} from '@/shared/domain/token-service.port';
+import {
+  USER_REPOSITORY,
+  type UserRepository,
+} from '@/shared/domain/ports/user-repository.port';
 
 export interface RefreshResult {
   accessToken: string;
@@ -21,12 +27,17 @@ export class RefreshUseCase {
     const auth = await this.tokens.verifyRefresh(refreshToken);
     const user = await this.users.findById(auth.userId);
     if (!user) {
-      fail(401, "UNAUTHORIZED", "يجب تسجيل الدخول");
+      fail(401, 'UNAUTHORIZED', 'يجب تسجيل الدخول');
     }
     const [accessToken, newRefresh] = await Promise.all([
       this.tokens.signAccess({ userId: user.id, role: user.role }),
       this.tokens.signRefresh({ userId: user.id, role: user.role }),
     ]);
-    return { accessToken, refreshToken: newRefresh, userId: user.id, role: user.role };
+    return {
+      accessToken,
+      refreshToken: newRefresh,
+      userId: user.id,
+      role: user.role,
+    };
   }
 }

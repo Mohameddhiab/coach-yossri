@@ -1,19 +1,19 @@
-import { Injectable } from "@nestjs/common";
-import { PrismaService } from "@/shared/database/prisma.service";
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '@/shared/database/prisma.service';
 import {
   COACH_REPOSITORY,
   type CoachRepository,
-} from "@/shared/domain/ports/coach-repository.port";
-import type { CoachNote, CoachSettings } from "@/shared/domain/entities";
+} from '@/shared/domain/ports/coach-repository.port';
+import type { CoachNote, CoachSettings } from '@/shared/domain/entities';
 
-const DEFAULT_SETTINGS: Omit<CoachSettings, "id" | "updatedAt"> = {
-  motivationMessage: "استمر يا بطل! 🔥",
+const DEFAULT_SETTINGS: Omit<CoachSettings, 'id' | 'updatedAt'> = {
+  motivationMessage: 'استمر يا بطل! 🔥',
   rappelIntervalJours: 2,
   sendMotivation: true,
   messageTemplates: [
-    "حصة اليوم لا تنسَ! 💪",
-    "ركز على هدفك هذا الشهر 🎯",
-    "شرب الماء مهم بعد التمرين 💧",
+    'حصة اليوم لا تنسَ! 💪',
+    'ركز على هدفك هذا الشهر 🎯',
+    'شرب الماء مهم بعد التمرين 💧',
   ],
 };
 
@@ -22,19 +22,26 @@ export class PrismaCoachRepository implements CoachRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   private async ensureSettingsRow(): Promise<CoachSettings> {
-    const first = await this.prisma.coachSettings.findFirst({ orderBy: { updatedAt: "asc" } });
+    const first = await this.prisma.coachSettings.findFirst({
+      orderBy: { updatedAt: 'asc' },
+    });
     if (first) {
       return {
         id: first.id,
         motivationMessage: first.motivationMessage,
         rappelIntervalJours: first.rappelIntervalJours,
         sendMotivation: first.sendMotivation,
-        messageTemplates: Array.isArray(first.messageTemplates) ? (first.messageTemplates as string[]) : [],
+        messageTemplates: Array.isArray(first.messageTemplates)
+          ? (first.messageTemplates as string[])
+          : [],
         updatedAt: first.updatedAt,
       };
     }
     const row = await this.prisma.coachSettings.create({
-      data: { ...DEFAULT_SETTINGS, messageTemplates: DEFAULT_SETTINGS.messageTemplates },
+      data: {
+        ...DEFAULT_SETTINGS,
+        messageTemplates: DEFAULT_SETTINGS.messageTemplates,
+      },
     });
     return {
       id: row.id,
@@ -54,22 +61,35 @@ export class PrismaCoachRepository implements CoachRepository {
     patch: Partial<
       Pick<
         CoachSettings,
-        "motivationMessage" | "rappelIntervalJours" | "sendMotivation" | "messageTemplates"
+        | 'motivationMessage'
+        | 'rappelIntervalJours'
+        | 'sendMotivation'
+        | 'messageTemplates'
       >
     >,
   ): Promise<CoachSettings> {
     await this.ensureSettingsRow();
-    const current = await this.prisma.coachSettings.findFirst({ orderBy: { updatedAt: "asc" } });
+    const current = await this.prisma.coachSettings.findFirst({
+      orderBy: { updatedAt: 'asc' },
+    });
     if (!current) {
-      throw new Error("coachSettings row missing after ensure");
+      throw new Error('coachSettings row missing after ensure');
     }
     const row = await this.prisma.coachSettings.update({
       where: { id: current.id },
       data: {
-        ...(patch.motivationMessage !== undefined ? { motivationMessage: patch.motivationMessage } : {}),
-        ...(patch.rappelIntervalJours !== undefined ? { rappelIntervalJours: patch.rappelIntervalJours } : {}),
-        ...(patch.sendMotivation !== undefined ? { sendMotivation: patch.sendMotivation } : {}),
-        ...(patch.messageTemplates !== undefined ? { messageTemplates: patch.messageTemplates } : {}),
+        ...(patch.motivationMessage !== undefined
+          ? { motivationMessage: patch.motivationMessage }
+          : {}),
+        ...(patch.rappelIntervalJours !== undefined
+          ? { rappelIntervalJours: patch.rappelIntervalJours }
+          : {}),
+        ...(patch.sendMotivation !== undefined
+          ? { sendMotivation: patch.sendMotivation }
+          : {}),
+        ...(patch.messageTemplates !== undefined
+          ? { messageTemplates: patch.messageTemplates }
+          : {}),
       },
     });
     return {
@@ -85,7 +105,7 @@ export class PrismaCoachRepository implements CoachRepository {
   async notesOf(userId: string): Promise<CoachNote[]> {
     const rows = await this.prisma.coachNote.findMany({
       where: { userId },
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: 'desc' },
     });
     return rows.map((r) => ({
       id: r.id,
@@ -96,8 +116,14 @@ export class PrismaCoachRepository implements CoachRepository {
     }));
   }
 
-  async addNote(coachId: string, userId: string, contenu: string): Promise<CoachNote> {
-    const row = await this.prisma.coachNote.create({ data: { coachId, userId, contenu } });
+  async addNote(
+    coachId: string,
+    userId: string,
+    contenu: string,
+  ): Promise<CoachNote> {
+    const row = await this.prisma.coachNote.create({
+      data: { coachId, userId, contenu },
+    });
     return {
       id: row.id,
       coachId: row.coachId,

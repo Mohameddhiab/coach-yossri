@@ -1,9 +1,12 @@
-import { Injectable } from "@nestjs/common";
-import { PrismaService } from "@/shared/database/prisma.service";
-import { USER_REPOSITORY, type UserRepository } from "@/shared/domain/ports/user-repository.port";
-import type { NotificationPrefs, User } from "@/shared/domain/entities";
-import { DEFAULT_PREFS } from "@/shared/domain/entities";
-import { Prisma } from "@prisma/client";
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '@/shared/database/prisma.service';
+import {
+  USER_REPOSITORY,
+  type UserRepository,
+} from '@/shared/domain/ports/user-repository.port';
+import type { NotificationPrefs, User } from '@/shared/domain/entities';
+import { DEFAULT_PREFS } from '@/shared/domain/entities';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class PrismaUserRepository implements UserRepository {
@@ -25,13 +28,13 @@ export class PrismaUserRepository implements UserRepository {
   }): User {
     return {
       id: row.id,
-      role: row.role as User["role"],
+      role: row.role as User['role'],
       email: row.email,
       nom: row.nom,
       prenom: row.prenom,
       telephone: row.telephone,
       dateNaissance: row.dateNaissance,
-      sexe: row.sexe as User["sexe"],
+      sexe: row.sexe as User['sexe'],
       tailleCm: row.tailleCm,
       coachId: row.coachId,
       referredBy: row.referredBy,
@@ -39,7 +42,9 @@ export class PrismaUserRepository implements UserRepository {
     };
   }
 
-  async findByEmail(email: string): Promise<(User & { passwordHash: string }) | null> {
+  async findByEmail(
+    email: string,
+  ): Promise<(User & { passwordHash: string }) | null> {
     const row = await this.prisma.user.findUnique({ where: { email } });
     return row ? { ...this.map(row), passwordHash: row.passwordHash } : null;
   }
@@ -51,26 +56,32 @@ export class PrismaUserRepository implements UserRepository {
 
   async listByRole(): Promise<User[]> {
     const rows = await this.prisma.user.findMany({
-      where: { role: "USER" },
-      orderBy: { createdAt: "desc" },
+      where: { role: 'USER' },
+      orderBy: { createdAt: 'desc' },
     });
     return rows.map((r) => this.map(r));
   }
 
-  async create(data: Parameters<UserRepository["create"]>[0]): Promise<User> {
+  async create(data: Parameters<UserRepository['create']>[0]): Promise<User> {
     const row = await this.prisma.user.create({ data });
     return this.map(row);
   }
 
   async update(
     id: string,
-    patch: Partial<Pick<User, "nom" | "prenom" | "telephone" | "dateNaissance" | "sexe" | "tailleCm">>,
+    patch: Partial<
+      Pick<
+        User,
+        'nom' | 'prenom' | 'telephone' | 'dateNaissance' | 'sexe' | 'tailleCm'
+      >
+    >,
   ): Promise<User> {
     const data: Prisma.UserUpdateInput = {};
     if (patch.nom !== undefined) data.nom = patch.nom;
     if (patch.prenom !== undefined) data.prenom = patch.prenom;
     if (patch.telephone !== undefined) data.telephone = patch.telephone;
-    if (patch.dateNaissance !== undefined) data.dateNaissance = patch.dateNaissance;
+    if (patch.dateNaissance !== undefined)
+      data.dateNaissance = patch.dateNaissance;
     if (patch.sexe !== undefined) data.sexe = patch.sexe;
     if (patch.tailleCm !== undefined) data.tailleCm = patch.tailleCm;
     const row = await this.prisma.user.update({ where: { id }, data });
@@ -86,7 +97,9 @@ export class PrismaUserRepository implements UserRepository {
   }
 
   async prefsOf(userId: string): Promise<NotificationPrefs | null> {
-    const row = await this.prisma.notificationPrefs.findUnique({ where: { userId } });
+    const row = await this.prisma.notificationPrefs.findUnique({
+      where: { userId },
+    });
     if (!row) return null;
     return {
       userId: row.userId,
@@ -97,7 +110,10 @@ export class PrismaUserRepository implements UserRepository {
     };
   }
 
-  async savePrefs(userId: string, prefs: Partial<NotificationPrefs>): Promise<NotificationPrefs> {
+  async savePrefs(
+    userId: string,
+    prefs: Partial<NotificationPrefs>,
+  ): Promise<NotificationPrefs> {
     const defined = Object.fromEntries(
       Object.entries(prefs).filter(([, v]) => v !== undefined),
     ) as Partial<NotificationPrefs>;

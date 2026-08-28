@@ -1,4 +1,7 @@
-export function renderPasswordResetEmail(name: string, resetUrl: string): string {
+export function renderPasswordResetEmail(
+  name: string,
+  resetUrl: string,
+): string {
   return `<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><title>تغيير كلمة المرور</title></head>

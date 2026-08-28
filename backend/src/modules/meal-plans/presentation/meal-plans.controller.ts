@@ -6,21 +6,33 @@ import {
   Post,
   Put,
   UseGuards,
-} from "@nestjs/common";
-import { IsNumber, IsOptional, IsString } from "class-validator";
-import { JwtAuthGuard } from "@/shared/common/guards/jwt-auth.guard";
-import { RolesGuard } from "@/shared/common/guards/roles.guard";
-import { SubscriptionGuard } from "@/shared/common/guards/subscription.guard";
-import { CoachOwnershipGuard } from "@/shared/common/guards/coach-ownership.guard";
-import { TierGuard } from "@/shared/common/guards/tier.guard";
-import { RequireTier } from "@/shared/common/decorators/require-tier.decorator";
-import { Roles } from "@/shared/common/decorators/roles.decorator";
-import { CurrentUser, type AuthUser } from "@/shared/common/decorators/current-user.decorator";
-import { GetPlanUseCase, CreatePlanUseCase, UpdatePlanUseCase, DuplicatePlanUseCase, VersionsUseCase } from "../application/use-cases/meal-plans.use-cases";
-import { MEAL_PLAN_REPOSITORY, type MealPlanRepository } from "@/shared/domain/ports/meal-plan-repository.port";
-import { Inject } from "@nestjs/common";
-import { toMealPlanApi } from "@/shared/mapping/api.mapper";
-import { fail } from "@/shared/common/errors/domain-exception";
+} from '@nestjs/common';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { JwtAuthGuard } from '@/shared/common/guards/jwt-auth.guard';
+import { RolesGuard } from '@/shared/common/guards/roles.guard';
+import { SubscriptionGuard } from '@/shared/common/guards/subscription.guard';
+import { CoachOwnershipGuard } from '@/shared/common/guards/coach-ownership.guard';
+import { TierGuard } from '@/shared/common/guards/tier.guard';
+import { RequireTier } from '@/shared/common/decorators/require-tier.decorator';
+import { Roles } from '@/shared/common/decorators/roles.decorator';
+import {
+  CurrentUser,
+  type AuthUser,
+} from '@/shared/common/decorators/current-user.decorator';
+import {
+  GetPlanUseCase,
+  CreatePlanUseCase,
+  UpdatePlanUseCase,
+  DuplicatePlanUseCase,
+  VersionsUseCase,
+} from '../application/use-cases/meal-plans.use-cases';
+import {
+  MEAL_PLAN_REPOSITORY,
+  type MealPlanRepository,
+} from '@/shared/domain/ports/meal-plan-repository.port';
+import { Inject } from '@nestjs/common';
+import { toMealPlanApi } from '@/shared/mapping/api.mapper';
+import { fail } from '@/shared/common/errors/domain-exception';
 
 export class MealDto {
   @IsOptional() @IsString() jour_semaine?: string;
@@ -72,24 +84,24 @@ export class MealPlansController {
     private readonly versionsUseCase: VersionsUseCase,
   ) {}
 
-  @Get("users/:userId/plan")
-  @RequireTier("ONLINE")
+  @Get('users/:userId/plan')
+  @RequireTier('ONLINE')
   @UseGuards(SubscriptionGuard, TierGuard)
-  async get(@CurrentUser() auth: AuthUser, @Param("userId") userId: string) {
-    const resolved = userId === "me" ? auth.userId : userId;
-    if (auth.role === "USER" && resolved !== auth.userId) {
-      fail(403, "FORBIDDEN", "غير مصرح به");
+  async get(@CurrentUser() auth: AuthUser, @Param('userId') userId: string) {
+    const resolved = userId === 'me' ? auth.userId : userId;
+    if (auth.role === 'USER' && resolved !== auth.userId) {
+      fail(403, 'FORBIDDEN', 'غير مصرح به');
     }
     const plan = await this.getUseCase.execute(resolved);
     return plan ? toMealPlanApi(plan) : null;
   }
 
-  @Post("users/:userId/plan")
-  @Roles("COACH")
+  @Post('users/:userId/plan')
+  @Roles('COACH')
   @UseGuards(RolesGuard)
   async create(
     @CurrentUser() auth: AuthUser,
-    @Param("userId") userId: string,
+    @Param('userId') userId: string,
     @Body() dto: PlanDto,
   ) {
     const plan = await this.createUseCase.execute(auth.userId, userId, {
@@ -104,13 +116,10 @@ export class MealPlansController {
     return toMealPlanApi(plan);
   }
 
-  @Put("users/:userId/plan")
-  @Roles("COACH")
+  @Put('users/:userId/plan')
+  @Roles('COACH')
   @UseGuards(RolesGuard, CoachOwnershipGuard)
-  async update(
-    @Param("userId") userId: string,
-    @Body() dto: PlanDto,
-  ) {
+  async update(@Param('userId') userId: string, @Body() dto: PlanDto) {
     const plan = await this.updateUseCase.execute(userId, {
       titre: dto.titre,
       objectif: dto.objectif,
@@ -123,22 +132,26 @@ export class MealPlansController {
     return toMealPlanApi(plan);
   }
 
-  @Post("users/:userId/plan/duplicate")
-  @Roles("COACH")
+  @Post('users/:userId/plan/duplicate')
+  @Roles('COACH')
   @UseGuards(RolesGuard)
   async duplicate(
     @CurrentUser() auth: AuthUser,
-    @Param("userId") userId: string,
+    @Param('userId') userId: string,
     @Body() dto: DuplicatePlanDto,
   ) {
-    const plan = await this.duplicateUseCase.execute(auth.userId, userId, dto.source_plan_id);
+    const plan = await this.duplicateUseCase.execute(
+      auth.userId,
+      userId,
+      dto.source_plan_id,
+    );
     return toMealPlanApi(plan);
   }
 
-  @Get("users/:userId/plan/versions")
-  @Roles("COACH")
+  @Get('users/:userId/plan/versions')
+  @Roles('COACH')
   @UseGuards(RolesGuard, CoachOwnershipGuard)
-  async versions(@Param("userId") userId: string) {
+  async versions(@Param('userId') userId: string) {
     const versions = await this.versionsUseCase.execute(userId);
     return versions.map((v) => ({
       version: v.version,
@@ -147,8 +160,8 @@ export class MealPlansController {
     }));
   }
 
-  @Get("plans/templates")
-  @Roles("COACH")
+  @Get('plans/templates')
+  @Roles('COACH')
   @UseGuards(RolesGuard)
   async templates() {
     const rows = await this.plans.templates();
