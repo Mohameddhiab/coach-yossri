@@ -466,55 +466,6 @@ function ResultsSection() {
   );
 }
 
-function B2BSection() {
-  const items = [
-    { icon: Users, text: "أعضاء واشتراكات — تتبع كامل بالدينار" },
-    { icon: Trophy, text: "تصنيف وتحديات أسبوعية بين الأعضاء" },
-    { icon: MessageCircle, text: "محادثة مباشرة مع كل عضو" },
-  ];
-  return (
-    <section id="b2b" className="scroll-mt-20 py-14">
-      <Reveal>
-        <Card className="overflow-hidden border-primary/25 bg-gradient-to-l from-primary/10 to-transparent">
-          <CardContent className="grid gap-6 p-6 lg:grid-cols-2 lg:items-center">
-            <div className="space-y-3">
-              <span className="text-xs font-black uppercase tracking-[0.3em] text-primary/70">
-                B2B / لأصحاب القاعات
-              </span>
-              <h3 className="text-2xl font-black">أدِر قاعتك بنظام متكامل</h3>
-              <p className="text-sm leading-relaxed text-muted-foreground">
-                نفس التطبيق الذي أستخدمه مع أعضائي — لوحة تحكم للمدرب: اشتراكات، حضور،
-                خطط، تصنيف ومتابعة. كل شيء في مكان واحد.
-              </p>
-              <div className="flex flex-wrap gap-3 pt-1">
-                <Button asChild>
-                  <Link href="/login">
-                    <LayoutDashboard />
-                    دخول لوحة المدرب
-                  </Link>
-                </Button>
-              </div>
-            </div>
-            <div className="grid gap-2 sm:grid-cols-2">
-              {items.map((item) => (
-                <div
-                  key={item.text}
-                  className="flex items-center gap-2.5 rounded-xl border bg-background/60 p-3 text-sm"
-                >
-                  <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                    <item.icon className="size-4" />
-                  </span>
-                  <span className="font-medium leading-snug">{item.text}</span>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </Reveal>
-    </section>
-  );
-}
-
 function PricingSection({ whatsappUrl }: { whatsappUrl: string }) {
   const waFor = (plan: LandingPlan) =>
     `${whatsappUrl}?text=${encodeURIComponent(
@@ -972,56 +923,7 @@ export function LandingPage() {
         <ComparisonSection />
         <FaqSection />
 
-        {/* CONTACT */}
-        <section id="contact" className="scroll-mt-20 space-y-6 py-14">
-          <SectionTitle icon={<Phone className="size-5" />}>تواصل معنا</SectionTitle>
-          <Reveal>
-            <Card>
-              <CardContent className="space-y-3 p-5 sm:p-6">
-                <div className="flex items-center gap-3">
-                  <Phone className="size-4 text-primary" />
-                  <a
-                    href={`tel:${contact.phone.replace(/\s/g, "")}`}
-                    dir="ltr"
-                    className="font-semibold transition-colors hover:text-primary"
-                  >
-                    {contact.phone}
-                  </a>
-                </div>
-                <div className="flex items-center gap-3">
-                  <MessageCircle className="size-4 text-primary" />
-                  <a
-                    href={whatsappUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    dir="ltr"
-                    className="font-semibold transition-colors hover:text-primary"
-                  >
-                    {contact.phone}
-                  </a>
-                </div>
-                <div className="flex items-center gap-3">
-                  <MapPin className="size-4 text-primary" />
-                  <span>{contact.address}</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Clock className="size-4 text-primary" />
-                  <span>{contact.hours}</span>
-                </div>
-                <Button asChild className="mt-2 w-full" size="lg">
-                  <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
-                    <MessageCircle />
-                    تواصل عبر واتساب
-                  </a>
-                </Button>
-              </CardContent>
-            </Card>
-          </Reveal>
-        </section>
-
         <FinalCta whatsappUrl={whatsappUrl} />
-
-        <B2BSection />
       </main>
 
       <footer className="border-t py-8 text-center text-sm text-muted-foreground">
