@@ -27,8 +27,8 @@ export function ChallengeCard({ coach = false }: { coach?: boolean }) {
         </CardTitle>
         <CardDescription>
           {coach
-            ? "عدد حصص الشهر المسجّلة هذا الأسبوع لكل عضو"
-            : "سجّلت حصتك هذا الأسبوع؟ شوف وين انت في الترتيب"}
+            ? "عدد الحصص المسجلة هذا الأسبوع لكل عضو"
+            : "سجلت حصتك هذا الأسبوع؟ اطلع على ترتيبك"}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-2">
@@ -46,7 +46,7 @@ export function ChallengeCard({ coach = false }: { coach?: boolean }) {
             title="لا يوجد ترتيب بعد"
             description={
               coach
-                ? "الهدف الشهري يغذّي الترتيب — حصص هذا الأسبوع تتصنّفو أوتوماتيك."
+                ? "الهدف الشهري يغذي الترتيب — حصص هذا الأسبوع تُصنف تلقائياً."
                 : "سجل حضورك في القاعة لتظهر في الترتيب."
             }
           />
