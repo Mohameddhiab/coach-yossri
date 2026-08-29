@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,6 +13,7 @@ import {
   Copy,
   Dumbbell,
   Edit3,
+  FileDown,
   KeyRound,
   Mail,
   Phone,
@@ -68,7 +69,9 @@ import { WeightTargetCard } from "@/features/progress/components/weight-target-c
 import { PhotoGallery } from "@/features/progress/components/photo-gallery";
 import { MacrosCards } from "@/features/meal-plans/components/macros-cards";
 import { MealPlanDayView } from "@/features/meal-plans/components/meal-plan-day-view";
+import { PlanPdfDocument, downloadPlanPdf } from "@/features/meal-plans/components/plan-pdf";
 import { WorkoutPlanDayView } from "@/features/workout-plans/components/workout-plan-day-view";
+import { WorkoutPlanPdfDocument, downloadWorkoutPdf } from "@/features/workout-plans/components/workout-plan-pdf";
 import { useWorkoutPlan } from "@/features/workout-plans/hooks/useWorkoutPlan";
 import { FollowUpCoachCard } from "@/features/follow-ups/components/follow-up-coach-card";
 import {
@@ -135,6 +138,9 @@ export default function UserDetailPage() {
 
   const [editOpen, setEditOpen] = useState(false);
   const [passwordResult, setPasswordResult] = useState<string | null>(null);
+  const [pdfBusy, setPdfBusy] = useState<"meal" | "workout" | null>(null);
+  const mealPdfRef = useRef<HTMLDivElement>(null);
+  const workoutPdfRef = useRef<HTMLDivElement>(null);
 
   const editForm = useForm<EditValues>({
     resolver: zodResolver(editSchema),
@@ -197,6 +203,33 @@ export default function UserDetailPage() {
       setPasswordResult(res.password);
     } catch {
       toast.error("تعذر تغيير كلمة المرور — حاول مرة أخرى");
+    }
+  };
+
+  const handlePdfDownload = async (kind: "meal" | "workout") => {
+    const el =
+      kind === "meal"
+        ? (mealPdfRef.current?.firstElementChild as HTMLElement | null)
+        : (workoutPdfRef.current?.firstElementChild as HTMLElement | null);
+    if (!el || (kind === "meal" ? !plan : !workout)) return;
+    setPdfBusy(kind);
+    try {
+      if (kind === "meal") {
+        await downloadPlanPdf(
+          el,
+          `plan-${plan!.titre.replace(/\s+/g, "-")}-${new Date().toISOString().slice(0, 10)}.pdf`,
+        );
+      } else {
+        await downloadWorkoutPdf(
+          el,
+          `workout-${workout!.titre.replace(/\s+/g, "-")}-${new Date().toISOString().slice(0, 10)}.pdf`,
+        );
+      }
+      toast.success("تم تحميل PDF");
+    } catch {
+      toast.error("تعذر تحويل ملف PDF — حاول مرة أخرى");
+    } finally {
+      setPdfBusy(null);
     }
   };
 
@@ -552,9 +585,25 @@ export default function UserDetailPage() {
                     <span className="text-xs">الإصدار {workout.version}</span>
                   </CardDescription>
                 </div>
-                <Button asChild>
-                  <Link href={`/users/${userId}/exercices`}>تعديل التمارين</Link>
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handlePdfDownload("workout")}
+                    disabled={pdfBusy === "workout"}
+                    className="gap-1.5"
+                  >
+                    {pdfBusy === "workout" ? (
+                      <span className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                    ) : (
+                      <FileDown className="size-4" />
+                    )}
+                    PDF تمارين
+                  </Button>
+                  <Button asChild>
+                    <Link href={`/users/${userId}/exercices`}>تعديل التمارين</Link>
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <WorkoutPlanDayView day={todayWeekDay()} exercises={workout.exercises} />
@@ -584,9 +633,25 @@ export default function UserDetailPage() {
                       <span className="text-xs">الإصدار {plan.version}</span>
                     </CardDescription>
                   </div>
-                  <Button asChild>
-                    <Link href={`/users/${userId}/plan`}>تعديل الخطة</Link>
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handlePdfDownload("meal")}
+                      disabled={pdfBusy === "meal"}
+                      className="gap-1.5"
+                    >
+                      {pdfBusy === "meal" ? (
+                        <span className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                      ) : (
+                        <FileDown className="size-4" />
+                      )}
+                      PDF وجبات
+                    </Button>
+                    <Button asChild>
+                      <Link href={`/users/${userId}/plan`}>تعديل الخطة</Link>
+                    </Button>
+                  </div>
                 </CardHeader>
               </Card>
               <MacrosCards
@@ -619,6 +684,25 @@ export default function UserDetailPage() {
           )}
         </TabsContent>
       </Tabs>
+
+      {plan && (
+        <div
+          ref={mealPdfRef}
+          aria-hidden="true"
+          className="pointer-events-none fixed inset-x-0 top-0 -z-10 opacity-0"
+        >
+          <PlanPdfDocument plan={plan} logs={weightLogs ?? []} target={null} goal={goal ?? null} />
+        </div>
+      )}
+      {workout && (
+        <div
+          ref={workoutPdfRef}
+          aria-hidden="true"
+          className="pointer-events-none fixed inset-x-0 top-0 -z-10 opacity-0"
+        >
+          <WorkoutPlanPdfDocument plan={workout} />
+        </div>
+      )}
 
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
         <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">

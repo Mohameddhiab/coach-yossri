@@ -8,6 +8,7 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { Copy, Loader2, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ApiError } from "@/shared/lib/api-client";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -25,30 +26,30 @@ import { OFFRES, type SubscriptionTier } from "@/shared/lib/domain";
 
 const schema = z
   .object({
-    prenom: z.string().min(1, "الاسم الأول خاطي"),
-    nom: z.string().min(1, "اللقب خاطي"),
-    email: z.string().email("البريد الإلكتروني ما صحيحش"),
+    prenom: z.string().min(1, "الاسم الأول غير صحيح"),
+    nom: z.string().min(1, "اسم العائلة غير صحيح"),
+    email: z.string().email("البريد الإلكتروني غير صحيح"),
     telephone: z
       .string()
-      .regex(/^[\d+\s]{8,}$/, "رقم الهاتف لازم يكون 8 أرقام على الأقل"),
+      .regex(/^[\d+\s]{8,}$/, "يجب أن يتكون رقم الهاتف من ٨ أرقام على الأقل"),
     tier: z.string().optional(),
     date_debut: z.string().optional(),
     date_fin: z.string().optional(),
-    montant: z.coerce.number().min(1, "المبلغ لازم يكون أكثر من 0").optional(),
+    montant: z.coerce.number().min(1, "يجب أن يكون المبلغ أكبر من صفر").optional(),
     referred_by: z.string().optional(),
   })
   .superRefine((v, ctx) => {
     if (Boolean(v.date_debut) !== Boolean(v.date_fin)) {
       ctx.addIssue({
         code: "custom",
-        message: "دخّل التاريخين مع بعض ولا خليهم فارغين",
+        message: "يُرجى إدخال تاريخي البداية والنهاية معًا أو تركهما فارغين",
         path: ["date_fin"],
       });
     }
     if (v.date_debut && v.date_fin && new Date(v.date_fin) <= new Date(v.date_debut)) {
       ctx.addIssue({
         code: "custom",
-        message: "تاريخ النهاية لازم يكون بعد البداية",
+        message: "يجب أن يكون تاريخ النهاية بعد تاريخ البداية",
         path: ["date_fin"],
       });
     }
@@ -81,17 +82,17 @@ export function CreateUserForm({ onDone }: { onDone?: () => void }) {
 
   const pickTier = (t: SubscriptionTier) => {
     form.setValue("tier", t);
-    const o = OFFRES.find((x) => x.tier === t)!;
-    form.setValue("montant", o.prix);
+    const o = OFFRES.find((x) => x.tier === t) ?? OFFRES[0];
+    if (o) form.setValue("montant", o.prix);
   };
 
   const onSubmit = async (values: FormValues) => {
     try {
       const res = await createUser.mutateAsync({
-        prenom: values.prenom,
-        nom: values.nom,
-        email: values.email,
-        telephone: values.telephone,
+        prenom: values.prenom.trim(),
+        nom: values.nom.trim(),
+        email: values.email.trim().toLowerCase(),
+        telephone: values.telephone.trim(),
         referred_by:
           values.referred_by && values.referred_by !== "none" ? values.referred_by : null,
         tier: values.tier,
@@ -100,12 +101,23 @@ export function CreateUserForm({ onDone }: { onDone?: () => void }) {
         montant: values.montant,
         date_naissance: null,
       });
+      if (!res?.password || !res?.user?.id) {
+        throw new Error("الخادم لم يرجع كلمة المرور — تحقق من الاتصال وحاول مرة أخرى");
+      }
       setCreatedUserId(res.user.id);
       setGenerated(res.password);
       queryClient.invalidateQueries({ queryKey: ["users"] });
-      toast.success("تصيّر الحساب بنجاح");
-    } catch {
-      toast.error("تعذر نصيّر الحساب — تحقق من المعلومات وحاول مرة أخرى");
+      toast.success("تم إنشاء الحساب بنجاح — كلمة المرور بالأسفل");
+    } catch (err) {
+      const msg =
+        err instanceof ApiError
+          ? err.code === "EMAIL_TAKEN"
+            ? "هذا البريد موجود مسبقاً — استخدم بريداً آخر"
+            : err.message
+          : err instanceof Error
+            ? err.message
+            : "تعذّر إنشاء الحساب — يُرجى التحقق من المعلومات والمحاولة مرة أخرى";
+      toast.error(msg);
     }
   };
 
@@ -113,7 +125,7 @@ export function CreateUserForm({ onDone }: { onDone?: () => void }) {
     return (
       <div className="space-y-4 text-center">
         <div className="text-sm text-muted-foreground">
-          تصيّر الحساب. هاك كلمة السر المولّدة — سلّمها للعضو (تظهر مرة وحدة فقط):
+          تم إنشاء الحساب. هذه هي كلمة المرور المُنشأة — يُرجى تسليمها للمشترك (تظهر مرة واحدة فقط):
         </div>
         <div className="mx-auto flex max-w-sm items-center gap-2 rounded-xl border border-primary/40 bg-primary/10 p-3">
           <code dir="ltr" className="flex-1 text-lg font-bold tracking-wider text-primary">
@@ -122,10 +134,10 @@ export function CreateUserForm({ onDone }: { onDone?: () => void }) {
           <Button
             size="sm"
             variant="ghost"
-            aria-label="انسخ كلمة السر"
+            aria-label="نسخ كلمة المرور"
             onClick={() => {
               navigator.clipboard.writeText(generated);
-              toast.success("تنسخ");
+              toast.success("تم النسخ");
             }}
           >
             <Copy />
@@ -133,7 +145,7 @@ export function CreateUserForm({ onDone }: { onDone?: () => void }) {
         </div>
         <div className="flex flex-col justify-center gap-2 sm:flex-row">
           <Button asChild>
-            <Link href={`/users/${createdUserId}`}>اذهب لملف العضو</Link>
+            <Link href={`/users/${createdUserId}`}>الانتقال إلى ملف المشترك</Link>
           </Button>
           <Button
             variant="outline"
@@ -144,7 +156,7 @@ export function CreateUserForm({ onDone }: { onDone?: () => void }) {
               onDone?.();
             }}
           >
-            أضف عضو آخر
+            إضافة مشترك آخر
           </Button>
         </div>
       </div>
@@ -173,7 +185,7 @@ export function CreateUserForm({ onDone }: { onDone?: () => void }) {
             name="nom"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>اللقب</FormLabel>
+                <FormLabel>اسم العائلة</FormLabel>
                 <FormControl>
                   <Input placeholder="الجبالي" {...field} />
                 </FormControl>
@@ -210,7 +222,7 @@ export function CreateUserForm({ onDone }: { onDone?: () => void }) {
         />
         <div className="rounded-xl border border-dashed p-3">
           <div className="mb-2 flex items-center justify-between">
-            <span className="text-sm font-medium">جيب صاحبك (اختياري)</span>
+            <span className="text-sm font-medium">الإحالة (اختياري)</span>
           </div>
           <FormField
             control={form.control}
@@ -220,11 +232,11 @@ export function CreateUserForm({ onDone }: { onDone?: () => void }) {
                 <Select value={field.value || "none"} onValueChange={field.onChange}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="من جاب هذا العضو؟" />
+                      <SelectValue placeholder="تمت الإحالة بواسطة" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="none">بدون — عضو جديد</SelectItem>
+                    <SelectItem value="none">بدون إحالة — مشترك جديد</SelectItem>
                     {members?.map((m) => (
                       <SelectItem key={m.id} value={m.id}>
                         {m.prenom} {m.nom}
@@ -272,7 +284,7 @@ export function CreateUserForm({ onDone }: { onDone?: () => void }) {
           <div className="mb-2 flex items-center justify-between">
             <span className="text-sm font-medium">اشتراك أولي (اختياري)</span>
             <Badge variant="outline" className="text-xs">
-              نقداً — برّا التطبيق
+              نقدًا — خارج التطبيق
             </Badge>
           </div>
           <div className="grid gap-3 sm:grid-cols-3">
@@ -319,7 +331,7 @@ export function CreateUserForm({ onDone }: { onDone?: () => void }) {
         </div>
         <Button type="submit" disabled={createUser.isPending} className="w-full">
           {createUser.isPending && <Loader2 className="animate-spin" />}
-          صيّر الحساب
+          إنشاء الحساب
         </Button>
       </form>
     </Form>
