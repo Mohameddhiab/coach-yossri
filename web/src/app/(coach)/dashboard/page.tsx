@@ -23,10 +23,9 @@ import { AlertsMiniList } from "@/features/dashboard/components/alerts-mini-list
 import { TierDistributionCard } from "@/features/dashboard/components/tier-distribution-card";
 import { UnreadMessagesCard } from "@/features/dashboard/components/unread-messages-card";
 import { TodayAttendanceCard } from "@/features/check-ins/components/today-attendance-card";
+import { useSummary, useGrowth } from "@/features/stats/hooks/useStats";
 import { useUsers } from "@/features/users/hooks/useUsers";
 import { useAuth } from "@/shared/lib/auth-context";
-import { getSubscriptionStatus } from "@/shared/lib/domain";
-import { payingRevenue } from "@/shared/lib/insights";
 
 function ClickableStat({
   href,
@@ -44,11 +43,13 @@ function ClickableStat({
 
 export default function DashboardPage() {
   const { user } = useAuth();
-  const { data: users, isLoading } = useUsers("", "TOUS");
+  const { data: summary, isLoading: loadingSummary } = useSummary();
+  const { data: growth, isLoading: loadingGrowth } = useGrowth(12);
+  const { data: users } = useUsers("", "TOUS");
 
-  if (isLoading) return <PageLoader />;
+  if (loadingSummary || loadingGrowth || !summary || !growth) return <PageLoader />;
 
-  if (!users?.length) {
+  if (summary.total === 0) {
     return (
       <div className="space-y-6">
         <PageHeader
@@ -79,13 +80,12 @@ export default function DashboardPage() {
     );
   }
 
-  const actif = users.filter((u) =>
-    getSubscriptionStatus(u.subscription) === "ACTIF",
-  ).length;
-  const bientot = users.filter(
-    (u) => getSubscriptionStatus(u.subscription) === "EXPIRE_BIENTOT",
-  ).length;
-  const revenue = payingRevenue(users);
+  const actif = summary.actifs;
+  const bientot = summary.expirant7j;
+  const revenue = {
+    total: summary.revenue_mensuel,
+    payers: summary.membres_actifs,
+  };
 
   // Time of day greeting
   const hour = new Date().getHours();
@@ -149,7 +149,7 @@ export default function DashboardPage() {
         <ClickableStat
           href="/users"
           label="إجمالي الأعضاء"
-          value={users.length}
+          value={summary.total}
           icon={<Users className="size-6" />}
           hint={
             <span className="flex items-center gap-1">
@@ -189,20 +189,20 @@ export default function DashboardPage() {
       </div>
 
       {/* Quick Attendance Widget */}
-      <TodayAttendanceCard users={users} />
+      <TodayAttendanceCard activeCount={summary.membres_actifs} />
 
       {/* Analytics Charts Grid */}
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
-          <MemberGrowthChart users={users} />
+          <MemberGrowthChart growth={growth} />
         </div>
-        <SubscriptionStatusChart users={users} />
+        <SubscriptionStatusChart summary={summary} />
       </div>
 
       {/* Actionable Insights Row */}
       <div className="grid gap-6 lg:grid-cols-3">
-        <TierDistributionCard users={users} />
-        <AlertsMiniList users={users} />
+        <TierDistributionCard users={users ?? []} />
+        <AlertsMiniList users={users ?? []} />
         <UnreadMessagesCard />
       </div>
     </div>

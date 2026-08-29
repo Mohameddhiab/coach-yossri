@@ -7,7 +7,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { EmptyState } from "@/shared/components/empty-state";
 import { UserAvatar } from "@/shared/components/user-avatar";
 import { useTodayCheckIns } from "@/features/check-ins/hooks/useCheckIns";
-import { getSubscriptionStatus, type UserWithSubscription } from "@/shared/lib/domain";
 
 function timeOf(iso: string) {
   return new Date(iso).toLocaleTimeString("fr-FR", {
@@ -22,15 +21,12 @@ function splitName(full: string): [string, string] {
 }
 
 export function TodayAttendanceCard({
-  users,
+  activeCount,
 }: {
-  users: UserWithSubscription[];
+  activeCount: number;
 }) {
   const { data: checkins } = useTodayCheckIns(30000);
   const rows = [...(checkins ?? [])].sort((a, b) => b.checked_at.localeCompare(a.checked_at));
-  const activeCount = users.filter((u) =>
-    ["ACTIF", "EXPIRE_BIENTOT"].includes(getSubscriptionStatus(u.subscription)),
-  ).length;
 
   return (
     <Card>

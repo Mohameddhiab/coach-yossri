@@ -15,8 +15,7 @@ import {
   YAxis,
 } from "recharts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import type { UserWithSubscription } from "@/shared/lib/domain";
-import { getSubscriptionStatus } from "@/shared/lib/domain";
+import type { StatsGrowthRow, StatsSummary } from "@/features/stats/api/stats.api";
 
 const STATUS_META: { key: string; label: string; color: string }[] = [
   { key: "ACTIF", label: "نشط", color: "#10b981" },
@@ -24,27 +23,21 @@ const STATUS_META: { key: string; label: string; color: string }[] = [
   { key: "EXPIRE", label: "منتهي", color: "#ef4444" },
 ];
 
-export function MemberGrowthChart({ users }: { users: UserWithSubscription[] }) {
-  const data = useMemo(() => {
-    const now = new Date();
-    const buckets = new Map<string, number>();
-    for (let i = 11; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      buckets.set(`${d.getFullYear()}-${d.getMonth()}`, 0);
-    }
-    for (const u of users) {
-      const d = new Date(u.created_at);
-      const key = `${d.getFullYear()}-${d.getMonth()}`;
-      if (buckets.has(key)) buckets.set(key, (buckets.get(key) ?? 0) + 1);
-    }
-    let cumul = 0;
-    return Array.from(buckets.entries()).map(([key, count]) => {
-      cumul += count;
-      const [y, m] = key.split("-").map(Number);
-      const label = new Date(y, m, 1).toLocaleDateString("ar-TN", { month: "short" });
-      return { label, membres: cumul, ajouts: count };
-    });
-  }, [users]);
+function monthLabel(key: string): string {
+  const [y, m] = key.split("-").map(Number);
+  return new Date(y, m - 1, 1).toLocaleDateString("ar-TN", { month: "short" });
+}
+
+export function MemberGrowthChart({ growth }: { growth: StatsGrowthRow[] }) {
+  const data = useMemo(
+    () =>
+      growth.map((r) => ({
+        label: monthLabel(r.mois),
+        membres: r.cumul,
+        ajouts: r.nouveaux,
+      })),
+    [growth],
+  );
 
   return (
     <Card>
@@ -89,15 +82,17 @@ export function MemberGrowthChart({ users }: { users: UserWithSubscription[] }) 
   );
 }
 
-export function SubscriptionStatusChart({ users }: { users: UserWithSubscription[] }) {
-  const data = useMemo(() => {
-    const counts = new Map<string, number>();
-    for (const u of users) {
-      const status = getSubscriptionStatus(u.subscription);
-      counts.set(status, (counts.get(status) ?? 0) + 1);
-    }
-    return STATUS_META.map((s) => ({ name: s.label, value: counts.get(s.key) ?? 0, color: s.color }));
-  }, [users]);
+export function SubscriptionStatusChart({ summary }: { summary: StatsSummary }) {
+  const data = STATUS_META.map((s) => ({
+    name: s.label,
+    value:
+      s.key === "ACTIF"
+        ? summary.actifs
+        : s.key === "EXPIRE_BIENTOT"
+          ? summary.expirant7j
+          : summary.expires,
+    color: s.color,
+  }));
 
   const total = data.reduce((sum, d) => sum + d.value, 0);
 

@@ -19,6 +19,7 @@ import { getPlan } from "@/features/meal-plans/api/mealPlans.api";
 import { getMySubscription } from "@/features/subscriptions/api/subscriptions.api";
 import { isSubscriptionExpiredError } from "@/shared/lib/api-client";
 import { useGoal } from "@/features/goals/hooks/useGoals";
+import { useMyStats } from "@/features/stats/hooks/useStats";
 import { currentStreak } from "@/features/goals/lib/streak";
 import { formatDate } from "@/lib/utils";
 import { cn } from "@/lib/utils";
@@ -51,6 +52,7 @@ export default function MyProgressPage() {
   });
 
   const { data: goal } = useGoal("me");
+  const { data: stats } = useMyStats();
 
   if (isLoading) return <PageLoader rows={2} />;
 
@@ -84,7 +86,7 @@ export default function MyProgressPage() {
                 name={`${me?.user.prenom ?? ""} ${me?.user.nom ?? ""}`.trim()}
                 deltaKg={diff}
                 streak={currentStreak(goal?.checkins ?? [])}
-                badgesCount={0}
+                badgesCount={stats?.engaged_badges.length ?? 0}
                 currentWeight={last?.poids_kg ?? null}
               />
             )}

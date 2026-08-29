@@ -8,7 +8,7 @@ export default function ClassificationPage() {
     <div className="space-y-6">
       <PageHeader
         title="التصنيف"
-        description="ترتيب الأعضاء حسب حضور الحصص هذا الأسبوع"
+        description="ترتيب الأعضاء حسب حضور الحصص — اختر الفترة"
       />
       <ChallengeCard coach />
     </div>

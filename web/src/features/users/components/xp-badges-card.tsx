@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { CircularProgress } from "@/components/ui/circular-progress";
 import { useGoal } from "@/features/goals/hooks/useGoals";
 import { useWeightLogs } from "@/features/progress/hooks/useProgress";
 import { useMySubscription } from "@/features/subscriptions/hooks/useSubscriptions";
@@ -98,23 +99,28 @@ export function XpBadgesCard() {
             <span className="font-bold text-foreground">{xp.level.label}</span>
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-2">
-          <div className="flex items-center justify-between text-sm">
-            <span className="font-bold tabular-nums text-primary">{xp.xp} نقطة</span>
-            {xp.next ? (
-              <span className="text-xs text-muted-foreground">
-                المستوى التالي ({xp.next.label}) بعد {xp.xpForNext - xp.xpIntoLevel} نقطة
-              </span>
-            ) : (
-              <span className="text-xs font-semibold text-amber-500">أعلى مستوى! 👑</span>
-            )}
+        <CardContent className="flex items-center justify-between gap-4">
+          <div className="flex-1 space-y-2">
+            <div className="flex items-center justify-between gap-2 text-sm">
+              <span className="font-bold tabular-nums text-primary">{xp.xp} نقطة</span>
+              {xp.next ? (
+                <span className="text-xs text-muted-foreground">
+                  المستوى التالي ({xp.next.label}) بعد {xp.xpForNext - xp.xpIntoLevel} نقطة
+                </span>
+              ) : (
+                <span className="text-xs font-semibold text-amber-500">أعلى مستوى! 👑</span>
+              )}
+            </div>
+            <div className="h-2.5 overflow-hidden rounded-full bg-muted">
+              <div
+                className="h-full rounded-full bg-gradient-to-l from-primary to-amber-400 transition-all duration-700"
+                style={{ width: `${xp.progress}%` }}
+              />
+            </div>
           </div>
-          <div className="h-2.5 overflow-hidden rounded-full bg-muted">
-            <div
-              className="h-full rounded-full bg-gradient-to-l from-primary to-amber-400 transition-all duration-700"
-              style={{ width: `${xp.progress}%` }}
-            />
-          </div>
+          <CircularProgress value={xp.progress} size={72} strokeWidth={7}>
+            <span className="text-sm font-black tabular-nums text-primary">{xp.progress}%</span>
+          </CircularProgress>
         </CardContent>
       </Card>
 
