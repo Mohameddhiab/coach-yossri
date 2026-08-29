@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/shared/lib/api-client";
+import type { ChallengeLeaderboard } from "@/features/goals/hooks/useGoals";
 import type {
   CoachNote,
   CoachSettings,
@@ -228,6 +229,9 @@ export function useCoachLeaderboard() {
   return useQuery({
     queryKey: ["challenge", "leaderboard"],
     queryFn: () =>
-      apiClient<{ count: number; pseudo: string }[]>("GET", "/challenge/leaderboard"),
+      apiClient<ChallengeLeaderboard>(
+        "GET",
+        "/challenge/leaderboard?period=7",
+      ),
   });
 }

@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useChallengeLeaderboard, useCheckinGoal, useGoal } from "@/features/goals/hooks/useGoals";
+import type { LeaderboardPeriod } from "@/features/goals/hooks/useGoals";
 import {
   addWeightLog,
   clearPendingWeights,
@@ -15,12 +16,14 @@ import {
   useWeightLogs,
   useWeightTarget,
 } from "@/features/progress/hooks/useProgress";
+import { useMyStats } from "@/features/stats/hooks/useStats";
 import { isSubscriptionExpiredError } from "@/shared/lib/api-client";
 import {
   currentStreak,
   estimateTargetDate,
   isCheckedToday,
   maxStreakOf,
+  projectWeight,
   targetProgress,
 } from "@/shared/lib/insights";
 import { formatDate } from "@/shared/lib/storage";
@@ -31,6 +34,7 @@ import { Input } from "@/components/ui/input";
 import { EmptyState, Loader } from "@/components/ui/loader";
 import { ProgressRing } from "@/components/ui/progress-ring";
 import { Screen } from "@/components/ui/screen";
+import { Segmented } from "@/components/ui/segmented";
 import { useTheme } from "@/components/ui/theme";
 import { WeightChart } from "@/components/ui/weight-chart";
 import { ExpiredScreen } from "@/components/expired-screen";
@@ -67,6 +71,7 @@ export default function ProgressionScreen() {
       <WeightSection />
       <TargetSection />
       <GoalSection />
+      <PerformanceSection />
       <ChallengeSection />
     </Screen>
   );
@@ -88,6 +93,7 @@ function WeightSection() {
     () => [...(logs ?? [])].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
     [logs],
   );
+  const projection = useMemo(() => projectWeight(sorted, 28), [sorted]);
 
   const queryClient = useQueryClient();
 
@@ -138,6 +144,22 @@ function WeightSection() {
       ) : (
         <EmptyState title="سجّل قياس وزنك الأول" description="أضف وزنك اليوم وابدأ بمتابعة تقدمك." />
       )}
+
+      {projection ? (
+        <View style={[styles.projectionRow, { backgroundColor: colors.primarySoft }]}>
+          <View style={{ flex: 1, gap: 2 }}>
+            <Text style={[styles.projectionLabel, { color: colors.muted }]}>التوقعات بوتيرتك الحالية</Text>
+            <Text style={[styles.projectionValue, { color: colors.primary }]}>
+              ~{projection.projected} كغم
+              <Text style={{ color: colors.muted }}> خلال {projection.daysAhead} يومًا</Text>
+            </Text>
+          </View>
+          <Text style={[styles.projectionDelta, { color: colors.muted }]}>
+            {projection.slopePerWeek > 0 ? "+" : ""}
+            {projection.slopePerWeek} كغم/أسبوع
+          </Text>
+        </View>
+      ) : null}
 
       <View style={styles.addRow}>
         <Input
@@ -354,20 +376,106 @@ function GoalSection() {
   );
 }
 
+/* ---------------------- الأداء والإنجازات ---------------------- */
+
+function PerformanceSection() {
+  const { colors } = useTheme();
+  const { data: stats, isLoading } = useMyStats();
+  if (isLoading || !stats) return null;
+
+  const { xp, badges, engagement, fidelity } = stats;
+  const unlocked = badges.filter((b) => b.unlocked).length;
+  const engColor =
+    engagement.color === "green"
+      ? colors.success
+      : engagement.color === "amber"
+        ? "#F59E0B"
+        : colors.destructive;
+  const xpProgress = Math.min(100, Math.max(0, xp.progress));
+  const toNext = Math.max(0, xp.xpForNext - xp.xpIntoLevel);
+
+  return (
+    <Card>
+      <Text style={[styles.cardTitle, { color: colors.text }]}>الأداء والإنجازات</Text>
+      <View style={styles.perfRow}>
+        <View style={styles.perfCol}>
+          <Text style={[styles.perfValue, { color: colors.primary }]}>{xp.xp}</Text>
+          <Text style={[styles.perfLabel, { color: colors.muted }]}>
+            نقطة — {xp.level.label}
+          </Text>
+        </View>
+        <View style={styles.perfCol}>
+          <Text style={[styles.perfValue, { color: engColor }]}>{engagement.label}</Text>
+          <Text style={[styles.perfLabel, { color: colors.muted }]}>
+            الالتزام ({engagement.score}/100)
+          </Text>
+        </View>
+        <View style={styles.perfCol}>
+          <Text style={[styles.perfValue, { color: colors.accent }]}>
+            {unlocked}/{badges.length}
+          </Text>
+          <Text style={[styles.perfLabel, { color: colors.muted }]}>الأوسمة</Text>
+        </View>
+      </View>
+      <Text style={[styles.perfMeta, { color: colors.muted }]}>
+        {xp.next
+          ? `المستوى التالي (${xp.next.label}) بعد ${toNext} نقطة`
+          : "أعلى مستوى تحقق! 👑"}
+      </Text>
+      <View style={[styles.xpTrack, { backgroundColor: colors.border }]}>
+        <View
+          style={[
+            styles.xpFill,
+            { width: `${xpProgress}%`, backgroundColor: colors.primary },
+          ]}
+        />
+      </View>
+      {fidelity.level ? (
+        <Text style={[styles.perfMeta, { color: colors.muted }]}>
+          عضو {fidelity.level} · {fidelity.months} شهر من العضوية
+        </Text>
+      ) : null}
+    </Card>
+  );
+}
+
 /* --------------------------- التحدي --------------------------- */
+
+const PERIODS: { value: LeaderboardPeriod; label: string }[] = [
+  { value: "7", label: "7 أيام" },
+  { value: "30", label: "30 يوم" },
+  { value: "all", label: "الكل" },
+];
 
 function ChallengeSection() {
   const { colors } = useTheme();
-  const { data: rows, isLoading } = useChallengeLeaderboard();
+  const [period, setPeriod] = useState<LeaderboardPeriod>("7");
+  const { data, isLoading } = useChallengeLeaderboard(period);
   if (isLoading) return <Loader />;
-  if (!rows || rows.length === 0) return null;
+
+  const rows = data?.top ?? [];
+  const my_rank = data?.my_rank ?? null;
+  if (rows.length === 0 && !my_rank) return null;
 
   const medals = ["🥇", "🥈", "🥉"];
   return (
     <Card>
-      <Text style={[styles.cardTitle, { color: colors.text }]}>تحدي الأسبوع</Text>
+      <View style={styles.challengeHeader}>
+        <Text style={[styles.cardTitle, { color: colors.text }]}>تحدي الحضور</Text>
+        {my_rank ? (
+          <Text style={[styles.challengeRank, { color: colors.primary }]}>
+            ترتيبك: #{my_rank.rank}
+            <Text style={{ color: colors.muted }}> ({my_rank.count} حصة)</Text>
+          </Text>
+        ) : null}
+      </View>
+      <Segmented
+        items={PERIODS.map((p) => ({ value: p.value, label: p.label }))}
+        value={period}
+        onChange={(v) => setPeriod(v as LeaderboardPeriod)}
+      />
       {rows.map((row, i) => (
-        <View key={i} style={[styles.challengeRow, { borderBottomColor: colors.border }]}>
+        <View key={`${row.pseudo}-${i}`} style={[styles.challengeRow, { borderBottomColor: colors.border }]}>
           <Text style={[styles.challengePseudo, { color: colors.text }]}>
             {medals[i] ?? `${i + 1}.`} {row.pseudo}
           </Text>
@@ -411,4 +519,34 @@ const styles = StyleSheet.create({
   },
   challengePseudo: { fontSize: 13, fontFamily: F.semibold },
   challengeCount: { fontSize: 12, fontFamily: F.bold },
+  challengeHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  challengeRank: { fontSize: 13, fontFamily: F.bold },
+  projectionRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginTop: 10,
+  },
+  projectionLabel: { fontSize: 11, fontFamily: F.regular },
+  projectionValue: { fontSize: 15, fontFamily: F.bold },
+  projectionDelta: { fontSize: 12, fontFamily: F.medium },
+  perfRow: { flexDirection: "row", gap: 8, marginBottom: 8 },
+  perfCol: { flex: 1, alignItems: "center", gap: 2 },
+  perfValue: { fontSize: 16, fontFamily: F.extrabold },
+  perfLabel: { fontSize: 10, fontFamily: F.regular, textAlign: "center" },
+  perfMeta: { fontSize: 12, fontFamily: F.regular, marginTop: 2 },
+  xpTrack: {
+    height: 8,
+    borderRadius: 999,
+    overflow: "hidden",
+    marginTop: 6,
+  },
+  xpFill: { height: "100%", borderRadius: 999 },
 });

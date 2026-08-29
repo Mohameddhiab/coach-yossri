@@ -101,8 +101,8 @@ export default function CoachDashboard() {
       ) : null}
 
       <Card>
-        <Text style={[styles.cardTitle, { color: colors.text }]}>تحدي الأسبوع</Text>
-        {(leaderboard.data ?? []).slice(0, 5).map((row, i) => (
+        <Text style={[styles.cardTitle, { color: colors.text }]}>تحدي الحضور — الأسبوع</Text>
+        {(leaderboard.data?.top ?? []).slice(0, 5).map((row, i) => (
           <View key={`${row.pseudo}-${i}`} style={styles.rankRow}>
             <Text style={[styles.rank, { color: i === 0 ? "#F59E0B" : colors.muted }]}>
               {i + 1}
@@ -111,7 +111,7 @@ export default function CoachDashboard() {
             <Text style={[styles.rankCount, { color: colors.muted }]}>{row.count} حصص</Text>
           </View>
         ))}
-        {(leaderboard.data ?? []).length === 0 ? (
+        {(leaderboard.data?.top ?? []).length === 0 ? (
           <Text style={{ color: colors.muted, fontFamily: F.regular, fontSize: 13 }}>
             لا توجد بيانات لهذا الأسبوع
           </Text>

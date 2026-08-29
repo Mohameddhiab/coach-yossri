@@ -34,6 +34,7 @@ import { daysLeft, effectiveDateFin, getSubscriptionStatus, isPaused } from "@/s
 import { formatDate } from "@/shared/lib/storage";
 import { isCheckedToday } from "@/shared/lib/insights";
 import type { WeightLog } from "@/shared/lib/domain";
+import { WeightChart } from "@/components/ui/weight-chart";
 
 export default function MemberDetailScreen() {
   const { colors } = useTheme();
@@ -495,6 +496,9 @@ function MemberWeights({ userId }: { userId: string }) {
 
   return (
     <View style={{ gap: 8 }}>
+      {(logs.data ?? []).length >= 2 ? (
+        <WeightChart logs={logs.data ?? []} height={180} />
+      ) : null}
       {(logs.data ?? []).slice(0, 5).map((w) => (
         <View key={w.id} style={styles.subRow}>
           <Text style={{ flex: 1, color: colors.text, fontFamily: F.medium, fontSize: 13 }}>
