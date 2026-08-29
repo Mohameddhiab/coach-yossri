@@ -6,8 +6,9 @@ import type { EmailMessage, IEmailSender } from '../domain/email-sender.port';
 @Injectable()
 export class NodemailerEmailAdapter implements IEmailSender {
   private readonly logger = new Logger('Email');
-  private readonly transporter: Transporter;
+  private readonly transporter: Transporter | null = null;
   private readonly from: string;
+  private readonly configured: boolean;
 
   constructor() {
     const host = process.env.SMTP_HOST ?? '';
@@ -15,14 +16,44 @@ export class NodemailerEmailAdapter implements IEmailSender {
     const secure = (process.env.SMTP_SECURE ?? String(port === 465)) === 'true';
     const user = process.env.SMTP_USER ?? '';
     const pass = process.env.SMTP_PASS ?? '';
-    this.from = process.env.MAIL_FROM ?? `9AWI <${user}>`;
+    this.configured = Boolean(host && user && pass);
+    this.from =
+      process.env.MAIL_FROM ?? (user ? `9AWI <${user}>` : '9AWI <no-reply@localhost>');
+
+    if (!this.configured) {
+      this.logger.warn(
+        '[smtp] EMAIL_DRIVER=smtp mais SMTP_HOST/SMTP_USER/SMTP_PASS manquants — emails désactivés',
+      );
+      return;
+    }
 
     this.transporter = nodemailer.createTransport({
       host,
       port,
       secure,
-      auth: user && pass ? { user, pass } : undefined,
+      auth: { user, pass },
     });
+    this.verify(this.transporter);
+  }
+
+  private verify(transporter: Transporter): void {
+    setTimeout(() => {
+      this.logger.log(`[smtp] vérification de la connexion vers ${process.env.SMTP_HOST}...`);
+      const TIMEOUT_MS = 10_000;
+      Promise.race([
+        transporter.verify(),
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error(`timeout après ${TIMEOUT_MS}ms`)), TIMEOUT_MS),
+        ),
+      ])
+        .then(() => this.logger.log('[smtp] connexion SMTP OK'))
+        .catch((error) =>
+          this.logger.error(
+            '[smtp] connexion SMTP échouée — vérifiez SMTP_HOST/SMTP_PORT/SMTP_USER/SMTP_PASS',
+            error instanceof Error ? error.message : String(error),
+          ),
+        );
+    }, 1500);
   }
 
   private htmlToText(html: string): string {
@@ -40,6 +71,13 @@ export class NodemailerEmailAdapter implements IEmailSender {
   }
 
   async send(message: EmailMessage): Promise<void> {
+    if (!this.configured || !this.transporter) {
+      this.logger.warn(
+        `[smtp] non configuré — email ignoré template=${message.templateName} to=${message.to}`,
+      );
+      return;
+    }
+
     try {
       await this.transporter.sendMail({
         from: this.from,
@@ -56,12 +94,7 @@ export class NodemailerEmailAdapter implements IEmailSender {
         `[smtp] failed template=${message.templateName} to=${message.to}`,
         error instanceof Error ? error.message : String(error),
       );
-      // Ne pas propager l'erreur en dev — l'envoi d'email ne doit pas bloquer la création utilisateur
-      if ((process.env.EMAIL_DRIVER ?? 'console') === 'smtp') {
-        // En prod SMTP, on log seulement et on continue pour ne pas casser le flow utilisateur
-        return;
-      }
-      throw error;
+      // L'échec d'envoi ne doit jamais bloquer le flow utilisateur
     }
   }
 }
