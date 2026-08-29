@@ -99,7 +99,7 @@ export function projectWeight(logs: WeightLog[], daysAhead = 28): WeightProjecti
     slopePerWeek: Math.round(slopePerWeek * 10) / 10,
     projected: Math.round(projected * 10) / 10,
     daysAhead,
-    label: `بعد ${daysAhead} يوم`,
+    label: `بعد ${daysAhead} يومًا`,
   };
 }
 
@@ -163,10 +163,10 @@ export interface XpLevel {
 
 export const XP_LEVELS: XpLevel[] = [
   { index: 0, label: "مبتدئ", minXp: 0 },
-  { index: 1, label: "هاوي", minXp: 150 },
+  { index: 1, label: "هاوٍ", minXp: 150 },
   { index: 2, label: "ملتزم", minXp: 400 },
   { index: 3, label: "محترف", minXp: 800 },
-  { index: 4, label: "أسطورة", minXp: 1500 },
+  { index: 4, label: "أسطوري", minXp: 1500 },
 ];
 
 export interface XpResult {
@@ -216,18 +216,18 @@ export interface BadgeDef {
 }
 
 export const BADGE_DEFS: BadgeDef[] = [
-  { id: "FIRST_WEIGH", label: "أول وزنة", description: "سجلت وزنك لأول مرة", icon: "scale" },
-  { id: "REGULAR_10", label: "المواظب", description: "10 وزنات أو أكثر", icon: "calendar" },
-  { id: "LOST_5", label: "ناقص 5 كلغ", description: "خسرت 5 كلغ من البداية", icon: "trophy" },
-  { id: "LOST_10", label: "ناقص 10 كلغ", description: "خسرت 10 كلغ من البداية", icon: "medal" },
-  { id: "GAINED_5", label: "زاد 5 كلغ", description: "زدت 5 كلغ كتلة", icon: "dumbbell" },
-  { id: "STREAK_7", label: "سلسلة 7 أيام", description: "7 أيام متتالية من الحضور", icon: "flame" },
-  { id: "STREAK_30", label: "سلسلة 30 يوم", description: "30 يوم متتالي من الحضور", icon: "flame" },
-  { id: "GOAL_DONE", label: "تحدي الشهر", description: "أكملت هدف الشهر", icon: "target" },
-  { id: "FIDELITY_BRONZE", label: "عضو برونزي", description: "3 أشهر معنا", icon: "star" },
-  { id: "FIDELITY_SILVER", label: "عضو فضي", description: "6 أشهر معنا", icon: "star" },
-  { id: "FIDELITY_GOLD", label: "عضو ذهبي", description: "سنة كاملة معنا", icon: "medal" },
-  { id: "MEMBER_1Y", label: "سنة مع المدرب", description: "أنت معنا من سنة", icon: "calendar" },
+  { id: "FIRST_WEIGH", label: "تسجيل الوزن الأول", description: "سجّلت وزنك لأول مرة", icon: "scale" },
+  { id: "REGULAR_10", label: "المواظب", description: "١٠ تسجيلات وزن أو أكثر", icon: "calendar" },
+  { id: "LOST_5", label: "فقدان ٥ كغم", description: "فقدت ٥ كغم منذ البداية", icon: "trophy" },
+  { id: "LOST_10", label: "فقدان ١٠ كغم", description: "فقدت ١٠ كغم منذ البداية", icon: "medal" },
+  { id: "GAINED_5", label: "زيادة ٥ كغم", description: "اكتسبت ٥ كغم من الكتلة العضلية", icon: "dumbbell" },
+  { id: "STREAK_7", label: "سلسلة ٧ أيام", description: "٧ أيام متتالية من الحضور", icon: "flame" },
+  { id: "STREAK_30", label: "سلسلة ٣٠ يومًا", description: "٣٠ يومًا متتاليًا من الحضور", icon: "flame" },
+  { id: "GOAL_DONE", label: "تحدّي الشهر", description: "أتممت هدف الشهر بنجاح", icon: "target" },
+  { id: "FIDELITY_BRONZE", label: "عضو برونزي", description: "٣ أشهر من العضوية", icon: "star" },
+  { id: "FIDELITY_SILVER", label: "عضو فضّي", description: "٦ أشهر من العضوية", icon: "star" },
+  { id: "FIDELITY_GOLD", label: "عضو ذهبي", description: "سنة كاملة من العضوية", icon: "medal" },
+  { id: "MEMBER_1Y", label: "عام مع المدرب", description: "مضى عام كامل على انضمامك", icon: "calendar" },
 ];
 
 export interface BadgeResult {
@@ -317,7 +317,7 @@ export function computeEngagement(u: UserWithSubscription): EngagementScore {
   const clamped = Math.max(0, Math.min(100, score));
   const color = clamped >= 70 ? "green" : clamped >= 40 ? "amber" : "red";
   const label =
-    clamped >= 70 ? "ملتزم" : clamped >= 40 ? "متراجع" : "منقطع";
+    clamped >= 70 ? "ملتزم" : clamped >= 40 ? "متراجع" : "غير نشط";
   return { score: clamped, label, color };
 }
 
@@ -352,7 +352,7 @@ export function computeAlerts(users: UserWithSubscription[]): CoachAlert[] {
         userId: user.id,
         userName: name,
         title: `${name} — انتهى اشتراكه`,
-        description: "يجب تجديده ليعود إلى القاعة",
+        description: "يجب التجديد للعودة إلى الصالة الرياضية",
         badge: "منتهي",
       });
     } else if (status === "EXPIRE_BIENTOT") {
@@ -362,8 +362,8 @@ export function computeAlerts(users: UserWithSubscription[]): CoachAlert[] {
         userId: user.id,
         userName: name,
         title: `${name} — ينتهي اشتراكه خلال ${remaining} أيام`,
-        description: "ذكّره بالتجديد",
-        badge: "أوشك على الانتهاء",
+        description: "يُرجى تذكيره بالتجديد",
+        badge: "ينتهي قريبًا",
       });
     }
 
@@ -376,9 +376,9 @@ export function computeAlerts(users: UserWithSubscription[]): CoachAlert[] {
         kind: "stale",
         userId: user.id,
         userName: name,
-        title: `${name} — لم يسجل وزنه منذ ${user.days_since_last_weight ?? "?"} يوم`,
-        description: "تابع تقدمه",
-        badge: "تتبّع",
+        title: `${name} — لم يسجّل وزنه منذ ${user.days_since_last_weight ?? "?"} يومًا`,
+        description: "يُرجى متابعة تقدّمه",
+        badge: "متابعة",
       });
     }
   }

@@ -26,7 +26,7 @@ export class PauseSubscriptionUseCase {
       fail(404, 'NOT_FOUND', 'الاشتراك غير موجود');
     }
     if (sub.pauseStart) {
-      fail(400, 'ALREADY_PAUSED', 'الاشتراك متجمد بالفعل');
+      fail(400, 'ALREADY_PAUSED', 'الاشتراك مجمّد بالفعل');
     }
     return this.subs.pause(subId, new Date());
   }

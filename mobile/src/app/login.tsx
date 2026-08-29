@@ -52,13 +52,13 @@ export default function LoginScreen() {
           />
           <Text style={[styles.brand, { color: colors.text }]}>Coach Yosri</Text>
           <Text style={[styles.tagline, { color: colors.muted }]}>
-            مساحة العضو — تبع خطتك وبرامجك اليومية
+            مساحة المشترك — تابع خطتك وبرامجك اليومية
           </Text>
         </View>
 
         <View style={styles.form}>
           <Input
-            label="الإيميل"
+            label="البريد الإلكتروني"
             placeholder="you@email.com"
             value={email}
             onChangeText={setEmail}
@@ -68,7 +68,7 @@ export default function LoginScreen() {
             style={styles.field}
           />
           <Input
-            label="كلمة السر"
+            label="كلمة المرور"
             placeholder="••••••"
             value={password}
             onChangeText={setPassword}
@@ -84,7 +84,7 @@ export default function LoginScreen() {
             onPress={submit}
             disabled={!email || !password}
           >
-            دخول
+            تسجيل الدخول
           </Button>
         </View>
       </KeyboardAvoidingView>

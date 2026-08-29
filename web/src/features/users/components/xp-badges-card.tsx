@@ -63,7 +63,7 @@ export function XpBadgesCard() {
     const fresh = badges.filter((b) => b.unlocked && !known.includes(b.badge.id));
     if (fresh.length > 0) {
       fresh.forEach((b) => {
-        toast(`🎉 أوسمة جديدة: ${b.badge.label}`, {
+        toast(`🎉 وسام جديد: ${b.badge.label}`, {
           description: b.badge.description,
         });
       });
@@ -91,10 +91,10 @@ export function XpBadgesCard() {
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2 text-base">
             <Flame className="size-4 text-primary" />
-            قوّة الأسبوع
+            مستوى التقدم ونقاط الخبرة
           </CardTitle>
           <CardDescription>
-            كل تسجيل وزن وكل حصة وكل نشاط يزيد رصيدك — المستوى:{" "}
+            كل تسجيل للوزن وحضور للحصص يرفع رصيد نقاطك — المستوى الحالي:{" "}
             <span className="font-bold text-foreground">{xp.level.label}</span>
           </CardDescription>
         </CardHeader>
@@ -103,7 +103,7 @@ export function XpBadgesCard() {
             <span className="font-bold tabular-nums text-primary">{xp.xp} نقطة</span>
             {xp.next ? (
               <span className="text-xs text-muted-foreground">
-                {xp.next.label} بعد {xp.xpForNext - xp.xpIntoLevel} نقطة
+                المستوى التالي ({xp.next.label}) بعد {xp.xpForNext - xp.xpIntoLevel} نقطة
               </span>
             ) : (
               <span className="text-xs font-semibold text-amber-500">أعلى مستوى! 👑</span>
@@ -121,7 +121,7 @@ export function XpBadgesCard() {
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-base">الأوسمة ({unlockedCount}/{badges.length})</CardTitle>
-          <CardDescription>واصل حتى تكسب الكل — كل وسام قصة نجاح</CardDescription>
+          <CardDescription>استمر في الالتزام للحصول على جميع الأوسمة — كل وسام يمثل إنجازًا جديدًا</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">

@@ -138,7 +138,7 @@ export const WEEK_DAY_LABELS: Record<WeekDay, string> = {
   MER: "الأربعاء",
   JEU: "الخميس",
   VEN: "الجمعة",
-  TOUS_LES_JOURS: "كل الأيام",
+  TOUS_LES_JOURS: "جميع الأيام",
 };
 
 export const MEAL_TYPE_LABELS: Record<MealType, string> = {
@@ -151,9 +151,9 @@ export const MEAL_TYPE_LABELS: Record<MealType, string> = {
 export const MEAL_TYPE_ORDER: MealType[] = ["PETIT_DEJ", "DEJEUNER", "DINER", "COLLATION"];
 
 export const OBJECTIVE_LABELS: Record<PlanObjective, string> = {
-  PRISE_DE_MASSE: "زيادة الكتلة",
-  SECHE: "تنشيف",
-  MAINTIEN: "محافظة",
+  PRISE_DE_MASSE: "زيادة الكتلة العضلية",
+  SECHE: "تنشيف وتخفيف الدهون",
+  MAINTIEN: "المحافظة على الوزن",
 };
 
 export function effectiveDateFin(sub: Subscription | null): Date {

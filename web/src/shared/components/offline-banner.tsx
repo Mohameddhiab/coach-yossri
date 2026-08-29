@@ -28,7 +28,7 @@ export function OfflineBanner() {
   return (
     <div className="no-print flex items-center justify-center gap-2 bg-amber-500 px-4 py-1.5 text-xs font-semibold text-amber-950">
       <WifiOff className="size-3.5" />
-      أنت غير متصل — الخطة محفوظة وستتم مزامنتها تلقائيًا
+      أنت غير متصل بالإنترنت — الخطة محفوظة وستتم المزامنة تلقائيًّا عند عودة الاتصال
     </div>
   );
 }

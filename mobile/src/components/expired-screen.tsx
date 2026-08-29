@@ -17,14 +17,14 @@ export function ExpiredScreen() {
     <Screen>
       <View style={styles.center}>
         <Text style={[styles.emoji, { color: colors.destructive }]}>⏸</Text>
-        <Text style={[styles.title, { color: colors.text }]}>اشتراكك خلص</Text>
+        <Text style={[styles.title, { color: colors.text }]}>انتهت صلاحية اشتراكك</Text>
         <Text style={[styles.desc, { color: colors.muted }]}>
-          تواصل مع كوتشك باش تجدّد اشتراكك وترجع تتابع خطتك وتقدمك من جديد.
+          تواصل مع مدربك لتجديد الاشتراك ومواصلة متابعة خطتك الغذائية والتدريبية.
         </Text>
       </View>
 
       <Card>
-        <Text style={[styles.coachLabel, { color: colors.muted }]}>كوتشك:</Text>
+        <Text style={[styles.coachLabel, { color: colors.muted }]}>المدرب الخاص بك:</Text>
         {coach ? (
           <Text style={[styles.coachName, { color: colors.text }]}>
             {coach.prenom} {coach.nom}
@@ -36,7 +36,7 @@ export function ExpiredScreen() {
               variant="outline"
               onPress={() => Linking.openURL(`tel:${coach.telephone}`)}
             >
-              اتصل بالكوتش
+              اتصال بالمدرب
             </Button>
             <Button
               onPress={() =>
@@ -50,7 +50,7 @@ export function ExpiredScreen() {
       </Card>
 
       <Button variant="ghost" onPress={logout}>
-        اخرج
+        تسجيل الخروج
       </Button>
     </Screen>
   );

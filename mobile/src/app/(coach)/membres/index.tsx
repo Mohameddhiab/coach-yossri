@@ -18,8 +18,8 @@ import { daysLeft, getSubscriptionStatus, type SubscriptionStatus } from "@/shar
 
 const FILTERS: { value: SubscriptionStatus | "TOUS"; label: string }[] = [
   { value: "TOUS", label: "الكل" },
-  { value: "ACTIF", label: "مفعّل" },
-  { value: "EXPIRE_BIENTOT", label: "قريب الانتهاء" },
+  { value: "ACTIF", label: "نشط" },
+  { value: "EXPIRE_BIENTOT", label: "ينتهي قريباً" },
   { value: "EXPIRE", label: "منتهي" },
 ];
 
@@ -41,8 +41,8 @@ export default function MembresList() {
   return (
     <Screen scroll={false}>
       <Input
-        placeholder="بحث بالاسم ولا الإيميل ولا الهاتف…"
-        aria-label="بحث عن عضو"
+        placeholder="بحث بالاسم أو البريد الإلكتروني أو رقم الهاتف…"
+        aria-label="البحث عن مشترك"
         value={search}
         onChangeText={setSearch}
         style={styles.search}
@@ -54,7 +54,7 @@ export default function MembresList() {
       />
 
       <Button onPress={() => router.push("/membres/new")} style={styles.addBtn} size="md">
-        + زيد عضو
+        + إضافة مشترك جديد
       </Button>
 
       {users.isLoading ? (
@@ -91,11 +91,11 @@ export default function MembresList() {
                   <View style={styles.memberFooter}>
                     <Text style={[styles.memberMeta, { color: colors.muted }]}>
                       {status === "EXPIRE" || status === "EXPIRE_BIENTOT"
-                        ? `${daysLeft(item.subscription)} يوم باقي`
+                        ? `${daysLeft(item.subscription)} يومًا متبقيًا`
                         : lastWeightText(item.last_weight, item.days_since_last_weight)}
                     </Text>
                     <Text style={[styles.memberMeta, { color: colors.muted }]}>
-                      {item.notes_count > 0 ? `${item.notes_count} ملاحظة` : ""}
+                      {item.notes_count > 0 ? `${item.notes_count} ملاحظات` : ""}
                     </Text>
                   </View>
                 </Card>
@@ -107,7 +107,7 @@ export default function MembresList() {
           ListEmptyComponent={
             !users.isLoading ? (
               <Text style={{ color: colors.muted, fontFamily: F.regular, fontSize: 13, textAlign: "center", marginTop: 20 }}>
-                ما كاينش أعضاء مطابقين
+                لا يوجد مشتركون مطابقون لنتائج البحث
               </Text>
             ) : null
           }

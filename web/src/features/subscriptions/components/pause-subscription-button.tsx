@@ -27,14 +27,14 @@ export function PauseSubscriptionButton({
         onClick={async () => {
           try {
             await resume.mutateAsync(subscription.id);
-            toast.success("رجع الاشتراك — الأيام المجمّدة تُزاد للنهاية");
+            toast.success("تم استئناف الاشتراك — أضيفت فترة التجميد إلى تاريخ النهاية");
           } catch {
-            toast.error("تعذر نرجع الاشتراك — حاول مرة أخرى");
+            toast.error("تعذّر استئناف الاشتراك — يُرجى المحاولة مرة أخرى");
           }
         }}
       >
         <Play />
-        رجّع الاشتراك
+        استئناف الاشتراك
       </Button>
     );
   }
@@ -47,14 +47,14 @@ export function PauseSubscriptionButton({
       onClick={async () => {
         try {
           await pause.mutateAsync(subscription.id);
-          toast.success("تجمّد الاشتراك — الأيام الباقية محفوظة");
+          toast.success("تم تجميد الاشتراك مؤقتًا — الأيام المتبقية محفوظة");
         } catch {
-          toast.error("تعذر نجمّد الاشتراك — حاول مرة أخرى");
+          toast.error("تعذّر تجميد الاشتراك — يُرجى المحاولة مرة أخرى");
         }
       }}
     >
       <Pause />
-      جمّد الاشتراك
+      تجميد الاشتراك
     </Button>
   );
 }

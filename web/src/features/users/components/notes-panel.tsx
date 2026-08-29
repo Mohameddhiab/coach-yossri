@@ -17,7 +17,7 @@ function applyTemplate(
   vars: { prenom?: string; jours?: number },
 ): string {
   return template
-    .replaceAll("{prenom}", vars.prenom ?? "العضو")
+    .replaceAll("{prenom}", vars.prenom ?? "المشترك")
     .replaceAll("{jours}", String(vars.jours ?? "؟"));
 }
 
@@ -46,10 +46,10 @@ export function NotesPanel({
     if (!content.trim()) return;
     try {
       await addNote.mutateAsync(content.trim());
-      toast.success("زدات الملاحظة");
+      toast.success("تمت إضافة الملاحظة بنجاح");
       setContent("");
     } catch {
-      toast.error("تعذر إضافة الملاحظة — حاول مرة أخرى");
+      toast.error("تعذّرت إضافة الملاحظة — يُرجى المحاولة مرة أخرى");
     }
   };
 
@@ -87,14 +87,14 @@ export function NotesPanel({
         )}
         <div className="space-y-2">
           <Textarea
-            placeholder="ملاحظات سرية ما يراهاش العضو..."
+            placeholder="ملاحظات خاصة لا يراها المشترك..."
             value={content}
             onChange={(e) => setContent(e.target.value)}
             rows={3}
           />
           <Button onClick={submit} disabled={!content.trim() || addNote.isPending} className="w-full sm:w-auto">
             <Plus />
-            أضف ملاحظة
+            إضافة ملاحظة
           </Button>
         </div>
         {!isLoading && notes && notes.length > 0 && (
@@ -115,9 +115,9 @@ export function NotesPanel({
                     onClick={async () => {
                       try {
                         await deleteNote.mutateAsync(note.id);
-                        toast.success("تم الحذفت الملاحظة");
+                        toast.success("تم حذف الملاحظة بنجاح");
                       } catch {
-                        toast.error("تعذر نحذف الملاحظة");
+                        toast.error("تعذّر حذف الملاحظة — يُرجى المحاولة مرة أخرى");
                       }
                     }}
                   >
@@ -129,7 +129,7 @@ export function NotesPanel({
           </div>
         )}
         {!isLoading && notes && notes.length === 0 && (
-          <EmptyState title="لا يوجد ملاحظات بعد" />
+          <EmptyState title="لا توجد ملاحظات مسجلة بعد" />
         )}
       </CardContent>
     </Card>

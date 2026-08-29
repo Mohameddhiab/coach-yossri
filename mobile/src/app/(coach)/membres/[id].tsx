@@ -96,7 +96,7 @@ export default function MemberDetailScreen() {
       await updateUser.mutateAsync({ id: userId, patch: { nom: fNom, prenom: fPrenom, telephone: fTel } });
       setEditMode(false);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "صار خطأ");
+      setError(err instanceof ApiError ? err.message : "حدث خطأ أثناء تحديث البيانات");
     }
   };
 
@@ -106,7 +106,7 @@ export default function MemberDetailScreen() {
       await addNote.mutateAsync({ userId, contenu: noteText.trim() });
       setNoteText("");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "صار خطأ");
+      setError(err instanceof ApiError ? err.message : "حدث خطأ أثناء إضافة الملاحظة");
     }
   };
 
@@ -127,7 +127,7 @@ export default function MemberDetailScreen() {
       setSFin("");
       setSMontant("");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "صار خطأ");
+      setError(err instanceof ApiError ? err.message : "حدث خطأ أثناء إضافة الاشتراك");
     }
   };
 
@@ -140,7 +140,7 @@ export default function MemberDetailScreen() {
       setGTitre("");
       setGCible("");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "صار خطأ");
+      setError(err instanceof ApiError ? err.message : "حدث خطأ أثناء تعيين الهدف");
     }
   };
 
@@ -149,28 +149,28 @@ export default function MemberDetailScreen() {
     try {
       await checkin.mutateAsync(userId);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "صار خطأ");
+      setError(err instanceof ApiError ? err.message : "حدث خطأ أثناء تسجيل الحضور");
     }
   };
 
   const onResetPassword = () => {
-    Alert.alert("تبديل كلمة السر", "بيتم توليد كلمة سر جديدة للعضو.", [
+    Alert.alert("إعادة تعيين كلمة المرور", "سيتم إنشاء كلمة مرور عشوائية جديدة للمشترك.", [
       { text: "إلغاء", style: "cancel" },
       {
-        text: "ولّد",
+        text: "تأكيد التعيين",
         onPress: async () => {
           const res = await resetPassword.mutateAsync(userId);
-          Alert.alert("كلمة السر الجديدة", `أبلغ بيها العضو: ${res.password}`, [{ text: "ماشي" }]);
+          Alert.alert("كلمة المرور الجديدة", `يُرجى إبلاغ المشترك بكلمة المرور: ${res.password}`, [{ text: "حسنًا" }]);
         },
       },
     ]);
   };
 
   const onDelete = () => {
-    Alert.alert("امسح العضو", `بيتم مسح ${member.prenom} ${member.nom} نهائياً (البيانات، الخطط، الوزن…).`, [
+    Alert.alert("حذف المشترك نهائيًا", `هل أنت متأكد من حذف ${member.prenom} ${member.nom} نهائيًا بكافة بياناته وسجلاته؟`, [
       { text: "إلغاء", style: "cancel" },
       {
-        text: "مسح نهائي",
+        text: "حذف نهائي",
         style: "destructive",
         onPress: async () => {
           await deleteUser.mutateAsync(userId);
@@ -214,15 +214,15 @@ export default function MemberDetailScreen() {
                   : "—"}
             </Text>
             <Text style={[styles.statLbl, { color: colors.muted }]}>
-              {status === "EXPIRE" || status === "EXPIRE_BIENTOT" ? "يوم باقي" : "يخلص في"}
+              {status === "EXPIRE" || status === "EXPIRE_BIENTOT" ? "الأيام المتبقية" : "ينتهي في"}
             </Text>
           </View>
           <View style={styles.stat}>
             <Text style={[styles.statVal, { color: colors.text }]}>
-              {member.last_weight ? `${member.last_weight.poids_kg} كغ` : "—"}
+              {member.last_weight ? `${member.last_weight.poids_kg} كغم` : "—"}
             </Text>
             <Text style={[styles.statLbl, { color: colors.muted }]}>
-              {member.last_weight ? `آخر وزن من ${member.days_since_last_weight} أيام` : "ما كاينش وزن"}
+              {member.last_weight ? `آخر قياس منذ ${member.days_since_last_weight} يومًا` : "لا يوجد قياس مسجل"}
             </Text>
           </View>
           <View style={styles.stat}>
@@ -244,7 +244,7 @@ export default function MemberDetailScreen() {
           {!editMode ? (
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="بدّل المعلومات"
+              accessibilityLabel="تعديل المعلومات الشخصية"
               onPress={startEdit}
               style={{ padding: 4 }}
             >
@@ -254,16 +254,16 @@ export default function MemberDetailScreen() {
         </View>
         {editMode ? (
           <>
-            <Input label="اللقب" value={fPrenom} onChangeText={setFPrenom} />
-            <Input label="الاسم" value={fNom} onChangeText={setFNom} />
-            <Input label="الهاتف" value={fTel} onChangeText={setFTel} keyboardType="phone-pad" />
+            <Input label="الاسم الأول" value={fPrenom} onChangeText={setFPrenom} />
+            <Input label="اسم العائلة" value={fNom} onChangeText={setFNom} />
+            <Input label="رقم الهاتف" value={fTel} onChangeText={setFTel} keyboardType="phone-pad" />
             <Button onPress={saveEdit} loading={updateUser.isPending} size="sm">
               حفظ
             </Button>
           </>
         ) : (
           <Text style={[styles.meta, { color: colors.muted }]}>
-            {member.prenom} {member.nom} · {member.telephone || "بلا هاتف"} · عضو من{" "}
+            {member.prenom} {member.nom} · {member.telephone || "دون هاتف"} · مشترك منذ{" "}
             {formatDate(member.created_at)}
           </Text>
         )}
@@ -274,7 +274,7 @@ export default function MemberDetailScreen() {
           <Text style={[styles.sectionTitle, { color: colors.text }]}>هدف الشهر</Text>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={showGoalForm ? "غلق هدف الشهر" : "زيد هدف الشهر"}
+            accessibilityLabel={showGoalForm ? "إغلاق نموذج الهدف" : "إضافة هدف شهري"}
             onPress={() => setShowGoalForm((v) => !v)}
             style={{ padding: 4 }}
           >
@@ -298,11 +298,11 @@ export default function MemberDetailScreen() {
               loading={checkin.isPending}
               disabled={goalData ? isCheckedToday(goalData.checkins) : false}
             >
-              {isCheckedToday(goalData?.checkins ?? []) ? "سجّل اليوم ✓" : "سجّل حصة توا"}
+              {isCheckedToday(goalData?.checkins ?? []) ? "تم تسجيل الحضور اليوم ✓" : "تسجيل الحضور الآن"}
             </Button>
           </View>
         ) : (
-          <Text style={[styles.meta, { color: colors.muted }]}>ما كاينش هدف لهذا الشهر</Text>
+          <Text style={[styles.meta, { color: colors.muted }]}>لا يوجد هدف مسجل لهذا الشهر</Text>
         )}
         {showGoalForm ? (
           <>
@@ -314,14 +314,14 @@ export default function MemberDetailScreen() {
             />
             <Input label="عدد الحصص" value={gCible} onChangeText={setGCible} keyboardType="numeric" />
             <Button onPress={submitGoal} loading={setGoal.isPending} size="sm">
-              صيّر الهدف
+              حفظ الهدف
             </Button>
           </>
         ) : null}
       </Card>
 
       <Card>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>أوزان العضو</Text>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>سجل أوزان المشترك</Text>
         <MemberWeights userId={userId} />
       </Card>
 
@@ -330,7 +330,7 @@ export default function MemberDetailScreen() {
           <Text style={[styles.sectionTitle, { color: colors.text }]}>الاشتراكات</Text>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={showSubForm ? "غلق الاشتراكات" : "زيد اشتراك"}
+            accessibilityLabel={showSubForm ? "إغلاق نموذج الاشتراك" : "إضافة اشتراك جديد"}
             onPress={() => setShowSubForm((v) => !v)}
             style={{ padding: 4 }}
           >
@@ -342,7 +342,7 @@ export default function MemberDetailScreen() {
           </Pressable>
         </View>
         {sortedSubs.length === 0 ? (
-          <Text style={[styles.meta, { color: colors.muted }]}>ما كاينش اشتراك</Text>
+          <Text style={[styles.meta, { color: colors.muted }]}>لا توجد اشتراكات مسجلة</Text>
         ) : (
           sortedSubs.map((s) => {
             const paused = isPaused(s);
@@ -355,12 +355,12 @@ export default function MemberDetailScreen() {
                     {formatDate(s.date_debut)} ← {formatDate(s.date_fin)}
                   </Text>
                   <Text style={{ color: colors.muted, fontFamily: F.regular, fontSize: 12 }}>
-                    {s.montant} دت · {s.mode_paiement === "ESSAI" ? "تجريبي" : "نقداً"}
-                    {paused ? ` · متجمد من ${formatDate(s.pause_start!)}` : ""}
+                    {s.montant} د.ت · {s.mode_paiement === "ESSAI" ? "تجريبي" : "نقداً"}
+                    {paused ? ` · مجمّد منذ ${formatDate(s.pause_start!)}` : ""}
                   </Text>
                 </View>
                 <Badge
-                  label={paused ? "متجمد" : subBadge.label}
+                  label={paused ? "مجمّد" : subBadge.label}
                   variant={paused ? "frozen" : subBadge.variant}
                 />
                 {isLatest && !paused && status !== "EXPIRE" ? (
@@ -399,18 +399,18 @@ export default function MemberDetailScreen() {
                   onChangeText={setSFin}
                   placeholder="2026-09-01"
                 />
-                <Input label="المبلغ (دينار)" value={sMontant} onChangeText={setSMontant} keyboardType="numeric" />
+                <Input label="المبلغ (دينار تونسي)" value={sMontant} onChangeText={setSMontant} keyboardType="numeric" />
               </>
             ) : null}
             <Button onPress={submitSub} loading={addSub.isPending} size="sm">
-              زيد الاشتراك
+              تأكيد إضافة الاشتراك
             </Button>
           </>
         ) : null}
       </Card>
 
       <Card>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>ملاحظات الكوتش</Text>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>ملاحظات المدرب الخاصة</Text>
         {(notes.data ?? []).map((n) => (
           <View key={n.id} style={styles.noteRow}>
             <Text style={{ flex: 1, color: colors.text, fontFamily: F.regular, fontSize: 13 }}>
@@ -430,21 +430,21 @@ export default function MemberDetailScreen() {
           </View>
         ))}
         {notes.data?.length === 0 ? (
-          <Text style={[styles.meta, { color: colors.muted }]}>مازال ما كاينش ملاحظات</Text>
+          <Text style={[styles.meta, { color: colors.muted }]}>لا توجد ملاحظات مسجلة بعد</Text>
         ) : null}
-        <Input placeholder="اكتب ملاحظة…" value={noteText} onChangeText={setNoteText} />
+        <Input placeholder="اكتب ملاحظة خاصة عن المشترك…" value={noteText} onChangeText={setNoteText} />
         <Button size="sm" onPress={submitNote} loading={addNote.isPending}>
-          زيد ملاحظة
+          إضافة ملاحظة
         </Button>
       </Card>
 
       <Card>
         <Text style={[styles.sectionTitle, { color: colors.text }]}>إجراءات</Text>
         <Button variant="outline" onPress={onResetPassword} loading={resetPassword.isPending}>
-          تبديل كلمة السر
+          إعادة تعيين كلمة المرور
         </Button>
         <Button variant="danger" onPress={onDelete} loading={deleteUser.isPending}>
-          امسح العضو نهائياً
+          حذف المشترك نهائيًا
         </Button>
       </Card>
     </Screen>
@@ -482,14 +482,14 @@ function MemberWeights({ userId }: { userId: string }) {
     setError(null);
     const value = Number(poids);
     if (!value || value < 30 || value > 250) {
-      setError("دخّل وزن صحيح (30–250 كغ)");
+      setError("أدخل قيمة وزن صحيحة (٣٠ - ٢٥٠ كغم)");
       return;
     }
     try {
       await add.mutateAsync(value);
       setPoids("");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "صار خطأ");
+      setError(err instanceof ApiError ? err.message : "حدث خطأ أثناء حفظ الوزن");
     }
   };
 
@@ -498,7 +498,7 @@ function MemberWeights({ userId }: { userId: string }) {
       {(logs.data ?? []).slice(0, 5).map((w) => (
         <View key={w.id} style={styles.subRow}>
           <Text style={{ flex: 1, color: colors.text, fontFamily: F.medium, fontSize: 13 }}>
-            {w.poids_kg} كغ
+            {w.poids_kg} كغم
           </Text>
           <Text style={{ color: colors.muted, fontFamily: F.regular, fontSize: 12 }}>
             {formatDate(w.date)}
@@ -514,19 +514,19 @@ function MemberWeights({ userId }: { userId: string }) {
         </View>
       ))}
       {logs.data?.length === 0 ? (
-        <Text style={[styles.meta, { color: colors.muted }]}>ما كاينش أوزان مسجلة</Text>
+        <Text style={[styles.meta, { color: colors.muted }]}>لا توجد أوزان مسجلة بعد</Text>
       ) : null}
       <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
         <View style={{ flex: 1 }}>
           <Input
-            placeholder="الوزن اليوم (كغ)"
+            placeholder="الوزن اليوم (كغم)"
             value={poids}
             onChangeText={setPoids}
             keyboardType="numeric"
           />
         </View>
         <Button size="sm" onPress={submit} loading={add.isPending}>
-          زيد
+          إضافة
         </Button>
       </View>
       {error ? (

@@ -23,7 +23,7 @@ export function TransformationSlider({ photos }: { photos: ProgressPhoto[] }) {
     <div className="space-y-2">
       <div className="flex items-center gap-2 text-sm font-semibold">
         <Images className="size-4 text-primary" />
-        التحوّل — اسحب للمقارنة المباشرة
+        مقارنة التحول الجسدي — اسحب للمقارنة قبل وبعد
       </div>
       <div className="relative aspect-[3/4] w-full select-none overflow-hidden rounded-xl border">
         <Image

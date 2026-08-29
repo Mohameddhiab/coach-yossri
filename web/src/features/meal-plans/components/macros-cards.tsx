@@ -3,7 +3,7 @@ import { Flame, Drumstick, Wheat, Droplet } from "lucide-react";
 const ITEMS = [
   { key: "cal", label: "السعرات", unit: "سعرة", icon: Flame, color: "text-amber-500", ring: "ring-amber-500/20", bg: "bg-gradient-to-br from-amber-500/10 to-amber-500/5" },
   { key: "pro", label: "بروتين", unit: "غ", icon: Drumstick, color: "text-emerald-600", ring: "ring-emerald-500/20", bg: "bg-gradient-to-br from-emerald-500/10 to-emerald-500/5" },
-  { key: "glu", label: "كارب", unit: "غ", icon: Wheat, color: "text-sky-600", ring: "ring-sky-500/20", bg: "bg-gradient-to-br from-sky-500/10 to-sky-500/5" },
+  { key: "glu", label: "كربوهيدرات", unit: "غ", icon: Wheat, color: "text-sky-600", ring: "ring-sky-500/20", bg: "bg-gradient-to-br from-sky-500/10 to-sky-500/5" },
   { key: "lip", label: "دهون", unit: "غ", icon: Droplet, color: "text-orange-500", ring: "ring-orange-500/20", bg: "bg-gradient-to-br from-orange-500/10 to-orange-500/5" },
 ] as const;
 

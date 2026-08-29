@@ -83,7 +83,7 @@ export function WeightChart({ logs, height = 260 }: { logs: WeightLog[]; height?
                 <div className="rounded-lg border border-border bg-popover px-3 py-2 text-sm shadow-lg">
                   <div className="font-semibold">{point.label}</div>
                   <div className="text-primary font-extrabold tabular-nums">
-                    {point.poids} كغ
+                    {point.poids} كغم
                   </div>
                 </div>
               );

@@ -14,7 +14,7 @@ export class EmailService {
     await this.sender.send({
       to,
       templateName: 'password-reset',
-      subject: 'تغيير كلمة السر — قاوي',
+      subject: 'إعادة تعيين كلمة المرور — كوتش يسري',
       html: renderPasswordResetEmail(name, resetUrl),
     });
   }
@@ -23,8 +23,8 @@ export class EmailService {
     await this.sender.send({
       to,
       templateName: 'welcome',
-      subject: 'مرحباً بك في قاوي 💪',
-      html: `<p>تم إنشاء حسابك في تطبيق قاوي.</p><p>بريدك: ${to}<br/>كلمة السر المؤقتة: <b>${password}</b></p><p>غيّرها من الإعدادات بعد أول دخول.</p>`,
+      subject: 'مرحباً بك في منصة التدريب الرياضي 💪',
+      html: `<p>تم إنشاء حسابك بنجاح في المنصة التدريبية.</p><p>البريد الإلكتروني: ${to}<br/>كلمة المرور المؤقتة: <b>${password}</b></p><p>يُرجى تغيير كلمة المرور من صفحة الإعدادات بعد أول تسجيل دخول.</p>`,
     });
   }
 
@@ -32,8 +32,8 @@ export class EmailService {
     await this.sender.send({
       to,
       templateName: 'new-plan',
-      subject: 'خطتك الجديدة جاهزة 🍽️',
-      html: `<p>كوتشك وضع لك خطة جديدة: <b>${titre}</b></p><p>افتح التطبيق لرؤيتها.</p>`,
+      subject: 'خطتك التدريبية والغذائية الجديدة جاهزة 🍽️',
+      html: `<p>قام المدرب بإعداد خطة جديدة لك: <b>${titre}</b></p><p>افتح التطبيق لمتابعة تفاصيل خطتك.</p>`,
     });
   }
 }

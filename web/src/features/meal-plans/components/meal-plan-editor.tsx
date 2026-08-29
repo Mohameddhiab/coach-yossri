@@ -76,14 +76,14 @@ function emptyMeal(jour: WeekDay, type: MealType): DraftMeal {
 const PLAN_MACRO_FIELDS: { key: keyof MacroState; label: string; unit: string }[] = [
   { key: "calories_cible", label: "سعرات", unit: "سعرة" },
   { key: "proteines_g", label: "بروتين", unit: "غ" },
-  { key: "glucides_g", label: "كارب", unit: "غ" },
+  { key: "glucides_g", label: "كربوهيدرات", unit: "غ" },
   { key: "lipides_g", label: "دهون", unit: "غ" },
 ];
 
 const MEAL_MACRO_FIELDS: { key: MealMacroKey; label: string; unit: string }[] = [
   { key: "calories", label: "سعرات", unit: "سعرة" },
   { key: "proteines_g", label: "بروتين", unit: "غ" },
-  { key: "glucides_g", label: "كارب", unit: "غ" },
+  { key: "glucides_g", label: "كربوهيدرات", unit: "غ" },
   { key: "lipides_g", label: "دهون", unit: "غ" },
 ];
 
@@ -198,7 +198,7 @@ function PlanEditorInner({ plan, userId }: { plan: MealPlan | null; userId: stri
   const save = async () => {
     const filled = meals.filter((m) => m.description.trim());
     if (filled.length === 0) {
-      toast.error("أضف وجبة واحدة على الأقل");
+      toast.error("يُرجى إضافة وجبة واحدة على الأقل");
       return;
     }
     setSaving(true);
@@ -214,13 +214,13 @@ function PlanEditorInner({ plan, userId }: { plan: MealPlan | null; userId: stri
       };
       if (plan) {
         await updatePlan.mutateAsync(input);
-        toast.success(`تم تسجيلت الخطة (الإصدار ${plan.version + 1})`);
+        toast.success(`تم حفظ الخطة بنجاح (الإصدار ${plan.version + 1})`);
       } else {
         await createPlan.mutateAsync(input);
-        toast.success("تصيّرت الخطة");
+        toast.success("تم إنشاء الخطة بنجاح");
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "خطأ في الحفظ");
+      toast.error(err instanceof Error ? err.message : "حدث خطأ أثناء الحفظ");
     } finally {
       setSaving(false);
     }
@@ -235,7 +235,7 @@ function PlanEditorInner({ plan, userId }: { plan: MealPlan | null; userId: stri
       glucides_g: s.glucides_g,
       lipides_g: s.lipides_g,
     });
-    toast.success("تطبّقت السعرات المحسوبة على الخطة");
+    toast.success("تم تطبيق السعرات المقترحة على الخطة بنجاح");
   };
 
   const printPlan = useMemo(() => {
@@ -346,7 +346,7 @@ function PlanEditorInner({ plan, userId }: { plan: MealPlan | null; userId: stri
         <CardHeader className="pb-2">
           <CardTitle className="text-base">الوجبات</CardTitle>
           <CardDescription className="text-xs">
-            نظّم الوجبات حسب اليوم — «كل الأيام» = تتكرر يومياً.
+            تنظيم الوجبات بحسب اليوم — «جميع الأيام» تعني تكرار الوجبة يوميًا.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -394,8 +394,8 @@ function PlanEditorInner({ plan, userId }: { plan: MealPlan | null; userId: stri
             <TabsContent value={activeDay} className="space-y-4 pt-4">
               {mealsForDay.length === 0 && (
                 <EmptyState
-                  title={`لا يوجد وجبات ليوم ${WEEK_DAY_LABELS[activeDay]}`}
-                  description="أضف وجبة من الأسفل"
+                  title={`لا توجد وجبات مسجلة ليوم ${WEEK_DAY_LABELS[activeDay]}`}
+                  description="أضف وجبة من الخيارات أدناه"
                 />
               )}
 
@@ -410,7 +410,7 @@ function PlanEditorInner({ plan, userId }: { plan: MealPlan | null; userId: stri
                       </span>
                       <Button variant="ghost" size="sm" onClick={() => addMeal(type)}>
                         <Plus />
-                        أضف وجبة
+                        إضافة وجبة
                       </Button>
                     </div>
                     {typeMeals.map((meal) => {
@@ -421,7 +421,7 @@ function PlanEditorInner({ plan, userId }: { plan: MealPlan | null; userId: stri
                             id={`meal-desc-${key}`}
                             rows={2}
                             maxLength={400}
-                            placeholder="وصف الوجبة: الأكل والكميات..."
+                            placeholder="مكونات الوجبة والكميات بالتفصيل..."
                             value={meal.description}
                             onChange={(e) => updateMeal(key, { description: e.target.value })}
                             className="mb-3"
@@ -450,13 +450,13 @@ function PlanEditorInner({ plan, userId }: { plan: MealPlan | null; userId: stri
                           </div>
                           <div className="mt-2 space-y-2">
                             <Input
-                              placeholder="بدائل (اختياري): إلا ما كانش دجاج → ديك رومي أو تونة"
+                              placeholder="البدائل المتاحة (اختياري): مثل استبدال الدجاج بالتونة أو البيض..."
                               value={meal.alternatives ?? ""}
                               onChange={(e) => updateMeal(key, { alternatives: e.target.value })}
                             />
                             <Button variant="ghost" size="sm" onClick={() => removeMeal(key)}>
                               <Trash2 />
-                              احذف الوجبة
+                              حذف الوجبة
                             </Button>
                           </div>
                         </div>
@@ -526,7 +526,7 @@ function CalorieDialog({
         <DialogHeader>
           <DialogTitle>حساب السعرات اليومية</DialogTitle>
           <DialogDescription>
-            ميفلين-سانت جيور: آخر وزنة + الطول + العمر + الجنس، مضروبة في معامل النشاط.
+            معادلة ميفلين-سانت جيور: آخر وزن مسجل + الطول + العمر + الجنس، مضروبة في معامل النشاط البدني.
           </DialogDescription>
         </DialogHeader>
 
@@ -582,12 +582,12 @@ function CalorieDialog({
                 </div>
                 <div className="flex gap-4 text-xs text-muted-foreground">
                   <span dir="ltr">بروتين {suggestion.proteines_g}غ</span>
-                  <span dir="ltr">كارب {suggestion.glucides_g}غ</span>
+                  <span dir="ltr">كربوهيدرات {suggestion.glucides_g}غ</span>
                   <span dir="ltr">دهون {suggestion.lipides_g}غ</span>
                 </div>
               </div>
               <div className="text-xs text-muted-foreground">
-                الوزن {data.poids_kg}كغ • الطول {data.taille_cm}سم • العمر {data.age} سنة
+                الوزن {data.poids_kg} كغم • الطول {data.taille_cm} سم • العمر {data.age} سنة
               </div>
             </>
           )}
@@ -595,7 +595,7 @@ function CalorieDialog({
 
         <DialogFooter>
           <Button onClick={() => suggestion && onApply(suggestion)} disabled={!suggestion}>
-            طبّق على الخطة
+            تطبيق على الخطة
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -617,10 +617,10 @@ function CopyPlanDialog({ userId }: { userId: string }) {
     if (!selected) return;
     try {
       await duplicate.mutateAsync(selected);
-      toast.success("تم نسخ الخطة كنقطة بداية — عدّلها ثم احفظ");
+      toast.success("تم نسخ الخطة بنجاح — يمكنك التعديل عليها ثم الحفظ");
       setOpen(false);
     } catch {
-      toast.error("تعذر نسخ الخطة — حاول مرة أخرى");
+      toast.error("تعذّر نسخ الخطة — يُرجى المحاولة مرة أخرى");
     }
   };
 
@@ -629,14 +629,14 @@ function CopyPlanDialog({ userId }: { userId: string }) {
       <DialogTrigger asChild>
         <Button variant="ghost" size="sm">
           <Copy className="size-4" />
-          انسخ من خطة
+          نسخ من خطة سابقة
         </Button>
       </DialogTrigger>
       <DialogContent className="max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>نسخ خطة كنقطة بداية</DialogTitle>
           <DialogDescription>
-            اختر قالب جاهز أو خطة لعضو آخر، ثم بدّلها لهذا العضو.
+            اختر قالبًا جاهزًا أو خطة لمشترك آخر، ثم عدّلها بما يناسب هذا المشترك.
           </DialogDescription>
         </DialogHeader>
         <Tabs value={tab} onValueChange={(v) => setTab(v as "templates" | "members")}>
@@ -645,14 +645,14 @@ function CopyPlanDialog({ userId }: { userId: string }) {
               قوالب جاهزة ({presets.length})
             </TabsTrigger>
             <TabsTrigger value="members" className="flex-1">
-              خطط الأعضاء ({members.length})
+              خطط المشتركين ({members.length})
             </TabsTrigger>
           </TabsList>
           <TabsContent value="templates" className="space-y-2 pt-3">
             {isLoading ? (
               <Skeleton className="h-10" />
             ) : presets.length === 0 ? (
-              <p className="text-sm text-muted-foreground">لا يوجد قوالب جاهزة حاليًا.</p>
+              <p className="text-sm text-muted-foreground">لا توجد قوالب جاهزة حاليًا.</p>
             ) : (
               presets.map((t) => (
                 <button
@@ -683,7 +683,7 @@ function CopyPlanDialog({ userId }: { userId: string }) {
             {isLoading ? (
               <Skeleton className="h-10" />
             ) : members.length === 0 ? (
-              <p className="text-sm text-muted-foreground">لا يوجد خطط أعضاء لنسخها.</p>
+              <p className="text-sm text-muted-foreground">لا توجد خطط مشتركين متاحة للنسخ.</p>
             ) : (
               members.map((t) => (
                 <button
@@ -710,7 +710,7 @@ function CopyPlanDialog({ userId }: { userId: string }) {
         </Tabs>
         <DialogFooter>
           <Button onClick={run} disabled={!selected || duplicate.isPending}>
-            انسخ الخطة
+            نسخ الخطة
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -725,7 +725,7 @@ function VersionsDialog({ userId }: { userId: string }) {
     <Dialog>
       <DialogTrigger asChild>
         <Button variant="ghost" className="text-muted-foreground">
-          تاريخ الإصدارات ({versions?.length ?? 0})
+          سجل الإصدارات ({versions?.length ?? 0})
         </Button>
       </DialogTrigger>
       <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-md">
@@ -736,7 +736,7 @@ function VersionsDialog({ userId }: { userId: string }) {
         <div className="space-y-2">
           {isLoading && <Skeleton className="h-16" />}
           {!isLoading && versions && versions.length === 0 && (
-            <p className="text-sm text-muted-foreground">لا يوجد إصدارات سابقة حاليًا.</p>
+            <p className="text-sm text-muted-foreground">لا توجد إصدارات سابقة حاليًا.</p>
           )}
           {versions?.map((v) => (
             <div key={v.version} className="rounded-lg border p-3 text-sm">

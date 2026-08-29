@@ -37,7 +37,7 @@ export function WorkoutPlanPdfDocument({ plan }: { plan: WorkoutPlan }) {
         <div className="mt-1 font-semibold text-neutral-900">
           {plan.titre} · {OBJECTIVE_LABELS[plan.objectif]} · الإصدار {plan.version}
         </div>
-        <div className="mt-1 text-neutral-500">تنسخ: {formatDateShort(new Date().toISOString())}</div>
+        <div className="mt-1 text-neutral-500">تاريخ الاستخراج: {formatDateShort(new Date().toISOString())}</div>
       </header>
 
       {WEEK_DAYS.map((day: WeekDay) => {
@@ -51,18 +51,18 @@ export function WorkoutPlanPdfDocument({ plan }: { plan: WorkoutPlan }) {
               {WEEK_DAY_LABELS[day]}
             </h2>
             {dayExercises.length === 0 ? (
-              <p className="text-neutral-500">راحة — لا يوجد تمارين</p>
+              <p className="text-neutral-500">يوم راحة — لا توجد تمارين مبرمجة</p>
             ) : (
               <table className="w-full border-collapse text-center text-xs">
                 <thead>
                   <tr className="bg-neutral-100 font-bold text-neutral-700">
-                    <th className="border border-neutral-200 px-2 py-1.5 text-start">Nom exercice</th>
-                    <th className="border border-neutral-200 px-2 py-1.5">image</th>
-                    <th className="border border-neutral-200 px-2 py-1.5">charge</th>
-                    <th className="border border-neutral-200 px-2 py-1.5">reps</th>
-                    <th className="border border-neutral-200 px-2 py-1.5">Nbre serie</th>
-                    <th className="border border-neutral-200 px-2 py-1.5">tempo</th>
-                    <th className="border border-neutral-200 px-2 py-1.5">rest</th>
+                    <th className="border border-neutral-200 px-2 py-1.5 text-start">التمرين</th>
+                    <th className="border border-neutral-200 px-2 py-1.5">الصورة</th>
+                    <th className="border border-neutral-200 px-2 py-1.5">الحمل</th>
+                    <th className="border border-neutral-200 px-2 py-1.5">التكرارات</th>
+                    <th className="border border-neutral-200 px-2 py-1.5">الجولات</th>
+                    <th className="border border-neutral-200 px-2 py-1.5">الإيقاع</th>
+                    <th className="border border-neutral-200 px-2 py-1.5">الراحة</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -112,7 +112,7 @@ export function WorkoutPlanPdfDocument({ plan }: { plan: WorkoutPlan }) {
       })}
 
       <footer className="mt-8 border-t border-neutral-200 pt-3 text-center text-xs text-neutral-500">
-        <div>بالصحة والقوة مع مدربك — Coach Yosri</div>
+        <div>مع تمنياتنا لك بدوام الصحة والقوة — Coach Yosri</div>
         {hasGuideImages && <div className="mt-1">صور التمارين : @bryllim/workout-guide — CC BY-SA 4.0 (Bryl Lim / Everkinetic)</div>}
         {hasWgerImages && <div className="mt-1">wger.de — CC-BY-SA (attribution : wger.de)</div>}
       </footer>

@@ -11,10 +11,10 @@ import { useTheme } from "@/components/ui/theme";
 import { F } from "@/fonts";
 
 const STATUS_LABEL = {
-  ACTIF: "مفعّل",
-  EXPIRE: "خلص",
-  EXPIRE_BIENTOT: "قرب يخلص",
-  ESSAI: "تجربة",
+  ACTIF: "نشط",
+  EXPIRE: "منتهي",
+  EXPIRE_BIENTOT: "ينتهي قريباً",
+  ESSAI: "تجريبي",
 } as const;
 
 const PAYMENT_LABEL = {
@@ -30,7 +30,7 @@ export default function AbonnementScreen() {
   if (!data) {
     return (
       <Screen>
-        <EmptyState title="ما كاينش معلومات على الاشتراك" />
+        <EmptyState title="لا توجد معلومات حول الاشتراك حاليًا" />
       </Screen>
     );
   }
@@ -44,22 +44,22 @@ export default function AbonnementScreen() {
 
   return (
     <Screen>
-      <Text style={[styles.screenTitle, { color: colors.text }]}>اشتراكي</Text>
+      <Text style={[styles.screenTitle, { color: colors.text }]}>الاشتراك</Text>
 
       {subscription ? (
         <Card>
           <View style={styles.statusRow}>
             <View style={styles.statusCol}>
               <Badge
-                label={paused ? "مجمّد مؤقتاً" : STATUS_LABEL[status]}
+                label={paused ? "مجمّد مؤقتًا" : STATUS_LABEL[status]}
                 variant={paused ? "frozen" : status === "EXPIRE" ? "expired" : status === "EXPIRE_BIENTOT" ? "soon" : trial ? "trial" : "active"}
               />
               <Text style={[styles.statusDesc, { color: colors.muted }]}>
                 {paused
-                  ? `مجمّد من ${formatDate(subscription.pause_start ?? subscription.date_debut)}`
+                  ? `مجمّد منذ ${formatDate(subscription.pause_start ?? subscription.date_debut)}`
                   : status === "EXPIRE"
-                    ? "اشتراكك خلص — جدّدو باش ترجع"
-                    : `يخلص في ${formatDate(subscription.date_fin)}`}
+                    ? "انتهت صلاحية اشتراكك — يُرجى التجديد للاستمرار"
+                    : `ينتهي في ${formatDate(subscription.date_fin)}`}
               </Text>
             </View>
           </View>
@@ -67,11 +67,11 @@ export default function AbonnementScreen() {
           <View style={styles.statsRow}>
             <View style={styles.stat}>
               <Text style={[styles.statValue, { color: colors.text }]}>{left}</Text>
-              <Text style={[styles.statLabel, { color: colors.muted }]}>يوم باقي</Text>
+              <Text style={[styles.statLabel, { color: colors.muted }]}>يومًا متبقيًا</Text>
             </View>
             <View style={styles.stat}>
               <Text style={[styles.statValue, { color: colors.text }]}>
-                {subscription.montant} د
+                {subscription.montant} د.ت
               </Text>
               <Text style={[styles.statLabel, { color: colors.muted }]}>الدفع</Text>
             </View>
@@ -85,25 +85,25 @@ export default function AbonnementScreen() {
         </Card>
       ) : (
         <Card>
-          <EmptyState title="بلا اشتراك" description="اتصل بكوتشك باش تبدأ." />
+          <EmptyState title="لا يوجد اشتراك نشط" description="تواصل مع مدربك لتفعيل الاشتراك." />
         </Card>
       )}
 
       {showCountdown ? (
         <Card style={{ backgroundColor: colors.warningSoft }}>
           <Text style={[styles.countdownTitle, { color: colors.warning }]}>
-            ⏳ اشتراكك يخلص خلال {left} يوم
+            ⏳ ينتهي اشتراكك خلال {left} يومًا
           </Text>
           <Text style={[styles.countdownText, { color: colors.muted }]}>
-            جدّد قبل ما يخلص باش ما تخسرش خطتك وسجلّك.
+            جدّد اشتراكك الآن لتضمن استمرار خطتك وسجل تقدمك دون انقطاع.
           </Text>
           {coach?.telephone ? (
             <View style={styles.contactRow}>
               <Button variant="outline" size="sm" onPress={() => Linking.openURL(`tel:${coach.telephone}`)}>
-                اتصل
+                اتصال هاتفي
               </Button>
               <Button size="sm" onPress={() => Linking.openURL(`https://wa.me/216${coach.telephone}`)}>
-                واتساب للتجديد
+                مراسلة عبر واتساب
               </Button>
             </View>
           ) : null}
@@ -113,10 +113,10 @@ export default function AbonnementScreen() {
       {paused && subscription ? (
         <Card>
           <Text style={[styles.countdownTitle, { color: colors.info }]}>
-            اشتراكك مجمّد حالياً
+            اشتراكك مجمّد حاليًا
           </Text>
           <Text style={[styles.countdownText, { color: colors.muted }]}>
-            الأيام المجمّدة تزداد في نهاية الاشتراك. تواصل مع كوتشك باش تفك التجميد.
+            تتم إضافة أيام التجميد تلقائيًا إلى نهاية فترة الاشتراك. تواصل مع مدربك لإلغاء التجميد.
           </Text>
         </Card>
       ) : null}
@@ -128,14 +128,14 @@ export default function AbonnementScreen() {
             <View key={s.id} style={[styles.historyRow, { borderBottomColor: colors.border }]}>
               <View>
                 <Text style={[styles.historyMain, { color: colors.text }]}>
-                  {s.montant} د — {PAYMENT_LABEL[s.mode_paiement]}
+                  {s.montant} د.ت — {PAYMENT_LABEL[s.mode_paiement]}
                 </Text>
                 <Text style={[styles.historySub, { color: colors.muted }]}>
                   {formatDate(s.date_debut)} ← {formatDate(s.date_fin)}
                 </Text>
               </View>
               <Badge
-                label={getSubscriptionStatus(s) === "EXPIRE" ? "خلص" : "مفعّل"}
+                label={getSubscriptionStatus(s) === "EXPIRE" ? "منتهي" : "نشط"}
                 variant={getSubscriptionStatus(s) === "EXPIRE" ? "expired" : "active"}
               />
             </View>
@@ -145,7 +145,7 @@ export default function AbonnementScreen() {
 
       {coach ? (
         <Card>
-          <Text style={[styles.cardTitle, { color: colors.text }]}>كوتشك</Text>
+          <Text style={[styles.cardTitle, { color: colors.text }]}>المدرب الخاص بك</Text>
           <Text style={[styles.coachName, { color: colors.text }]}>
             {coach.prenom} {coach.nom}
           </Text>
@@ -153,7 +153,7 @@ export default function AbonnementScreen() {
           {coach.telephone ? (
             <View style={styles.contactRow}>
               <Button variant="outline" size="sm" onPress={() => Linking.openURL(`tel:${coach.telephone}`)}>
-                اتصل
+                اتصال هاتفي
               </Button>
               <Button size="sm" onPress={() => Linking.openURL(`https://wa.me/216${coach.telephone}`)}>
                 واتساب

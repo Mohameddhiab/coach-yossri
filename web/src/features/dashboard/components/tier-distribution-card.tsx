@@ -12,8 +12,8 @@ export function TierDistributionCard({ users }: { users: UserWithSubscription[] 
   return (
     <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="text-base">الاشتراكات حسب العرض</CardTitle>
-        <CardDescription>توزيع الأعضاء النشطين على الباقات</CardDescription>
+        <CardTitle className="text-base">توزيع المشتركين حسب الباقة</CardTitle>
+        <CardDescription>توزيع المشتركين النشطين على الباقات المتاحة</CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
         {rows.map((r) => (
@@ -21,7 +21,7 @@ export function TierDistributionCard({ users }: { users: UserWithSubscription[] 
             <div className="flex items-center justify-between gap-2">
               <TierBadge tier={r.tier} />
               <span className="text-xs text-muted-foreground tabular-nums">
-                {r.count} عضو · {r.revenue} د.ت
+                {r.count} مشترك · {r.revenue} د.ت
               </span>
             </div>
             <div className="h-2 overflow-hidden rounded-full bg-muted">

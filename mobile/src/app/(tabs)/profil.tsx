@@ -15,10 +15,10 @@ import { useTheme } from "@/components/ui/theme";
 import { F } from "@/fonts";
 
 const STATUS_LABEL = {
-  ACTIF: "مفعّل",
-  EXPIRE: "خلص",
-  EXPIRE_BIENTOT: "قرب يخلص",
-  ESSAI: "تجربة",
+  ACTIF: "نشط",
+  EXPIRE: "منتهي",
+  EXPIRE_BIENTOT: "ينتهي قريباً",
+  ESSAI: "تجريبي",
 } as const;
 
 export default function ProfilScreen() {
@@ -35,17 +35,17 @@ export default function ProfilScreen() {
   const paused = isPaused(sub?.subscription ?? null);
 
   const stats = [
-    { label: "آخر وزن", value: last ? `${last.poids_kg.toFixed(1)} كغ` : "—" },
-    { label: "الهدف", value: target ? `${target.poids_kg} كغ` : "—" },
+    { label: "آخر وزن", value: last ? `${last.poids_kg.toFixed(1)} كغم` : "—" },
+    { label: "الهدف", value: target ? `${target.poids_kg} كغم` : "—" },
     {
-      label: "الأيام الباقية",
-      value: status === "EXPIRE" ? "0" : `${daysLeft(sub?.subscription ?? null)} يوم`,
+      label: "الأيام المتبقية",
+      value: status === "EXPIRE" ? "0" : `${daysLeft(sub?.subscription ?? null)} يومًا`,
     },
   ];
 
   return (
     <Screen>
-      <Text style={[styles.screenTitle, { color: colors.text }]}>ملفي</Text>
+      <Text style={[styles.screenTitle, { color: colors.text }]}>الملف الشخصي</Text>
 
       <Card>
         <View style={styles.avatarRow}>
@@ -61,7 +61,7 @@ export default function ProfilScreen() {
             <Text style={[styles.muted, { color: colors.muted }]}>{user.email}</Text>
             <View style={styles.badgeRow}>
               <Badge
-                label={paused ? "مجمّد مؤقتاً" : STATUS_LABEL[status]}
+                label={paused ? "مجمّد مؤقتًا" : STATUS_LABEL[status]}
                 variant={paused ? "frozen" : status === "EXPIRE" ? "expired" : status === "EXPIRE_BIENTOT" ? "soon" : status === "ESSAI" ? "trial" : "active"}
               />
             </View>
@@ -81,10 +81,10 @@ export default function ProfilScreen() {
       </Card>
 
       <Card>
-        <InfoRow label="الهاتف" value={user.telephone} />
-        <InfoRow label="عضو من" value={formatDate(user.created_at)} />
+        <InfoRow label="رقم الهاتف" value={user.telephone} />
+        <InfoRow label="تاريخ الانضمام" value={formatDate(user.created_at)} />
         {user.referred_by ? (
-          <InfoRow label="جاء عبر دعوة" value="صديق ✓" />
+          <InfoRow label="برنامج الإحالة" value="تمت الإحالة بواسطة صديق ✓" />
         ) : null}
       </Card>
     </Screen>

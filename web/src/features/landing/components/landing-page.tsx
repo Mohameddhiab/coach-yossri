@@ -217,7 +217,7 @@ const STEPS = [
   {
     num: "02",
     title: "تواصل مع المدرب",
-    desc: "تواصل مباشر عبر واتساب، تأكيد الاشتراك والدفع نقداً في القاعة.",
+    desc: "تواصل مباشر عبر واتساب، تأكيد الاشتراك والدفع نقدًا في الصالة الرياضية.",
   },
   {
     num: "03",
@@ -266,13 +266,13 @@ function MiniPlanTable() {
       <table className="w-full min-w-[520px] border-collapse text-xs">
         <thead>
           <tr className="bg-primary/10 text-xs font-bold text-muted-foreground">
-            <th className="border-b px-2.5 py-2 text-start">Nom exercice</th>
-            <th className="border-b px-2.5 py-2">image</th>
-            <th className="border-b px-2.5 py-2">charge</th>
-            <th className="border-b px-2.5 py-2">reps</th>
-            <th className="border-b px-2.5 py-2">Nbre serie</th>
-            <th className="border-b px-2.5 py-2">tempo</th>
-            <th className="border-b px-2.5 py-2">rest</th>
+            <th className="border-b px-2.5 py-2 text-start">التمرين</th>
+            <th className="border-b px-2.5 py-2">الصورة</th>
+            <th className="border-b px-2.5 py-2">الحمل</th>
+            <th className="border-b px-2.5 py-2">التكرارات</th>
+            <th className="border-b px-2.5 py-2">الجولات</th>
+            <th className="border-b px-2.5 py-2">الإيقاع</th>
+            <th className="border-b px-2.5 py-2">الراحة</th>
           </tr>
         </thead>
         <tbody>
@@ -309,10 +309,10 @@ function MiniPlanTable() {
 
 function MiniMacrosPreview() {
   const macros = [
-    { label: "Calories", value: "2200" },
-    { label: "Protéines", value: "160g" },
-    { label: "Glucides", value: "220g" },
-    { label: "Lipides", value: "65g" },
+    { label: "سعرات", value: "2200" },
+    { label: "بروتين", value: "160g" },
+    { label: "كربوهيدرات", value: "220g" },
+    { label: "دهون", value: "65g" },
   ];
   return (
     <div className="grid grid-cols-2 gap-2 rounded-xl border border-primary/15 bg-background/60 p-4 sm:grid-cols-4">
@@ -331,7 +331,7 @@ function MiniMacrosPreview() {
 function MiniChatPreview() {
   const messages = [
     { from: "member" as const, text: "أهلاً مدرب، هل يمكن تعديل تمرين اليوم؟" },
-    { from: "coach" as const, text: "بالتأكيد — استبدل السكوات بجهاز الضغط للأرجل بـ 60 كغ." },
+    { from: "coach" as const, text: "بالتأكيد — استبدل السكوات بجهاز الضغط للأرجل بـ 60 كغم." },
   ];
   return (
     <div className="space-y-2 rounded-xl border border-primary/15 bg-background/60 p-4">
@@ -367,7 +367,7 @@ const PILLARS = [
     label: "TRAINING",
     num: "02",
     title: "جدول تمارين احترافي",
-    desc: "كل تمرين بصورة توضيحية، مع عدد المجموعات والتكرارات والإيقاع وفترات الراحة — كما في أكبر القاعات.",
+    desc: "كل تمرين بصورة توضيحية، مع عدد المجموعات والتكرارات والإيقاع وفترات الراحة — كما في كبرى الصالات الرياضية.",
     visual: "table" as const,
   },
   {
@@ -428,7 +428,7 @@ const CERTIFICATES = [
   {
     file: "personal-trainer.jpeg",
     title: "Personal Trainer",
-    desc: "شهادة مدرب شخصي — متابعة فردية، برمجة أحمال وتغذية مخصصة لكل عضو.",
+    desc: "شهادة مدرب شخصي — متابعة فردية، برمجة أحمال وتغذية مخصصة لكل مشترك.",
   },
   {
     file: "ifbb-certificate.jpeg",
@@ -517,7 +517,7 @@ function ResultsSection() {
       </SectionTitle>
       <Reveal delay={100}>
         <p className="max-w-2xl text-sm text-muted-foreground">
-          تحولات حقيقية لأعضاء القاعة — تنشر بعد موافقتهم.
+          تحولات حقيقية لمشتركي الصالة الرياضية — تُنشر بعد موافقتهم.
         </p>
       </Reveal>
       <div className="grid gap-4 sm:grid-cols-3">
@@ -539,7 +539,7 @@ function ResultsSection() {
                   ))}
                 </div>
                 <p className="text-center text-xs text-muted-foreground">
-                  صور حقيقية قريب — بعد موافقة الأعضاء
+                  صور حقيقية قريبًا — بعد موافقة المشتركين
                 </p>
               </CardContent>
             </Card>
@@ -648,7 +648,7 @@ function ComparisonSection() {
                     <tr className="bg-muted/60 text-xs font-bold text-muted-foreground">
                       <th className="border-b px-3 py-3 text-start">الميزة</th>
                       <th className="border-b px-3 py-3">أونلاين</th>
-                      <th className="border-b px-3 py-3 text-primary">بريميوم كوش</th>
+                      <th className="border-b px-3 py-3 text-primary">بريميوم كوتش</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -719,7 +719,7 @@ function FinalCta({ whatsappUrl }: { whatsappUrl: string }) {
             أفضل نسخة منك تبدأ بقرار.
           </h2>
           <p className="mx-auto mt-3 max-w-md text-sm text-muted-foreground">
-            انضم إلى أكثر من 250 عضواً غيّروا أجسامهم ببرنامج مصمم خصيصاً لهم ومتابعة حقيقية.
+            انضم إلى أكثر من ٢٥٠ مشتركًا غيّروا أجسامهم ببرنامج مصمم خصيصاً لهم ومتابعة حقيقية.
           </p>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
             <Button asChild size="lg">
@@ -882,7 +882,7 @@ export function LandingPage() {
               className="hero-rise mx-auto max-w-xl text-muted-foreground lg:mx-0"
               style={{ "--d": "440ms" } as React.CSSProperties}
             >
-              كل شيء في تطبيق واحد: جدول تمارين كما في أكبر القاعات، خطة غذائية
+              كل شيء في تطبيق واحد: جدول تمارين كما في أفضل الصالات الرياضية، خطة غذائية
               بالمغذيات، تتبع للوزن والصور، ومحادثة مباشرة مع مدربك.
             </p>
             <div

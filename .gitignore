@@ -32,3 +32,8 @@ prisma/migrations/dev.db*
 
 # Workout guide assets (copied from node_modules via postinstall)
 web/public/guide-assets/
+# never commit prod secrets
+backend/.env.production
+web/.env.production
+web/.env.local
+

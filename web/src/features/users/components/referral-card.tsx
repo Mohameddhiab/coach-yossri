@@ -25,11 +25,11 @@ export function ReferralCard({ user }: { user: User }) {
       <CardContent className="flex flex-wrap items-center gap-x-6 gap-y-2 p-4 text-sm">
         <div className="flex items-center gap-2 font-semibold">
           <Gift className="size-4 text-primary" />
-          جيب صاحبك
+          برنامج الإحالة
         </div>
         {parrain && (
           <div className="text-muted-foreground">
-            جاء هذا العضو عن طريق:{" "}
+            تمت إحالة هذا المشترك بواسطة:{" "}
             <span className="font-bold text-foreground">
               {parrain.prenom} {parrain.nom}
             </span>
@@ -38,8 +38,8 @@ export function ReferralCard({ user }: { user: User }) {
         {filleuls > 0 && (
           <div className="flex items-center gap-1.5 text-muted-foreground">
             <Users className="size-4 text-primary" />
-            جاب معه: <span className="font-bold text-foreground">{filleuls}</span>{" "}
-            {filleuls === 1 ? "عضو" : "أعضاء"}
+            قام بدعوة: <span className="font-bold text-foreground">{filleuls}</span>{" "}
+            {filleuls === 1 ? "مشترك واحد" : "مشتركين"}
           </div>
         )}
       </CardContent>

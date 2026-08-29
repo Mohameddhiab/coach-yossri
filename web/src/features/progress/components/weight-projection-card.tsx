@@ -29,17 +29,17 @@ export function WeightProjectionCard({
             <Target className="size-5 text-primary" />
           </div>
           <div>
-            <div className="text-sm font-semibold">التوقع ({label})</div>
+            <div className="text-sm font-semibold">توقع الوزن ({label})</div>
             <div className="text-xs text-muted-foreground">
-              وتيرة حالية: {slopePerWeek > 0 ? "+" : ""}
-              {slopePerWeek} كغ / أسبوع
+              المعدل الأسبوعي الحالي: {slopePerWeek > 0 ? "+" : ""}
+              {slopePerWeek} كغم / أسبوع
             </div>
           </div>
         </div>
         <div className="flex items-center gap-1.5">
           <Icon className={cn("size-5", tone)} />
           <span className={cn("text-2xl font-black tabular-nums", tone)}>{projected}</span>
-          <span className="text-xs text-muted-foreground">كغ</span>
+          <span className="text-xs text-muted-foreground">كغم</span>
         </div>
       </CardContent>
     </Card>

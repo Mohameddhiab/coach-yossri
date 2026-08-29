@@ -21,8 +21,8 @@ export function CoachInbox() {
     return (
       <EmptyState
         icon={<MessagesSquare className="size-5" />}
-        title="لا يوجد محادثات"
-        description="يمكن لأعضاء باقة بريميوم كوش إرسال الرسائل إليك من هنا."
+        title="لا توجد محادثات نشطة"
+        description="يمكن لمشتركي باقة بريميوم كوتش إرسال الرسائل إليك من هنا."
       />
     );
   }
@@ -81,7 +81,7 @@ export function CoachInbox() {
             <EmptyState
               icon={<MessagesSquare className="size-5" />}
               title="اختر محادثة"
-              description="اختر عضوًا من القائمة لعرض الرسائل."
+              description="اختر مشتركًا من القائمة لعرض الرسائل."
             />
           </div>
         )}

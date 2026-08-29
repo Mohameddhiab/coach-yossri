@@ -43,20 +43,20 @@ export function TodayAttendanceCard({
               {rows.length}/{activeCount}
             </span>
           </CardTitle>
-          <CardDescription>الأعضاء اللي سجّلوا حضورهم اليوم</CardDescription>
+          <CardDescription>المشتركون الذين سجّلوا حضورهم اليوم</CardDescription>
         </div>
         <Button asChild size="sm" variant="outline">
           <Link href="/pointage">
             <ScanLine className="size-4" />
-            نقطة الحضور
+            تسجيل الحضور
           </Link>
         </Button>
       </CardHeader>
       <CardContent>
         {!rows.length ? (
           <EmptyState
-            title="حتى واحد ما سجّل حضورو بعد"
-            description="سجّل الحضور من صفحة الحضور بإدخال معرّف العضو."
+            title="لم يسجّل أحد حضوره اليوم بعد"
+            description="يمكنك تسجيل الحضور من صفحة تسجيل الحضور بإدخال رقم المشترك."
           />
         ) : (
           <div className="flex flex-wrap gap-2">

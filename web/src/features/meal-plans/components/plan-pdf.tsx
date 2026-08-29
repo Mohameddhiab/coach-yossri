@@ -68,7 +68,7 @@ export function PlanPdfDocument({
         </div>
         <div className="mt-1 text-neutral-500">
           ماكروز يومياً: {plan.calories_cible} سعرة · {plan.proteines_g}غ بروتين ·{" "}
-          {plan.glucides_g}غ كارب · {plan.lipides_g}غ دهون
+          {plan.glucides_g}غ كربوهيدرات · {plan.lipides_g}غ دهون
         </div>
       </header>
 
@@ -79,10 +79,10 @@ export function PlanPdfDocument({
         return (
           <section key={day} className="mt-6">
             <h2 className="mb-2 border-b border-neutral-200 pb-1 text-[15px] font-extrabold text-neutral-900">
-              {day === "TOUS_LES_JOURS" ? "كل الأيام" : WEEK_DAY_LABELS[day]}
+              {day === "TOUS_LES_JOURS" ? "جميع الأيام" : WEEK_DAY_LABELS[day]}
             </h2>
             {dayMeals.length === 0 ? (
-              <p className="text-neutral-500">لا يوجد وجبات مبرمجة</p>
+              <p className="text-neutral-500">لا توجد وجبات مسجلة</p>
             ) : (
               <div className="space-y-2">
                 {MEAL_TYPE_ORDER.map((type) => {
@@ -104,12 +104,12 @@ export function PlanPdfDocument({
                           <p className="text-xs text-neutral-500">
                             {meal.proteines_g ? `${meal.proteines_g}غ بروتين` : ""}
                             {meal.proteines_g && meal.glucides_g ? " · " : ""}
-                            {meal.glucides_g ? `${meal.glucides_g}غ كارب` : ""}
+                            {meal.glucides_g ? `${meal.glucides_g}غ كربوهيدرات` : ""}
                             {meal.glucides_g && meal.lipides_g ? " · " : ""}
                             {meal.lipides_g ? `${meal.lipides_g}غ دهون` : ""}
                           </p>
                           {meal.alternatives ? (
-                            <p className="text-xs text-neutral-500">بديل: {meal.alternatives}</p>
+                            <p className="text-xs text-neutral-500">البديل المتاح: {meal.alternatives}</p>
                           ) : null}
                         </div>
                       ))}
@@ -123,7 +123,7 @@ export function PlanPdfDocument({
       })}
 
       <section className="mt-8 border-t-2 border-amber-500 pt-4">
-        <h2 className="text-lg font-black text-neutral-900">تقدّمي مع الخطة</h2>
+        <h2 className="text-lg font-black text-neutral-900">متابعة التقدم مع الخطة</h2>
 
         {goal ? (
           <div className="mt-3 rounded-lg border border-neutral-200 p-3">
@@ -151,7 +151,7 @@ export function PlanPdfDocument({
           <div className="rounded-lg border border-neutral-200 p-3">
             <div className="text-xs text-neutral-500">الوزن الحالي</div>
             <div className="mt-1 text-lg font-black text-neutral-900">
-              {current ? `${current.poids_kg.toFixed(1)} كغ` : "—"}
+              {current ? `${current.poids_kg.toFixed(1)} كغم` : "—"}
             </div>
             {delta !== null ? (
               <div
@@ -160,14 +160,14 @@ export function PlanPdfDocument({
                 }`}
               >
                 {delta > 0 ? "+" : ""}
-                {delta.toFixed(1)} كغ من البداية
+                {delta.toFixed(1)} كغم من البداية
               </div>
             ) : null}
           </div>
           <div className="rounded-lg border border-neutral-200 p-3">
-            <div className="text-xs text-neutral-500">أول وزنة</div>
+            <div className="text-xs text-neutral-500">الوزن المبدئي (الأول)</div>
             <div className="mt-1 text-lg font-black text-neutral-900">
-              {first ? `${first.poids_kg.toFixed(1)} كغ` : "—"}
+              {first ? `${first.poids_kg.toFixed(1)} كغم` : "—"}
             </div>
             {first ? <div className="text-xs text-neutral-500">{formatDateShort(first.date)}</div> : null}
           </div>
@@ -176,7 +176,7 @@ export function PlanPdfDocument({
         {target ? (
           <div className="mt-3 rounded-lg border border-amber-300 bg-amber-50 p-3">
             <div className="flex items-center justify-between">
-              <span className="font-bold text-neutral-900">الهدف: {target.poids_kg} كغ</span>
+              <span className="font-bold text-neutral-900">الهدف: {target.poids_kg} كغم</span>
               <span className="text-xs text-neutral-600">قبل {formatDateShort(target.date)}</span>
             </div>
             <div className="mt-2 flex items-center gap-2">
@@ -209,7 +209,7 @@ export function PlanPdfDocument({
                     <tr key={log.id} className="border-b border-neutral-100 last:border-b-0">
                       <td className="px-3 py-1.5 text-neutral-600">{formatDateShort(log.date)}</td>
                       <td className="px-3 py-1.5 font-bold text-neutral-900">
-                        {log.poids_kg.toFixed(1)} كغ
+                        {log.poids_kg.toFixed(1)} كغم
                       </td>
                       <td
                         className={`px-3 py-1.5 text-xs font-bold ${
@@ -230,13 +230,13 @@ export function PlanPdfDocument({
           </div>
         ) : (
           <p className="mt-3 text-neutral-500">
-            لا يوجد أوزان مسجلة بعد — سجل وزنك بانتظام لنتابع تقدمك معك.
+            لا توجد أوزان مسجلة بعد — سجّل وزنك بانتظام لنتابع تقدمك باستمرار.
           </p>
         )}
       </section>
 
       <footer className="mt-8 border-t border-neutral-200 pt-3 text-center text-xs text-neutral-500">
-        بالصحة والقوة مع مدربك — Coach Yosri · تنسخ {formatDateShort(new Date().toISOString())}
+        مع تمنياتنا لك بدوام الصحة والقوة — Coach Yosri · تم الاستخراج في {formatDateShort(new Date().toISOString())}
       </footer>
     </div>
   );

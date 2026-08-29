@@ -26,7 +26,7 @@ export function AlertsMiniList({ users }: { users: UserWithSubscription[] }) {
       <CardHeader className="flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="flex items-center gap-2 text-base">
           <BellRing className="size-4 text-primary" />
-          يحتاج متابعة
+          تنبيهات تتطلب المتابعة
           {alerts.length > 0 && (
             <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-xs font-bold text-amber-600 tabular-nums dark:text-amber-400">
               {computeAlerts(users).length}
@@ -37,14 +37,14 @@ export function AlertsMiniList({ users }: { users: UserWithSubscription[] }) {
           href="/notifications"
           className="flex items-center gap-0.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
         >
-          الكل
+          عرض الكل
           <ChevronLeft className="size-3.5" />
         </Link>
       </CardHeader>
       <CardContent>
         {!alerts.length ? (
           <p className="py-4 text-center text-sm text-muted-foreground">
-            كل شيء على ما يرام 👌
+            لا توجد تنبيهات حالية — جميع الاشتراكات منتظمة 👌
           </p>
         ) : (
           <div className="space-y-1.5">

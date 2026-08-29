@@ -28,13 +28,13 @@ export function UnreadMessagesCard() {
           href="/messages"
           className="flex items-center gap-0.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
         >
-          الكل
+          عرض الكل
           <ChevronLeft className="size-3.5" />
         </Link>
       </CardHeader>
       <CardContent>
         {!unreadRows.length ? (
-          <p className="py-4 text-center text-sm text-muted-foreground">لا يوجد رسائل جديدة</p>
+          <p className="py-4 text-center text-sm text-muted-foreground">لا توجد رسائل جديدة غير مقروءة</p>
         ) : (
           <div className="space-y-1.5">
             {unreadRows.slice(0, 4).map((c) => (

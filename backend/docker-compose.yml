@@ -8,11 +8,11 @@ services:
       POSTGRES_PASSWORD: 9awi_dev_pw
       POSTGRES_DB: 9awi
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U 9awi -d 9awi"]
+      test: ['CMD-SHELL', 'pg_isready -U 9awi -d 9awi']
       interval: 5s
       timeout: 5s
       retries: 10
@@ -22,11 +22,11 @@ services:
     container_name: 9awi-redis
     restart: unless-stopped
     ports:
-      - "6379:6379"
+      - '6379:6379'
     volumes:
       - redisdata:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ['CMD', 'redis-cli', 'ping']
       interval: 5s
       timeout: 5s
       retries: 10

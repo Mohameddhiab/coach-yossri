@@ -54,7 +54,7 @@ export function MealPlanDayView({
         </div>
         <div>
           <p className="text-sm font-medium text-muted-foreground">
-            لا وجبات مبرمجة
+            لا توجد وجبات مسجلة
           </p>
           <p className="mt-0.5 text-xs text-muted-foreground/60">
             ليوم {WEEK_DAY_LABELS[day]}
@@ -97,12 +97,12 @@ export function MealPlanDayView({
                   <p className="text-sm leading-relaxed text-foreground">{meal.description}</p>
                   <div className="mt-2 flex flex-wrap items-center gap-1.5">
                     <MacroChip label="بروتين" value={meal.proteines_g} color="text-emerald-600 dark:text-emerald-400" />
-                    <MacroChip label="كارب" value={meal.glucides_g} color="text-sky-600 dark:text-sky-400" />
+                    <MacroChip label="كربوهيدرات" value={meal.glucides_g} color="text-sky-600 dark:text-sky-400" />
                     <MacroChip label="دهون" value={meal.lipides_g} color="text-orange-600 dark:text-orange-400" />
                   </div>
                   {meal.alternatives && (
                     <div className="mt-2.5 flex items-start gap-1.5 rounded-lg bg-muted/40 px-2.5 py-2 text-xs text-muted-foreground">
-                      <span className="mt-0.5 shrink-0 text-xs">بديل</span>
+                      <span className="mt-0.5 shrink-0 text-xs">بدائل متاحة:</span>
                       <span>{meal.alternatives}</span>
                     </div>
                   )}

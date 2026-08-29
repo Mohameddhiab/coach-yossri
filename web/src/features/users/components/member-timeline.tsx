@@ -58,7 +58,7 @@ export function MemberTimeline({ userId }: { userId: string }) {
       id: `w-${w.id}`,
       date: w.date,
       type: "weight" as const,
-      text: `سجّل وزنة جديدة: ${w.poids_kg} كغ`,
+      text: `تم تسجيل قياس وزن جديد: ${w.poids_kg} كغم`,
       detail: w.note ?? undefined,
     })),
     ...(subscriptions ?? []).map((s) => ({
@@ -101,7 +101,7 @@ export function MemberTimeline({ userId }: { userId: string }) {
       </CardHeader>
       <CardContent>
         {events.length === 0 ? (
-          <EmptyState title="لا يوجد نشاط بعد" />
+          <EmptyState title="لا يوجد نشاط مسجّل بعد" />
         ) : (
           <div className="relative space-y-4 before:absolute before:inset-y-1 before:start-[13px] before:w-px before:bg-border">
             {events.slice(0, 40).map((event) => {

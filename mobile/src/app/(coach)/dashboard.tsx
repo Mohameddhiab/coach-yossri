@@ -48,23 +48,23 @@ export default function CoachDashboard() {
       let text = "";
       let variant: "expired" | "soon" | "neutral" = "neutral";
       if (s === "EXPIRE") {
-        text = `خلص اشتراك ${u.prenom} ${u.nom}`;
+        text = `انتهى اشتراك ${u.prenom} ${u.nom}`;
         variant = "expired";
       } else if (s === "EXPIRE_BIENTOT") {
-        text = `اشتراك ${u.prenom} ${u.nom} يخلص خلال ${daysLeft(u.subscription)} يوم`;
+        text = `ينتهي اشتراك ${u.prenom} ${u.nom} خلال ${daysLeft(u.subscription)} يومًا`;
         variant = "soon";
       } else {
-        text = `${u.prenom} ${u.nom} ما سجّلش وزنه من ${u.days_since_last_weight} أيام`;
+        text = `لم يسجّل ${u.prenom} ${u.nom} وزنه منذ ${u.days_since_last_weight} يومًا`;
       }
       return { id: u.id, text, variant };
     })
     .slice(0, 6);
 
   const stats = [
-    { label: "إجمالي الأعضاء", value: all.length, icon: "people-outline" as const, tint: colors.primary },
-    { label: "اشتراك نشط", value: actifs, icon: "checkmark-circle-outline" as const, tint: "#22C55E" },
-    { label: "يخلص خلال 7 أيام", value: expiresSoon, icon: "time-outline" as const, tint: "#F59E0B" },
-    { label: "اشتراك خلص", value: expired, icon: "close-circle-outline" as const, tint: colors.destructive },
+    { label: "إجمالي المشتركين", value: all.length, icon: "people-outline" as const, tint: colors.primary },
+    { label: "اشتراكات نشطة", value: actifs, icon: "checkmark-circle-outline" as const, tint: "#22C55E" },
+    { label: "ينتهي خلال 7 أيام", value: expiresSoon, icon: "time-outline" as const, tint: "#F59E0B" },
+    { label: "اشتراكات منتهية", value: expired, icon: "close-circle-outline" as const, tint: colors.destructive },
   ];
 
   return (
@@ -113,14 +113,14 @@ export default function CoachDashboard() {
         ))}
         {(leaderboard.data ?? []).length === 0 ? (
           <Text style={{ color: colors.muted, fontFamily: F.regular, fontSize: 13 }}>
-            ما كاينش بيانات هذا الأسبوع
+            لا توجد بيانات لهذا الأسبوع
           </Text>
         ) : null}
       </Card>
 
       <Pressable onPress={() => router.push("/membres")} style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}>
         <View style={[styles.membersLink, { borderColor: colors.border, backgroundColor: colors.card }]}>
-          <Text style={{ color: colors.text, fontFamily: F.bold, fontSize: 14 }}>إدارة الأعضاء</Text>
+          <Text style={{ color: colors.text, fontFamily: F.bold, fontSize: 14 }}>إدارة المشتركين</Text>
           <Ionicons name="chevron-forward" size={18} color={colors.muted} />
         </View>
       </Pressable>

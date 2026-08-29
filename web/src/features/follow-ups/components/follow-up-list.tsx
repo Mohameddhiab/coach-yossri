@@ -26,7 +26,7 @@ export function FollowUpList() {
             <Skeleton className="h-20 rounded-xl" />
           </div>
         ) : !rows?.length ? (
-          <EmptyState title="لا يوجد تقييمات حاليًا" description="المدرب ينشر هنا تقييماتك و تعديلاتك." />
+          <EmptyState title="لا توجد تقييمات مسجلة حاليًا" description="سينشر المدرب هنا تقييماتك الدورية وتعديلات الخطة." />
         ) : (
           <div className="space-y-3">
             {[...rows]
@@ -40,7 +40,7 @@ export function FollowUpList() {
                   <p className="whitespace-pre-line text-sm">{f.bilan}</p>
                   {f.ajustements ? (
                     <p className="mt-2 whitespace-pre-line rounded-lg bg-muted p-2 text-sm text-muted-foreground">
-                      تعديلات : {f.ajustements}
+                      التعديلات المقترحة: {f.ajustements}
                     </p>
                   ) : null}
                 </div>

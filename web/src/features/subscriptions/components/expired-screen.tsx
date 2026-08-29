@@ -27,23 +27,23 @@ export function ExpiredScreen({
           <div className="space-y-2">
             <h1 className="flex items-center justify-center gap-2 text-xl font-extrabold text-destructive">
               <CalendarX2 className="size-5" />
-              اشتراكك منتهي
+              انتهت صلاحية اشتراكك
             </h1>
             <p className="text-sm text-muted-foreground">
-              مدّة اشتراكك انتهت. جدّد مع مدربك حتى ترجع لخطتك وأوزانك وكل التقدم.
+              انتهت فترة اشتراكك. يُرجى التجديد مع مدربك للاستمرار في متابعة خطتك وسجلات أوزانك وتقدمك الرياضي.
             </p>
           </div>
 
           {subscription && (
             <div className="grid grid-cols-2 gap-3 rounded-xl border bg-muted/40 p-4 text-sm">
               <div>
-                <div className="text-xs text-muted-foreground">تاريخ النهاية</div>
+                <div className="text-xs text-muted-foreground">تاريخ انتهاء الاشتراك</div>
                 <div className="mt-0.5 font-bold tabular-nums">
                   {formatDate(subscription.date_fin)}
                 </div>
               </div>
               <div>
-                <div className="text-xs text-muted-foreground">آخر مبلغ</div>
+                <div className="text-xs text-muted-foreground">مبلغ آخر اشتراك</div>
                 <div className="mt-0.5 font-bold tabular-nums">{subscription.montant} د.ت</div>
               </div>
             </div>
@@ -73,7 +73,7 @@ export function ExpiredScreen({
               >
                 <a href={`tel:${coach.telephone}`}>
                   <Phone />
-                  اتصل بمدربك للتجديد
+                  التواصل مع المدرب للتجديد
                 </a>
               </Button>
             )}
@@ -87,7 +87,7 @@ export function ExpiredScreen({
               }}
             >
               <LogOut />
-              اخرج
+              تسجيل الخروج
             </Button>
           </div>
         </CardContent>

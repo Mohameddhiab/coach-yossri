@@ -44,9 +44,9 @@ export function WorkoutPlanDayView({
           <Dumbbell className="size-6 text-amber-600 dark:text-amber-400" />
         </div>
         <div>
-          <p className="text-sm font-bold text-foreground">لا تمارين اليوم</p>
+          <p className="text-sm font-bold text-foreground">لا توجد تمارين مبرمجة اليوم</p>
           <p className="mt-1 text-xs text-muted-foreground">
-            استراحة — {WEEK_DAY_LABELS[day]}
+            يوم راحة واستشفاء — {WEEK_DAY_LABELS[day]}
           </p>
         </div>
       </div>
@@ -135,19 +135,19 @@ export function WorkoutPlanDayView({
               </div>
               <div className="rounded-xl bg-muted/40 px-2 py-2 text-center">
                 <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
-                  <Repeat className="size-3" /> تكرار
+                  <Repeat className="size-3" /> تكرارات
                 </div>
                 <div className="mt-1 whitespace-pre-line text-xs font-bold leading-tight text-foreground">{e.repetitions ?? "—"}</div>
               </div>
               <div className="rounded-xl bg-muted/40 px-2 py-2 text-center">
                 <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
-                  <Layers className="size-3" /> مجموعات
+                  <Layers className="size-3" /> جولات
                 </div>
                 <div className="mt-1 text-sm font-black tabular-nums text-foreground">{e.series ?? "—"}</div>
               </div>
               <div className="rounded-xl bg-muted/40 px-2 py-2 text-center">
                 <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
-                  <Timer className="size-3" /> راحة
+                  <Timer className="size-3" /> الراحة
                 </div>
                 <div className="mt-1 text-xs font-bold text-foreground">{e.repos ?? e.tempo ?? "—"}</div>
               </div>
@@ -157,10 +157,10 @@ export function WorkoutPlanDayView({
               <div className="mt-2 flex items-center justify-center gap-3 text-xs text-muted-foreground">
                 <span className="flex items-center gap-1 font-mono">
                   <Clock className="size-3" />
-                  tempo {e.tempo}
+                  الإيقاع: {e.tempo}
                 </span>
                 <span className="size-1 rounded-full bg-border" />
-                <span>راحة {e.repos}</span>
+                <span>الراحة: {e.repos}</span>
               </div>
             )}
           </div>

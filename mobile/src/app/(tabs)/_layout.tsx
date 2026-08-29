@@ -19,7 +19,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="plan"
         options={{
-          title: "خطّتي",
+          title: "الخطة",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="restaurant-outline" color={color} size={size} />
           ),
@@ -28,7 +28,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="progression"
         options={{
-          title: "تقدّمي",
+          title: "التقدم",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="trending-up-outline" color={color} size={size} />
           ),
@@ -37,7 +37,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="profil"
         options={{
-          title: "ملفي",
+          title: "الملف الشخصي",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="person-outline" color={color} size={size} />
           ),
@@ -46,7 +46,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="abonnement"
         options={{
-          title: "اشتراكي",
+          title: "الاشتراك",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="card-outline" color={color} size={size} />
           ),
@@ -55,7 +55,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="reglages"
         options={{
-          title: "إعدادات",
+          title: "الإعدادات",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="settings-outline" color={color} size={size} />
           ),

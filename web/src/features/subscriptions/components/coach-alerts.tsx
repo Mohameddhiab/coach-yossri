@@ -42,8 +42,8 @@ export function CoachAlerts({ users }: { users: UserWithSubscription[] }) {
         </CardHeader>
         <CardContent>
           <EmptyState
-            title="لا يوجد تنبيهات"
-            description="كل شيء على ما يرام — لا يوجد عضو يحتاج تدخلًا حاليًا"
+            title="لا توجد تنبيهات"
+            description="كل شيء على ما يرام — لا يوجد أي مشترك يتطلب تدخلاً حاليًا"
           />
         </CardContent>
       </Card>
@@ -55,7 +55,7 @@ export function CoachAlerts({ users }: { users: UserWithSubscription[] }) {
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-base">
           <BellRing className="size-4 text-primary" />
-          يحتاج انتباهك
+          تنبيهات تتطلب اهتمامك
           <Badge variant="secondary" className="tabular-nums">
             {alerts.length}
           </Badge>

@@ -43,7 +43,7 @@ import { cn } from "@/lib/utils";
 const STATUS_TABS: { value: SubscriptionStatus | "TOUS"; label: string }[] = [
   { value: "TOUS", label: "الكل" },
   { value: "ACTIF", label: "نشط" },
-  { value: "EXPIRE_BIENTOT", label: "أوشك على الانتهاء" },
+  { value: "EXPIRE_BIENTOT", label: "ينتهي قريباً" },
   { value: "EXPIRE", label: "منتهي" },
 ];
 
@@ -119,8 +119,8 @@ export function UsersTable() {
         <div className="relative min-w-56 flex-1 sm:max-w-xs">
           <Search className="absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder={placeholderIndex === 0 ? "بحث بالاسم أو اللقب…" : "بحث بالبريد أو الهاتف…"}
-            aria-label="بحث عن عضو"
+            placeholder={placeholderIndex === 0 ? "البحث بالاسم أو اسم العائلة…" : "البحث بالبريد أو الهاتف…"}
+            aria-label="البحث عن مشترك"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pe-8 ps-9 rounded-xl border-border/80 bg-background/80"
@@ -171,15 +171,15 @@ export function UsersTable() {
             "gap-1.5 rounded-xl font-semibold",
             byEngagement && "bg-primary text-primary-foreground shadow-sm",
           )}
-          title="ترتيب الأعضاء حسب درجة التزامهم"
+          title="ترتيب المشتركين بحسب درجة التزامهم"
         >
           <HeartPulse className="size-4" />
-          <span>ترتيب الالتزام</span>
+          <span>ترتيب بحسب الالتزام</span>
         </Button>
 
         {!isLoading && !isError && (
           <span className="ms-auto hidden text-xs font-medium text-muted-foreground tabular-nums sm:inline-block">
-            {rows.length} عضو معروض
+            {rows.length} مشترك معروض
           </span>
         )}
       </div>
@@ -195,18 +195,18 @@ export function UsersTable() {
         <ErrorState onRetry={() => refetch()} retrying={isRefetching} />
       ) : !rows || rows.length === 0 ? (
         <EmptyState
-          title={search ? "لا يوجد نتائج مطابقة للبحث" : "لا يوجد أعضاء في هذا القسم"}
+          title={search ? "لا توجد نتائج مطابقة للبحث" : "لا يوجد مشتركون في هذا القسم"}
           description={
             search
-              ? "تحقق من كتابة الاسم أو رقم الهاتف وجرّب كلمات أخرى"
-              : "أضف عضواً جديداً لتبدأ متابعته من هنا"
+              ? "تحقق من صحة الاسم أو رقم الهاتف وجرّب كلمات بحث أخرى"
+              : "أضف مشتركًا جديدًا لتبدأ متابعته من هنا"
           }
           action={
             !search ? (
               <Button asChild className="gap-2 font-bold">
                 <Link href="/users/new">
                   <UserCheck className="size-4" />
-                  أضف عضو جديد
+                  إضافة مشترك جديد
                 </Link>
               </Button>
             ) : (
@@ -223,7 +223,7 @@ export function UsersTable() {
             <Table>
               <TableHeader>
                 <TableRow className="border-b border-border bg-muted/30 hover:bg-transparent">
-                  <TableHead className="font-bold">العضو</TableHead>
+                  <TableHead className="font-bold">المشترك</TableHead>
                   <TableHead className="hidden md:table-cell font-bold">الهاتف</TableHead>
                   <TableHead className="font-bold">الاشتراك</TableHead>
                   <TableHead className="hidden lg:table-cell font-bold">آخر وزن</TableHead>
@@ -314,7 +314,7 @@ export function UsersTable() {
                           <SubscriptionBadge status={statusValue} />
                           {remaining > 0 && statusValue === "EXPIRE_BIENTOT" && (
                             <span className="rounded-md bg-amber-500/15 px-1.5 py-0.5 text-xs font-bold text-amber-600 dark:text-amber-400 tabular-nums">
-                              باقي {remaining} يوم
+                              متبقٍ {remaining} يومًا
                             </span>
                           )}
                         </div>
@@ -325,7 +325,7 @@ export function UsersTable() {
                         {user.last_weight ? (
                           <div className="leading-tight">
                             <div className="font-bold tabular-nums text-foreground">
-                              {user.last_weight.poids_kg} كغ
+                              {user.last_weight.poids_kg} كغم
                             </div>
                             <div
                               className={cn(
@@ -335,12 +335,12 @@ export function UsersTable() {
                             >
                               {user.days_since_last_weight === 0
                                 ? "اليوم"
-                                : `منذ ${user.days_since_last_weight} يوم`}
+                                : `منذ ${user.days_since_last_weight} يومًا`}
                             </div>
                           </div>
                         ) : (
                           <Badge variant="outline" className="border-dashed text-destructive">
-                            لم يسجل بعد
+                            لم يسجّل بعد
                           </Badge>
                         )}
                       </TableCell>
@@ -422,13 +422,13 @@ export function UsersTable() {
                             stale ? "text-destructive font-bold" : "text-muted-foreground",
                           )}
                         >
-                          {user.last_weight.poids_kg} كغ ·{" "}
+                          {user.last_weight.poids_kg} كغم ·{" "}
                           {user.days_since_last_weight === 0
                             ? "اليوم"
-                            : `منذ ${user.days_since_last_weight} يوم`}
+                            : `منذ ${user.days_since_last_weight} يومًا`}
                         </span>
                       ) : (
-                        <span className="text-xs text-destructive">لم يسجل وزن</span>
+                        <span className="text-xs text-destructive">لم يسجّل الوزن بعد</span>
                       )}
                     </div>
                   </div>

@@ -54,25 +54,25 @@ export function WeightTargetCard({
   const save = async () => {
     const p = Number(poids);
     if (!p || p <= 0 || !date) {
-      toast.error("أدخل وزن وتاريخ صحيحين");
+      toast.error("يُرجى إدخال وزن وتاريخ صحيحين");
       return;
     }
     try {
       await setTarget.mutateAsync({ poids_kg: p, date });
-      toast.success("تم تسجيل هدف الوزن");
+      toast.success("تم حفظ هدف الوزن بنجاح");
       setOpen(false);
     } catch {
-      toast.error("تعذر حفظ الهدف — حاول مرة أخرى");
+      toast.error("تعذّر حفظ الهدف — يُرجى المحاولة مرة أخرى");
     }
   };
 
   const clear = async () => {
     try {
       await deleteTarget.mutateAsync();
-      toast.success("تسمح الهدف");
+      toast.success("تم حذف الهدف بنجاح");
       setOpen(false);
     } catch {
-      toast.error("تعذر نحذف الهدف — حاول مرة أخرى");
+      toast.error("تعذّر حذف الهدف — يُرجى المحاولة مرة أخرى");
     }
   };
 
@@ -89,7 +89,7 @@ export function WeightTargetCard({
           </CardTitle>
           {target && (
             <CardDescription>
-              وزنك الهدف {target.poids_kg} كغ قبل {formatDate(target.date)}
+              الوزن المستهدف {target.poids_kg} كغم بحلول {formatDate(target.date)}
             </CardDescription>
           )}
         </div>
@@ -104,8 +104,8 @@ export function WeightTargetCard({
         {isLoading ? null : !target ? (
           <p className="text-sm text-muted-foreground">
             {canEdit
-              ? "حدّد هدفك مع المدرب — وزن هدف وتاريخ حتى توصلو."
-              : "ما حدّدش المدرب هدف بعد."}
+              ? "حدّد هدفك مع المدرب — الوزن المستهدف والتاريخ المتوقع لتحقيقه."
+              : "لم يقم المدرب بتحديد هدف وزن بعد."}
           </p>
         ) : (
           <div className="flex items-center gap-5">
@@ -126,29 +126,29 @@ export function WeightTargetCard({
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
                 <span className="text-2xl font-extrabold tabular-nums">{progress}%</span>
-                <span className="text-xs text-muted-foreground">المسار</span>
+                <span className="text-xs text-muted-foreground">نسبة الإنجاز</span>
               </div>
             </div>
             <div className="space-y-2 text-sm">
               <div className="flex items-center justify-between gap-6">
                 <span className="text-muted-foreground">الآن</span>
-                <span className="font-bold tabular-nums">{logs?.[0]?.poids_kg ?? "—"} كغ</span>
+                <span className="font-bold tabular-nums">{logs?.[0]?.poids_kg ?? "—"} كغم</span>
               </div>
               <div className="flex items-center justify-between gap-6">
                 <span className="text-muted-foreground">الهدف</span>
-                <span className="font-bold tabular-nums text-primary">{target.poids_kg} كغ</span>
+                <span className="font-bold tabular-nums text-primary">{target.poids_kg} كغم</span>
               </div>
               <div className="flex items-center justify-between gap-6">
-                <span className="text-muted-foreground">باقي</span>
+                <span className="text-muted-foreground">المتبقي</span>
                 <span className="font-semibold tabular-nums">
                   {logs?.[0]
-                    ? `${Math.round((logs[0].poids_kg - target.poids_kg) * 10) / 10} كغ`
+                    ? `${Math.round((logs[0].poids_kg - target.poids_kg) * 10) / 10} كغم`
                     : "—"}
                 </span>
               </div>
               {eta && (
                 <div className="max-w-52 rounded-lg bg-primary/10 px-3 py-1.5 text-xs text-primary">
-                  على هذا الإقاع توصل لهدفك يوم {formatDate(eta.date)}
+                  بهذا المعدل ستصل إلى هدفك بحلول {formatDate(eta.date)}
                 </div>
               )}
             </div>
@@ -161,12 +161,12 @@ export function WeightTargetCard({
           <DialogHeader>
             <DialogTitle>{target ? "تعديل هدف الوزن" : "تحديد هدف الوزن"}</DialogTitle>
             <DialogDescription>
-              المدرب والمشترك يتابعو المسار لهذا الهدف.
+              يتابع المدرب والمشترك مسار التقدم نحو هذا الهدف.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>وزن الهدف (كغ)</Label>
+              <Label>الوزن المستهدف (كغم)</Label>
               <Input
                 type="number"
                 dir="ltr"
@@ -178,7 +178,7 @@ export function WeightTargetCard({
               />
             </div>
             <div className="space-y-2">
-              <Label>تاريخ الوصول</Label>
+              <Label>التاريخ المستهدف</Label>
               <Input type="date" dir="ltr" value={date} onChange={(e) => setDate(e.target.value)} />
             </div>
           </div>
@@ -186,7 +186,7 @@ export function WeightTargetCard({
             {target && (
               <Button variant="ghost" className="me-auto text-destructive" onClick={clear}>
                 <Trash2 />
-                امسح الهدف
+                حذف الهدف
               </Button>
             )}
             <Button onClick={save} disabled={setTarget.isPending}>

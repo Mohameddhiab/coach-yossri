@@ -26,7 +26,7 @@ export class ResumeSubscriptionUseCase {
       fail(404, 'NOT_FOUND', 'الاشتراك غير موجود');
     }
     if (!sub.pauseStart) {
-      fail(400, 'NOT_PAUSED', 'الاشتراك ليس متجمداً');
+      fail(400, 'NOT_PAUSED', 'الاشتراك ليس مجمّداً');
     }
     const pausedDays = Math.max(
       1,

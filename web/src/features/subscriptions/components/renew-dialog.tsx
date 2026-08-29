@@ -32,7 +32,7 @@ const schema = z
     if (v.date_debut && v.date_fin && new Date(v.date_fin) <= new Date(v.date_debut)) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "تاريخ النهاية يجب أن يكون بعد البداية",
+        message: "يجب أن يكون تاريخ النهاية بعد تاريخ البداية",
         path: ["date_fin"],
       });
     }
@@ -74,11 +74,11 @@ export function RenewDialog({ userId, userName }: { userId: string; userName: st
         montant: values.montant,
         tier,
       });
-      toast.success("تم تجديد الاشتراك — دفعة نقداً مسجّلة");
+      toast.success("تم تجديد الاشتراك بنجاح — تم تسجيل الدفعة نقدًا");
       setOpen(false);
       form.reset({ date_debut: "", date_fin: "", montant: OFFRES[0].prix });
     } catch {
-      toast.error("تعذر نجدّد الاشتراك — حاول مرة أخرى");
+      toast.error("تعذّر تجديد الاشتراك — يُرجى المحاولة مرة أخرى");
     }
   };
 
@@ -94,7 +94,7 @@ export function RenewDialog({ userId, userName }: { userId: string; userName: st
         <DialogHeader>
           <DialogTitle>تجديد اشتراك {userName}</DialogTitle>
           <DialogDescription>
-            الدفع يتم نقداً خارج التطبيق — هنا فقط تم تسجيل العرض والمدة والمبلغ.
+            يتم الدفع نقدًا خارج التطبيق — يُسجّل هنا فقط نوع الباقة والمدة والمبلغ المستلم.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>

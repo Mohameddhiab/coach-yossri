@@ -45,7 +45,7 @@ export default function CoachSettingsScreen() {
     setSaved(false);
     const days = Number(interval);
     if (!days || days < 1) {
-      setError("فترة التذكير لازم تكون رقم موجب");
+      setError("يجب أن تكون فترة التذكير رقمًا موجبًا أكبر من الصفر");
       return;
     }
     try {
@@ -57,7 +57,7 @@ export default function CoachSettingsScreen() {
       });
       setSaved(true);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "صار خطأ");
+      setError(err instanceof ApiError ? err.message : "حدث خطأ أثناء حفظ الإعدادات");
     }
   };
 
@@ -77,13 +77,13 @@ export default function CoachSettingsScreen() {
       <Card>
         <Text style={[styles.sectionTitle, { color: colors.text }]}>رسالة التحفيز</Text>
         <Input
-          label="تتسيف للعضو مع التذكير بالتدريب"
+          label="الرسالة التلقائية المرسلة للمشتركين مع التذكير"
           value={message}
           onChangeText={setMessage}
           multiline
         />
         <Input
-          label="فترة التذكير (بالأيام)"
+          label="الفاصل الزمني للتذكير (بالأيام)"
           value={interval}
           onChangeText={setInterval}
           keyboardType="numeric"
@@ -93,7 +93,7 @@ export default function CoachSettingsScreen() {
             إرسال رسائل التحفيز
           </Text>
           <Button variant={send ? "primary" : "outline"} size="sm" onPress={() => setSend((v) => !v)}>
-            {send ? "مفعّل" : "متوقف"}
+            {send ? "مفعّل" : "معطّل"}
           </Button>
         </View>
       </Card>
@@ -114,14 +114,14 @@ export default function CoachSettingsScreen() {
           </View>
         ))}
         {templates.length === 0 ? (
-          <Text style={{ color: colors.muted, fontFamily: F.regular, fontSize: 12 }}>مازال ما كاينش قوالب</Text>
+          <Text style={{ color: colors.muted, fontFamily: F.regular, fontSize: 12 }}>لا توجد قوالب رسائل مسجلة بعد</Text>
         ) : null}
         <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
           <View style={{ flex: 1 }}>
-            <Input placeholder="نص القالب…" value={newTemplate} onChangeText={setNewTemplate} />
+            <Input placeholder="أدخل نص القالب الجديد…" value={newTemplate} onChangeText={setNewTemplate} />
           </View>
           <Button size="sm" variant="outline" onPress={addTemplate}>
-            زيد
+            إضافة
           </Button>
         </View>
       </Card>
@@ -130,7 +130,7 @@ export default function CoachSettingsScreen() {
         <Text style={{ color: colors.destructive, fontSize: 12, fontFamily: F.regular }}>{error}</Text>
       ) : null}
       {saved ? (
-        <Text style={{ color: "#22C55E", fontSize: 12, fontFamily: F.regular }}>تسجّل حفظ الإعدادات ✓</Text>
+        <Text style={{ color: "#22C55E", fontSize: 12, fontFamily: F.regular }}>تم حفظ الإعدادات بنجاح ✓</Text>
       ) : null}
 
       <Button onPress={submit} loading={save.isPending}>

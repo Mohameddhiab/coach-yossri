@@ -53,8 +53,8 @@ export default function PlanScreen() {
     return (
       <Screen>
         <EmptyState
-          title="ما كاينش خطة حالياً"
-          description="كوتشك مازال ما زادلكش خطة غذائية — تواصل معاه."
+          title="لا توجد خطة غذائية حاليًا"
+          description="لم يقم المدرب بإضافة خطة غذائية بعد — يُرجى التواصل معه."
         />
       </Screen>
     );
@@ -70,7 +70,7 @@ export default function PlanScreen() {
 
   return (
     <Screen>
-      <Text style={[styles.screenTitle, { color: colors.text }]}>خطّتي الغذائية</Text>
+      <Text style={[styles.screenTitle, { color: colors.text }]}>الخطة الغذائية</Text>
       <Text style={[styles.screenSub, { color: colors.muted }]}>{motivationOfToday()}</Text>
 
       <Card>
@@ -87,7 +87,7 @@ export default function PlanScreen() {
           {[
             { label: "سعرات", value: `${plan.calories_cible}` },
             { label: "بروتين", value: `${plan.proteines_g}غ` },
-            { label: "كارب", value: `${plan.glucides_g}غ` },
+            { label: "كربوهيدرات", value: `${plan.glucides_g}غ` },
             { label: "دهون", value: `${plan.lipides_g}غ` },
           ].map((m) => (
             <View key={m.label} style={styles.macro}>
@@ -99,13 +99,13 @@ export default function PlanScreen() {
       </Card>
 
       <Segmented
-        items={[...dayItems, { value: "TOUS_LES_JOURS", label: "كل الأيام" }]}
+        items={[...dayItems, { value: "TOUS_LES_JOURS", label: "جميع الأيام" }]}
         value={day}
         onChange={(v) => setDay(v as WeekDay | "TOUS_LES_JOURS")}
       />
 
       {byType.length === 0 ? (
-        <EmptyState title="ما كاينش وجبات لهذا اليوم" />
+        <EmptyState title="لا توجد وجبات مسجلة لهذا اليوم" />
       ) : (
         byType.map((group) => (
           <Card key={group.type}>
@@ -124,7 +124,7 @@ export default function PlanScreen() {
                 </View>
                 {meal.alternatives ? (
                   <Text style={[styles.mealAlt, { color: colors.primary }]}>
-                    بديل: {meal.alternatives}
+                    البديل المتاح: {meal.alternatives}
                   </Text>
                 ) : null}
               </View>

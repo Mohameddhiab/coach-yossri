@@ -17,7 +17,7 @@ export function MealPlanPrintView({ plan }: { plan: MealPlan }) {
         </div>
         <div className="mt-1 text-xs text-muted-foreground">
           ماكروز يومياً: {plan.calories_cible} سعرة · {plan.proteines_g}غ بروتين ·{" "}
-          {plan.glucides_g}غ كارب · {plan.lipides_g}غ دهون
+          {plan.glucides_g}غ كربوهيدرات · {plan.lipides_g}غ دهون
         </div>
       </header>
 
@@ -28,10 +28,10 @@ export function MealPlanPrintView({ plan }: { plan: MealPlan }) {
         return (
           <section key={day}>
             <h2 className="mb-2 text-base font-extrabold">
-              {day === "TOUS_LES_JOURS" ? "كل الأيام" : WEEK_DAY_LABELS[day]}
+              {day === "TOUS_LES_JOURS" ? "جميع الأيام" : WEEK_DAY_LABELS[day]}
             </h2>
             {dayMeals.length === 0 ? (
-              <p className="text-muted-foreground">لا يوجد وجبات مبرمجة</p>
+              <p className="text-muted-foreground">لا توجد وجبات مسجلة</p>
             ) : (
               <div className="space-y-2">
                 {MEAL_TYPE_ORDER.map((type) => {
@@ -55,13 +55,13 @@ export function MealPlanPrintView({ plan }: { plan: MealPlan }) {
                           <p className="text-xs text-muted-foreground">
                             {meal.proteines_g ? `${meal.proteines_g}غ بروتين` : ""}
                             {meal.proteines_g && meal.glucides_g ? " · " : ""}
-                            {meal.glucides_g ? `${meal.glucides_g}غ كارب` : ""}
+                            {meal.glucides_g ? `${meal.glucides_g}غ كربوهيدرات` : ""}
                             {meal.glucides_g && meal.lipides_g ? " · " : ""}
                             {meal.lipides_g ? `${meal.lipides_g}غ دهون` : ""}
                           </p>
                           {meal.alternatives && (
                             <p className="text-xs text-muted-foreground">
-                              بديل: {meal.alternatives}
+                              البديل المتاح: {meal.alternatives}
                             </p>
                           )}
                         </div>
@@ -76,7 +76,7 @@ export function MealPlanPrintView({ plan }: { plan: MealPlan }) {
       })}
 
       <footer className="border-t border-border pt-3 text-center text-xs text-muted-foreground">
-        بالصحة والقوة مع مدربك — Coach Yosri
+        مع تمنياتنا لك بدوام الصحة والقوة — Coach Yosri
       </footer>
     </div>
   );

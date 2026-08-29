@@ -17,21 +17,21 @@ export interface UserNavItem {
 
 const BASE_NAV: UserNavItem[] = [
   { href: "/progression", label: "تقدّمي", icon: Scale },
-  { href: "/profil", label: "ملفي", icon: UserRound },
-  { href: "/abonnement", label: "اشتراكي", icon: Ticket },
+  { href: "/profil", label: "الملف الشخصي", icon: UserRound },
+  { href: "/abonnement", label: "الاشتراك", icon: Ticket },
   { href: "/reglages", label: "الإعدادات", icon: Settings },
 ];
 
 export function navForTier(tier: SubscriptionTier | null): UserNavItem[] {
   if (tier === "PREMIUM_COACH") {
     return [
-      { href: "/plan", label: "خطتي", icon: CalendarCheck },
-      { href: "/messages", label: "رسائل", icon: MessagesSquare },
+      { href: "/plan", label: "خطّتي", icon: CalendarCheck },
+      { href: "/messages", label: "الرسائل", icon: MessagesSquare },
       ...BASE_NAV.slice(0, 3),
     ];
   }
   if (tier === "ONLINE") {
-    return [{ href: "/plan", label: "خطتي", icon: CalendarCheck }, ...BASE_NAV];
+    return [{ href: "/plan", label: "خطّتي", icon: CalendarCheck }, ...BASE_NAV];
   }
   return [...BASE_NAV];
 }

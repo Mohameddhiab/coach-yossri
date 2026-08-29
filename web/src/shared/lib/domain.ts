@@ -32,8 +32,8 @@ export const OFFRES: Offre[] = [
   {
     tier: "PREMIUM_COACH",
     prix: 150,
-    nom: "بريميوم كوش",
-    features: ["خطة غذائية", "خطة تمارين", "متابعة شخصية", "شات مباشر مع المدرب"],
+    nom: "بريميوم كوتش",
+    features: ["خطة غذائية", "خطة تمارين", "متابعة شخصية", "محادثة مباشرة مع المدرب"],
   },
 ];
 
@@ -64,10 +64,10 @@ export type Sexe = "HOMME" | "FEMME";
 export type ActiviteLevel = "SEDENTAIRE" | "LEGER" | "MODERE" | "INTENSE";
 
 export const ACTIVITE_LABELS: Record<ActiviteLevel, string> = {
-  SEDENTAIRE: "خامل (جالس طوال اليوم)",
-  LEGER: "نشاط خفيف (1-3 مرات في الأسبوع)",
-  MODERE: "نشاط متوسط (3-5 مرات في الأسبوع)",
-  INTENSE: "نشاط عالي (6-7 مرات في الأسبوع)",
+  SEDENTAIRE: "خامل (جلوس طوال اليوم)",
+  LEGER: "نشاط خفيف (١ - ٣ مرات في الأسبوع)",
+  MODERE: "نشاط متوسط (٣ - ٥ مرات في الأسبوع)",
+  INTENSE: "نشاط مرتفع (٦ - ٧ مرات في الأسبوع)",
 };
 
 export const SEXE_LABELS: Record<Sexe, string> = {
@@ -218,7 +218,7 @@ export const WEEK_DAY_LABELS: Record<WeekDay, string> = {
   MER: "الأربعاء",
   JEU: "الخميس",
   VEN: "الجمعة",
-  TOUS_LES_JOURS: "كل الأيام",
+  TOUS_LES_JOURS: "جميع الأيام",
 };
 
 export const MEAL_TYPE_LABELS: Record<MealType, string> = {
@@ -231,9 +231,9 @@ export const MEAL_TYPE_LABELS: Record<MealType, string> = {
 export const MEAL_TYPE_ORDER: MealType[] = ["PETIT_DEJ", "DEJEUNER", "DINER", "COLLATION"];
 
 export const OBJECTIVE_LABELS: Record<PlanObjective, string> = {
-  PRISE_DE_MASSE: "زيادة الكتلة",
-  SECHE: "تنشيف",
-  MAINTIEN: "محافظة",
+  PRISE_DE_MASSE: "زيادة الكتلة العضلية",
+  SECHE: "تنشيف وتخفيف الدهون",
+  MAINTIEN: "المحافظة على الوزن",
 };
 
 export function effectiveDateFin(sub: Subscription | null): Date {
@@ -271,6 +271,6 @@ export function todayWeekDay(): WeekDay {
 
 export const SUBSCRIPTION_STATUS_LABELS: Record<SubscriptionStatus, string> = {
   ACTIF: "نشط",
-  EXPIRE_BIENTOT: "أوشك على الانتهاء",
+  EXPIRE_BIENTOT: "ينتهي قريباً",
   EXPIRE: "منتهي",
 };

@@ -24,9 +24,9 @@ export function FidelityCard({ history }: { history: Subscription[] | null | und
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-base">
           <Medal className={cn("size-4", LEVEL_STYLES[fidelity.level])} />
-          بطاقة الوفاء
+          بطاقة العضوية والولاء
         </CardTitle>
-        <CardDescription>التجديد المتواصل مكافأة — الالتزام يُحتسب</CardDescription>
+        <CardDescription>مكافآت التجديد المستمر — التزامك موضع تقدير</CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="flex items-center gap-3">
@@ -41,7 +41,7 @@ export function FidelityCard({ history }: { history: Subscription[] | null | und
           <div>
             <div className="font-bold">{levelLabel}</div>
             <div className="text-xs text-muted-foreground">
-              {fidelity.months} شهور مع المدرب — {fidelity.renewals} تجديد
+              {fidelity.months} أشهر مع المدرب — {fidelity.renewals} تجديدات
             </div>
           </div>
         </div>
@@ -49,7 +49,7 @@ export function FidelityCard({ history }: { history: Subscription[] | null | und
           <div>
             <div className="mb-1 flex justify-between text-xs text-muted-foreground">
               <span>{fidelity.months} شهر</span>
-              <span>{fidelity.monthsToNext} أشهر حتى تصل إلى {nextLabel}</span>
+              <span>متبقٍ {fidelity.monthsToNext} أشهر للوصول إلى المستوى {nextLabel}</span>
             </div>
             <div className="h-2 overflow-hidden rounded-full bg-muted">
               <div

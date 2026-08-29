@@ -16,7 +16,7 @@ import { useAuth } from "@/shared/lib/auth-context";
 
 const schema = z.object({
   email: z.string().email("أدخل بريدًا إلكترونيًا صحيحًا"),
-  password: z.string().min(1, "اكتب كلمة السر"),
+  password: z.string().min(1, "يُرجى إدخال كلمة المرور"),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -41,7 +41,7 @@ export function LoginForm() {
       router.push(user.role === "COACH" ? "/dashboard" : "/plan");
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "صار خطأ أثناء الدخول");
+      setError(err instanceof Error ? err.message : "حدث خطأ أثناء تسجيل الدخول");
     } finally {
       setSubmitting(false);
     }
@@ -75,7 +75,7 @@ export function LoginForm() {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>كلمة السر</FormLabel>
+                  <FormLabel>كلمة المرور</FormLabel>
                   <FormControl>
                     <div className="relative">
                       <Input
@@ -87,7 +87,7 @@ export function LoginForm() {
                       />
                       <button
                         type="button"
-                        aria-label={showPassword ? "إخفاء كلمة السر" : "إظهار كلمة السر"}
+                        aria-label={showPassword ? "إخفاء كلمة المرور" : "إظهار كلمة المرور"}
                         onClick={() => setShowPassword((v) => !v)}
                         className="absolute end-2 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
                       >
@@ -108,7 +108,7 @@ export function LoginForm() {
                 href="/forgot-password"
                 className="text-xs font-semibold text-primary transition-colors hover:underline"
               >
-                نسيت كلمة السر؟
+                نسيت كلمة المرور؟
               </Link>
             </div>
             {error && (
@@ -118,7 +118,7 @@ export function LoginForm() {
             )}
             <Button type="submit" className="w-full" disabled={submitting}>
               {submitting ? <Loader2 className="animate-spin" /> : <LogIn />}
-              دخول
+              تسجيل الدخول
             </Button>
           </form>
         </Form>

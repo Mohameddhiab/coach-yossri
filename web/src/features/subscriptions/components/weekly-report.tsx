@@ -39,7 +39,7 @@ export function WeeklyReport({
     <div>
       <Button variant="outline" onClick={() => window.print()}>
         <Printer />
-        بريم الأسبوع
+        طباعة التقرير الأسبوعي
       </Button>
 
       <div className="print-area">
@@ -47,7 +47,7 @@ export function WeeklyReport({
           <header className="flex items-center justify-between border-b-2 border-zinc-800 pb-3">
             <div>
               <div className="text-2xl font-extrabold">Coach Yosri</div>
-              <div>تقرير أسبوعي — {userName}</div>
+              <div>التقرير الأسبوعي — {userName}</div>
             </div>
             <div className="text-xs">
               <div>من {formatDate(reportStart)}</div>
@@ -60,17 +60,17 @@ export function WeeklyReport({
             <table className="w-full border-collapse text-sm">
               <thead>
                 <tr className="border-b border-zinc-400">
-                  <th className="py-1 text-start">بداية الأسبوع</th>
-                  <th className="py-1 text-start">نهاية الأسبوع</th>
-                  <th className="py-1 text-start">الفرق</th>
+                  <th className="py-1 text-start">الوزن في بداية الأسبوع</th>
+                  <th className="py-1 text-start">الوزن في نهاية الأسبوع</th>
+                  <th className="py-1 text-start">فارق الوزن</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td className="py-1 font-bold">{start ? `${start.poids_kg} كغ` : "—"}</td>
-                  <td className="py-1 font-bold">{end ? `${end.poids_kg} كغ` : "—"}</td>
+                  <td className="py-1 font-bold">{start ? `${start.poids_kg} كغم` : "—"}</td>
+                  <td className="py-1 font-bold">{end ? `${end.poids_kg} كغم` : "—"}</td>
                   <td className="py-1 font-bold">
-                    {delta === null ? "—" : `${delta > 0 ? "+" : ""}${delta} كغ`}
+                    {delta === null ? "—" : `${delta > 0 ? "+" : ""}${delta} كغم`}
                   </td>
                 </tr>
               </tbody>
@@ -82,14 +82,14 @@ export function WeeklyReport({
             <table className="w-full border-collapse text-sm">
               <thead>
                 <tr className="border-b border-zinc-400">
-                  <th className="py-1 text-start">حصص الشهر هذا الأسبوع</th>
-                  <th className="py-1 text-start">أوزان هذا الأسبوع</th>
+                  <th className="py-1 text-start">الحصص المكتملة هذا الأسبوع</th>
+                  <th className="py-1 text-start">مرات تسجيل الوزن هذا الأسبوع</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
                   <td className="py-1 font-bold">{weekCheckins} حصة</td>
-                  <td className="py-1 font-bold">{weekLogs.length} قياس</td>
+                  <td className="py-1 font-bold">{weekLogs.length} تسجيلات</td>
                 </tr>
               </tbody>
             </table>
@@ -100,19 +100,19 @@ export function WeeklyReport({
             <table className="w-full border-collapse text-sm">
               <tbody>
                 <tr>
-                  <td className="py-1 text-zinc-600">النهاية المقررة</td>
+                  <td className="py-1 text-zinc-600">تاريخ انتهاء الاشتراك</td>
                   <td className="py-1 font-bold">
                     {subscription ? formatDate(effectiveDateFin(subscription).toISOString()) : "—"}
                   </td>
                 </tr>
                 <tr>
-                  <td className="py-1 text-zinc-600">الأيام الباقية</td>
+                  <td className="py-1 text-zinc-600">الأيام المتبقية</td>
                   <td className="py-1 font-bold">{subscription ? daysLeft(subscription) : "—"}</td>
                 </tr>
                 <tr>
-                  <td className="py-1 text-zinc-600">تجميد</td>
+                  <td className="py-1 text-zinc-600">حالة التجميد</td>
                   <td className="py-1 font-bold">
-                    {subscription && isPaused(subscription) ? "مجمّد الآن" : "لا"}
+                    {subscription && isPaused(subscription) ? "مجمّد حاليًا" : "نشط (غير مجمّد)"}
                   </td>
                 </tr>
               </tbody>
@@ -121,7 +121,7 @@ export function WeeklyReport({
 
           <footer className="border-t border-zinc-400 pt-3 text-xs">
             <div className="mb-6">توقيع المدرب: ______________________</div>
-            <div>وثيقة داخلية — Coach Yosri · تنسخت {formatDate(reportEnd)}</div>
+            <div>وثيقة متابعة داخلية — كوتش يسري · تاريخ الاستخراج {formatDate(reportEnd)}</div>
           </footer>
         </div>
       </div>

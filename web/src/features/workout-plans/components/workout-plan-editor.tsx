@@ -144,7 +144,7 @@ const DURATION_OPTIONS = [
   { value: 3, label: "3 أيام", days: ["DIM", "MAR", "VEN"] as WeekDay[] },
   { value: 5, label: "5 أيام", days: ["SAM", "DIM", "LUN", "MAR", "MER"] as WeekDay[] },
   { value: 7, label: "7 أيام", days: WEEK_DAYS },
-  { value: 8, label: "7 + كل الأيام", days: [...WEEK_DAYS, "TOUS_LES_JOURS" as WeekDay] },
+  { value: 8, label: "٧ أيام + جميع الأيام", days: [...WEEK_DAYS, "TOUS_LES_JOURS" as WeekDay] },
 ] as const;
 
 function ExerciseFormDialog({
@@ -217,7 +217,7 @@ function ExerciseFormDialog({
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="ex-search">Nom exercice *</Label>
+            <Label htmlFor="ex-search">اسم التمرين *</Label>
             <Input
               id="ex-search"
               value={search || data.nom}
@@ -226,7 +226,7 @@ function ExerciseFormDialog({
                 if (!e.target.value) onChange({ nom: "" });
               }}
               onFocus={() => setSearch("")}
-              placeholder="ابحث عن تمرين — اكتب اسمًا..."
+              placeholder="البحث عن تمرين — اكتب اسم التمرين..."
             />
             <Select
               value={data.nom || ""}
@@ -261,7 +261,7 @@ function ExerciseFormDialog({
                     <span className="truncate">{data.nom}</span>
                   </span>
                 ) : (
-                  <SelectValue placeholder="أو اختر من القائمة" />
+                  <SelectValue placeholder="أو اختر التمرين من القائمة" />
                 )}
               </SelectTrigger>
               <SelectContent className="max-h-80">
@@ -341,35 +341,35 @@ function ExerciseFormDialog({
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label htmlFor="ex-charge">charge</Label>
+              <Label htmlFor="ex-charge">الوزن / الحِمل (Charge)</Label>
               <Input id="ex-charge" value={data.charge ?? ""} onChange={(e) => onChange({ charge: e.target.value || null })} placeholder="15 kg" inputMode="decimal" />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="ex-series">Nbre serie</Label>
+              <Label htmlFor="ex-series">عدد الجولات (Séries)</Label>
               <Input id="ex-series" value={data.series ?? ""} onChange={(e) => onChange({ series: e.target.value || null })} placeholder="4 3 2" dir="ltr" />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="ex-tempo">tempo</Label>
+              <Label htmlFor="ex-tempo">الإيقاع الحركي (Tempo)</Label>
               <Input id="ex-tempo" value={data.tempo ?? ""} onChange={(e) => onChange({ tempo: e.target.value || null })} placeholder="3-1-3-1" dir="ltr" className="font-mono" />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="ex-rest">rest</Label>
+              <Label htmlFor="ex-rest">فترة الراحة (Rest)</Label>
               <Input id="ex-rest" value={data.repos ?? ""} onChange={(e) => onChange({ repos: e.target.value || null })} placeholder="1 min entre série" />
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="ex-reps">reps</Label>
+            <Label htmlFor="ex-reps">التكرارات (Reps)</Label>
             <Textarea
               id="ex-reps"
               value={data.repetitions ?? ""}
               onChange={(e) => onChange({ repetitions: e.target.value || null })}
-              placeholder="سطر لكل مجموعة — مثال: 6-12 إخفاق"
+              placeholder="سطر لكل جولة — مثال: ٦-١٢ تكرار حتى الإخفاق العضلي"
               maxLength={300}
               rows={3}
               className="text-sm leading-4"
             />
-            <p className="text-xs text-muted-foreground">سطر لكل مجموعة: 6-12 إخفاق، {">"}12 زِد الحِمل، {"<"}5 خِفِّض</p>
+            <p className="text-xs text-muted-foreground">سطر لكل جولة: ٦-١٢ حتى الإخفاق، {">"}١٢ زيادة الحمل، {"<"}٥ تخفيف الحمل</p>
           </div>
         </div>
         <DialogFooter className="gap-2">
@@ -502,7 +502,7 @@ export function WorkoutPlanEditor({ userId }: { userId: string }) {
   const handleSave = async () => {
     const rows = exercises.filter((e) => e.nom.trim());
     if (!rows.length) {
-      toast.error("أضف تمرينًا واحدًا على الأقل");
+      toast.error("يُرجى إضافة تمرين واحد على الأقل");
       return;
     }
     const payload = {
@@ -524,13 +524,13 @@ export function WorkoutPlanEditor({ userId }: { userId: string }) {
     try {
       if (plan) {
         await updatePlan.mutateAsync(payload);
-        toast.success(`تحنّت خطة التمارين ✓ (الإصدار ${plan.version + 1})`);
+        toast.success(`تم تحديث خطة التمارين بنجاح (الإصدار ${plan.version + 1})`);
       } else {
         await createPlan.mutateAsync(payload);
-        toast.success("تصنعت خطة تمارين جديدة ✓");
+        toast.success("تم إنشاء خطة تمارين جديدة بنجاح");
       }
     } catch {
-      toast.error("تعذر حفظ الخطة — حاول مرة أخرى");
+      toast.error("تعذّر حفظ الخطة — يُرجى المحاولة مرة أخرى");
     }
   };
 
@@ -649,7 +649,7 @@ export function WorkoutPlanEditor({ userId }: { userId: string }) {
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-bold">
                   تمارين يوم {WEEK_DAY_LABELS[day]}
-                  {day === "TOUS_LES_JOURS" && <span className="ms-2 text-xs text-muted-foreground">(تُطبّق كل يوم)</span>}
+                  {day === "TOUS_LES_JOURS" && <span className="ms-2 text-xs text-muted-foreground">(تُطبّق في جميع الأيام)</span>}
                 </h3>
                 <Button size="sm" onClick={openAddForm}>
                   <Plus /> إضافة تمرين
@@ -659,11 +659,11 @@ export function WorkoutPlanEditor({ userId }: { userId: string }) {
               {!dayRows.length ? (
                 <div className="py-10">
                   <EmptyState
-                    title={`لا يوجد تمارين يوم ${WEEK_DAY_LABELS[day]}`}
-                    description="أضف تمرينًا من النموذج"
+                    title={`لا توجد تمارين مسجلة ليوم ${WEEK_DAY_LABELS[day]}`}
+                    description="أضف تمرينًا باستخدام زر الإضافة أعلاه"
                     action={
                       <Button onClick={openAddForm}>
-                        <Plus /> أضف تمرين
+                        <Plus /> إضافة تمرين
                       </Button>
                     }
                   />
@@ -675,13 +675,13 @@ export function WorkoutPlanEditor({ userId }: { userId: string }) {
                     <table className="w-full min-w-[860px] border-collapse text-sm">
                       <thead>
                         <tr>
-                          <th className={TH}>Nom exercice</th>
-                          <th className={TH}>image</th>
-                          <th className={TH}>charge</th>
-                          <th className={TH}>reps</th>
-                          <th className={TH}>Nbre serie</th>
-                          <th className={TH}>tempo</th>
-                          <th className={TH}>rest</th>
+                          <th className={TH}>التمرين</th>
+                          <th className={TH}>الصورة</th>
+                          <th className={TH}>الحمل (كغم)</th>
+                          <th className={TH}>التكرارات</th>
+                          <th className={TH}>الجولات</th>
+                          <th className={TH}>الإيقاع</th>
+                          <th className={TH}>الراحة</th>
                           <th className={`${TH} w-20`} />
                         </tr>
                       </thead>
@@ -795,24 +795,24 @@ export function WorkoutPlanEditor({ userId }: { userId: string }) {
                           )}
                           <div className="grid grid-cols-2 gap-2 text-sm">
                             <div className="rounded-lg bg-muted/50 p-2">
-                              <div className="text-xs text-muted-foreground">charge</div>
+                              <div className="text-xs text-muted-foreground">الحمل</div>
                               <div className="font-medium">{e.charge ?? "—"}</div>
                             </div>
                             <div className="rounded-lg bg-muted/50 p-2">
-                              <div className="text-xs text-muted-foreground">Nbre serie</div>
+                              <div className="text-xs text-muted-foreground">الجولات</div>
                               <div>{e.series ?? "—"}</div>
                             </div>
                             <div className="rounded-lg bg-muted/50 p-2">
-                              <div className="text-xs text-muted-foreground">tempo</div>
+                              <div className="text-xs text-muted-foreground">الإيقاع</div>
                               <div className="font-mono text-xs">{e.tempo ?? "—"}</div>
                             </div>
                             <div className="rounded-lg bg-muted/50 p-2">
-                              <div className="text-xs text-muted-foreground">rest</div>
+                              <div className="text-xs text-muted-foreground">الراحة</div>
                               <div>{e.repos ?? "—"}</div>
                             </div>
                           </div>
                           <div className="rounded-lg bg-muted/50 p-2 text-sm">
-                            <div className="text-xs text-muted-foreground">reps</div>
+                            <div className="text-xs text-muted-foreground">التكرارات</div>
                             <div className="whitespace-pre-line text-xs leading-4">{e.repetitions ?? "—"}</div>
                           </div>
                         </div>
@@ -885,10 +885,10 @@ function CopyTemplateDialog({ userId }: { userId: string }) {
     if (!selected) return;
     try {
       await duplicate.mutateAsync(selected);
-      toast.success("تم نسخ الخطة كنقطة بداية — عدّلها ثم احفظ");
+      toast.success("تم نسخ الخطة بنجاح — يمكنك التعديل عليها ثم الحفظ");
       setOpen(false);
     } catch {
-      toast.error("تعذر النسخ");
+      toast.error("تعذّر نسخ الخطة — يُرجى المحاولة مرة أخرى");
     }
   };
 
@@ -897,18 +897,18 @@ function CopyTemplateDialog({ userId }: { userId: string }) {
       <DialogTrigger asChild>
         <Button variant="ghost" size="sm">
           <Copy className="size-4" />
-          انسخ من خطة
+          نسخ من خطة سابقة
         </Button>
       </DialogTrigger>
       <DialogContent className="max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>نسخ خطة تمارين كنقطة بداية</DialogTitle>
-          <DialogDescription>اختر قالب جاهز أو خطة لعضو آخر، ثم عدّلها لهذا العضو.</DialogDescription>
+          <DialogDescription>اختر قالبًا جاهزًا أو خطة لمشترك آخر، ثم عدّلها بما يناسب هذا المشترك.</DialogDescription>
         </DialogHeader>
         <div className="space-y-2">
           {isLoading && <Skeleton className="h-10" />}
           {!isLoading && templates?.length === 0 && (
-            <p className="py-4 text-center text-sm text-muted-foreground">لا يوجد خطط لنسخها حاليًا.</p>
+            <p className="py-4 text-center text-sm text-muted-foreground">لا توجد خطط متاحة للنسخ حاليًا.</p>
           )}
           {presets.length > 0 && (
             <>
@@ -925,7 +925,7 @@ function CopyTemplateDialog({ userId }: { userId: string }) {
             <>
               <div className="flex items-center gap-1.5 pt-2 text-xs font-semibold text-muted-foreground">
                 <Users className="size-3.5" />
-                خطط الأعضاء
+                خطط المشتركين
               </div>
               {members.map((t) => (
                 <TemplateRow key={t.id} template={t} selected={selected === t.id} onSelect={() => setSelected(t.id)} />
@@ -935,7 +935,7 @@ function CopyTemplateDialog({ userId }: { userId: string }) {
         </div>
         <DialogFooter>
           <Button onClick={run} disabled={!selected || duplicate.isPending}>
-            انسخ الخطة
+            نسخ الخطة
           </Button>
         </DialogFooter>
       </DialogContent>

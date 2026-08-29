@@ -12,10 +12,10 @@ import { useTheme } from "@/components/ui/theme";
 import { F } from "@/fonts";
 
 const PREFS: { key: keyof NotificationPrefs; label: string; desc: string }[] = [
-  { key: "rappel_poids", label: "تذكير الوزن", desc: "تذكير أسبوعي باش تسجّل وزنك" },
-  { key: "motivation", label: "رسائل التحفيز", desc: "رسائل تحفيز من كوتشك" },
-  { key: "expiration_proche", label: "تنبيه نهاية الاشتراك", desc: "تنبيه قبل ما يخلص اشتراكك" },
-  { key: "nouveau_plan", label: "إشعار خطة جديدة", desc: "تنبيه وقت تحديث خطتك" },
+  { key: "rappel_poids", label: "تذكير الوزن", desc: "تذكير دوري لتسجيل قياس الوزن" },
+  { key: "motivation", label: "رسائل التحفيز", desc: "رسائل تحفيزية يومية من المدرب" },
+  { key: "expiration_proche", label: "تنبيه نهاية الاشتراك", desc: "تنبيه قبل موعد انتهاء الاشتراك" },
+  { key: "nouveau_plan", label: "إشعار خطة جديدة", desc: "إشعار فوري عند تحديث الخطة الغذائية أو التدريبية" },
 ];
 
 const DEFAULT_PREFS: NotificationPrefs = {
@@ -48,24 +48,24 @@ export default function ReglagesScreen() {
     setPwMsg(null);
     setPwError(null);
     if (next !== confirm) {
-      setPwError("كلمتي السر ما يتطابقوش");
+      setPwError("كلمتا المرور غير متطابقتين");
       return;
     }
     try {
       await changePassword.mutateAsync({ current, next });
-      setPwMsg("تبدّلت كلمة السر ✓");
+      setPwMsg("تم تغيير كلمة المرور بنجاح ✓");
       setCurrent("");
       setNext("");
       setConfirm("");
     } catch (err) {
-      setPwError(err instanceof ApiError ? err.message : "صار خطأ");
+      setPwError(err instanceof ApiError ? err.message : "حدث خطأ أثناء تغيير كلمة المرور");
     }
   };
 
   const confirmLogout = () => {
-    Alert.alert("اخرج", "متأكد أنك تحب تخرج؟", [
+    Alert.alert("تسجيل الخروج", "هل أنت متأكد من رغبتك في تسجيل الخروج؟", [
       { text: "إلغاء", style: "cancel" },
-      { text: "خروج", style: "destructive", onPress: () => void logout() },
+      { text: "تسجيل الخروج", style: "destructive", onPress: () => void logout() },
     ]);
   };
 
@@ -92,23 +92,23 @@ export default function ReglagesScreen() {
       </Card>
 
       <Card>
-        <Text style={[styles.cardTitle, { color: colors.text }]}>تبديل كلمة السر</Text>
+        <Text style={[styles.cardTitle, { color: colors.text }]}>تغيير كلمة المرور</Text>
         <Input
-          label="كلمة السر الحالية"
+          label="كلمة المرور الحالية"
           secureTextEntry
           value={current}
           onChangeText={setCurrent}
           placeholder="••••••"
         />
         <Input
-          label="كلمة السر الجديدة"
+          label="كلمة المرور الجديدة"
           secureTextEntry
           value={next}
           onChangeText={setNext}
-          placeholder="6 أحرف على الأقل"
+          placeholder="٦ أحرف على الأقل"
         />
         <Input
-          label="تأكيد كلمة السر"
+          label="تأكيد كلمة المرور الجديدة"
           secureTextEntry
           value={confirm}
           onChangeText={setConfirm}
@@ -121,7 +121,7 @@ export default function ReglagesScreen() {
           disabled={!current || !next || !confirm}
           onPress={submitPassword}
         >
-          حفظ
+          تحديث كلمة المرور
         </Button>
       </Card>
 
@@ -131,7 +131,7 @@ export default function ReglagesScreen() {
           مسجل باسم {user?.prenom} {user?.nom}
         </Text>
         <Button variant="danger" onPress={confirmLogout}>
-          اخرج
+          تسجيل الخروج
         </Button>
       </Card>
 

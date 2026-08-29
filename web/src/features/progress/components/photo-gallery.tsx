@@ -20,7 +20,7 @@ export function PhotoGallery({ userId, canEdit = true }: { userId: string; canEd
   const onFile = async (file: File | undefined) => {
     if (!file) return;
     if (file.size > 3 * 1024 * 1024) {
-      toast.error("الصورة كبيرة — اختر صورة أصغر من 3MB");
+      toast.error("حجم الصورة كبير جدًا — يُرجى اختيار صورة أصغر من ٣ ميغابايت");
       return;
     }
     setUploading(true);
@@ -32,9 +32,9 @@ export function PhotoGallery({ userId, canEdit = true }: { userId: string; canEd
         reader.readAsDataURL(file);
       });
       await addPhoto.mutateAsync({ url: dataUrl });
-      toast.success("تمت إضافة الصورة");
+      toast.success("تمت إضافة الصورة بنجاح");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "صار خطأ في تحميل الصورة");
+      toast.error(err instanceof Error ? err.message : "حدث خطأ أثناء تحميل الصورة");
     } finally {
       setUploading(false);
       if (inputRef.current) inputRef.current.value = "";
@@ -61,7 +61,7 @@ export function PhotoGallery({ userId, canEdit = true }: { userId: string; canEd
               disabled={uploading}
             >
               {uploading ? <Loader2 className="animate-spin" /> : <Camera />}
-              أضف صورة
+              إضافة صورة
             </Button>
           </div>
         )}
@@ -98,9 +98,9 @@ export function PhotoGallery({ userId, canEdit = true }: { userId: string; canEd
                       onClick={async () => {
                         try {
                           await deletePhoto.mutateAsync(photo.id);
-                          toast.success("تم حذف الصورة");
+                          toast.success("تم حذف الصورة بنجاح");
                         } catch {
-                          toast.error("تعذر حذف الصورة");
+                          toast.error("تعذّر حذف الصورة — يُرجى المحاولة مرة أخرى");
                         }
                       }}
                     >
@@ -114,8 +114,8 @@ export function PhotoGallery({ userId, canEdit = true }: { userId: string; canEd
         </div>
       ) : (
         <EmptyState
-          title="لا يوجد صور بعد"
-          description="أضف صورًا بانتظام (بنفس الوضعية) لترى فرق التقدم"
+          title="لا توجد صور مسجلة بعد"
+          description="أضف صورًا بانتظام (بنفس الزاوية والإضاءة) لمشاهدة تطور جسمك بوضوح"
         />
       )}
     </div>

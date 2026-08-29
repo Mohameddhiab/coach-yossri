@@ -45,13 +45,25 @@ export class GetCalorieNeedsUseCase {
     const lastWeight = await this.progress.lastWeight(userId);
     const weightKg = lastWeight?.poidsKg ?? null;
     if (weightKg === null) {
-      fail(409, 'NO_WEIGHT', 'لا يوجد وزن مسجل لهذا العضو — سجّل وزناً أولاً');
+      fail(
+        409,
+        'NO_WEIGHT',
+        'لا يوجد وزن مسجل لهذا المشترك — يُرجى تسجيل الوزن أولاً',
+      );
     }
     if (!user.sexe || user.tailleCm === null) {
-      fail(409, 'MISSING_PROFILE', 'أكمل جنس العضو وطوله في بطاقته أولاً');
+      fail(
+        409,
+        'MISSING_PROFILE',
+        'يُرجى إكمال جنس المشترك وطوله في الملف الشخصي أولاً',
+      );
     }
     if (!user.dateNaissance) {
-      fail(409, 'MISSING_PROFILE', 'أضف تاريخ ميلاد العضو لحساب عمره');
+      fail(
+        409,
+        'MISSING_PROFILE',
+        'يُرجى إضافة تاريخ ميلاد المشترك لحساب العمر بدقة',
+      );
     }
 
     const age = Math.max(

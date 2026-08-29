@@ -20,7 +20,7 @@ import { getSubscriptionStatus } from "@/shared/lib/domain";
 
 const STATUS_META: { key: string; label: string; color: string }[] = [
   { key: "ACTIF", label: "نشط", color: "#10b981" },
-  { key: "EXPIRE_BIENTOT", label: "أوشك على الانتهاء", color: "#f59e0b" },
+  { key: "EXPIRE_BIENTOT", label: "ينتهي قريباً", color: "#f59e0b" },
   { key: "EXPIRE", label: "منتهي", color: "#ef4444" },
 ];
 
@@ -49,8 +49,8 @@ export function MemberGrowthChart({ users }: { users: UserWithSubscription[] }) 
   return (
     <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="text-base">نمو الأعضاء</CardTitle>
-        <CardDescription>إجمالي الأعضاء المسجّلين شهر بشهر</CardDescription>
+        <CardTitle className="text-base">نمو أعداد المشتركين</CardTitle>
+        <CardDescription>إجمالي المشتركين المسجلين شهريًا</CardDescription>
       </CardHeader>
       <CardContent>
         <div dir="ltr" className="h-56">
@@ -76,7 +76,7 @@ export function MemberGrowthChart({ users }: { users: UserWithSubscription[] }) 
               <Area
                 type="monotone"
                 dataKey="membres"
-                name="الأعضاء"
+                name="المشتركون"
                 stroke="var(--primary)"
                 strokeWidth={2.5}
                 fill="url(#growthFill)"
@@ -104,8 +104,8 @@ export function SubscriptionStatusChart({ users }: { users: UserWithSubscription
   return (
     <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="text-base">وضعية الاشتراكات</CardTitle>
-        <CardDescription>توزيع الأعضاء حسب حالة اشتراكهم</CardDescription>
+        <CardTitle className="text-base">حالة الاشتراكات</CardTitle>
+        <CardDescription>توزيع المشتركين حسب حالة الاشتراك</CardDescription>
       </CardHeader>
       <CardContent>
         <div dir="ltr" className="h-56">
@@ -151,7 +151,7 @@ export function SubscriptionStatusChart({ users }: { users: UserWithSubscription
                 className="fill-muted-foreground"
                 style={{ fontSize: 11 }}
               >
-                عضو
+                مشترك
               </text>
             </PieChart>
           </ResponsiveContainer>

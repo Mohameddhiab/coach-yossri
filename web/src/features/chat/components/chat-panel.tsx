@@ -53,7 +53,7 @@ export function ChatPanel({
     try {
       await send.mutateAsync(contenu);
     } catch {
-      toast.error("لم يتم إرسال الرسالة — حاول مرة أخرى");
+      toast.error("تعذّر إرسال الرسالة — يُرجى المحاولة مرة أخرى");
       setText(contenu);
     }
   };
@@ -67,7 +67,7 @@ export function ChatPanel({
               variant="ghost"
               size="icon"
               className="size-7 lg:hidden"
-              aria-label="رجوع للقائمة"
+              aria-label="الرجوع إلى القائمة"
               onClick={onBack}
             >
               <ArrowRight className="size-4" />
@@ -91,7 +91,7 @@ export function ChatPanel({
              <span className="flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
                <MessageCircle className="size-7" />
              </span>
-             <p className="text-sm text-muted-foreground">{emptyHint ?? "ابدا المحادثة — ابعث أول رسالة 👋"}</p>
+             <p className="text-sm text-muted-foreground">{emptyHint ?? "ابدأ المحادثة — أرسل أول رسالة الآن 👋"}</p>
            </div>
         ) : (
           messages.map((m) => {

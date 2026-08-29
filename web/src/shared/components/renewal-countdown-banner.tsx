@@ -29,7 +29,7 @@ export function RenewalCountdownBanner() {
     >
       <Timer className="size-3.5" />
       <span>
-        بقي لك {remaining} {remaining === 1 ? "يوم واحد" : "أيام"} — جدد اشتراكك مع المدرب
+        بقي لك {remaining} {remaining === 1 ? "يوم واحد" : "أيام"} — يُرجى تجديد اشتراكك مع المدرب
       </span>
       {phone && (
         <span className="flex items-center gap-1">

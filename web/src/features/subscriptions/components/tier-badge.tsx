@@ -8,7 +8,7 @@ const CONFIG: Record<SubscriptionTier, { label: string; className: string }> = {
     className: "bg-blue-500/15 text-blue-600 dark:text-blue-400 border-transparent",
   },
   PREMIUM_COACH: {
-    label: "بريميوم كوش",
+    label: "بريميوم كوتش",
     className: "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-transparent",
   },
 };

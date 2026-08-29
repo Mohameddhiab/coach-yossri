@@ -62,7 +62,7 @@ export function projectWeight(logs: WeightLog[], daysAhead = 28): WeightProjecti
     slopePerWeek: Math.round(slopePerWeek * 10) / 10,
     projected: Math.round(projected * 10) / 10,
     daysAhead,
-    label: `بعد ${daysAhead} يوم`,
+    label: `خلال ${daysAhead} يومًا`,
   };
 }
 

@@ -27,9 +27,9 @@ function FirstMessageComposer() {
     try {
       await sendFirstToCoach(contenu);
       qc.invalidateQueries({ queryKey: ["me", "conversation"] });
-      toast.success("تم إرسال الرسالة ✓");
+      toast.success("تم إرسال الرسالة بنجاح");
     } catch {
-      toast.error("لم يتم الإرسال — حاول مرة أخرى");
+      toast.error("تعذّر إرسال الرسالة — يُرجى المحاولة مرة أخرى");
     } finally {
       setPending(false);
     }

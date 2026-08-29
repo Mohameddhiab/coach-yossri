@@ -22,9 +22,9 @@ import { toast } from "sonner";
 
 const schema = z.object({
   poids_kg: z.coerce
-    .number({ message: "أدخل الوزن" })
-    .min(20, "قيمة مش منطقية")
-    .max(300, "قيمة مش منطقية"),
+    .number({ message: "يُرجى إدخال الوزن" })
+    .min(20, "قيمة الوزن غير مقبولة")
+    .max(300, "قيمة الوزن غير مقبولة"),
   note: z.string().optional(),
 });
 
@@ -70,7 +70,7 @@ export function AddWeightButton({ userId }: { userId: string }) {
         }
       }
       localStorage.setItem(QUEUE_KEY, JSON.stringify([]));
-      toast.success(`تزامن ${queue.length} قياس كان محفوظ`);
+      toast.success(`تمت مزامنة ${queue.length} تسجيلات وزن محفوظة بنجاح`);
     };
     window.addEventListener("online", flush);
     return () => window.removeEventListener("online", flush);
@@ -85,7 +85,7 @@ export function AddWeightButton({ userId }: { userId: string }) {
       const queue = readQueue();
       queue.push({ userId, ...payload });
       localStorage.setItem(QUEUE_KEY, JSON.stringify(queue));
-      toast.success("أنت مش متصل — تم تسجيل الوزن وبيتزامن أوتوماتيكياً لما ترجع الاتصال");
+      toast.success("أنت غير متصل بالإنترنت — تم حفظ قياس الوزن وسوف تتم المزامنة تلقائيًا عند عودة الاتصال");
       setOpen(false);
       form.reset();
       return;
@@ -95,7 +95,7 @@ export function AddWeightButton({ userId }: { userId: string }) {
       setOpen(false);
       form.reset();
     } catch {
-      toast.error("تعذر نسجل الوزن — حاول مرة أخرى");
+      toast.error("تعذّر تسجيل الوزن — يُرجى المحاولة مرة أخرى");
     }
   };
 
@@ -104,13 +104,13 @@ export function AddWeightButton({ userId }: { userId: string }) {
       <DialogTrigger asChild>
         <Button>
           <Plus />
-          تسجيل وزن
+          تسجيل الوزن
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>تسجيل وزن جديد</DialogTitle>
-          <DialogDescription>أدخل وزن اليوم — كل أسبوع يحسب تقدم!</DialogDescription>
+          <DialogDescription>أدخل وزن اليوم لمتابعة تطور وتقدم جسمك بدقة.</DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -119,7 +119,7 @@ export function AddWeightButton({ userId }: { userId: string }) {
               name="poids_kg"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>الوزن (كغ)</FormLabel>
+                  <FormLabel>الوزن (كغم)</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
@@ -149,7 +149,7 @@ export function AddWeightButton({ userId }: { userId: string }) {
             {typeof navigator !== "undefined" && !navigator.onLine && (
               <p className="flex items-center gap-2 rounded-lg bg-amber-500/10 px-3 py-2 text-xs text-amber-600 dark:text-amber-400">
                 <CloudOff className="size-4" />
-                لا يوجد اتصال — بيتم حفظ الوزن والمزامنة لاحقاً.
+                لا يوجد اتصال بالإنترنت — سيتم حفظ القياس محليًا ومزامنته لاحقًا.
               </p>
             )}
             <DialogFooter>

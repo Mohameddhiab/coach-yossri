@@ -38,10 +38,10 @@ export function UpsellCard({ require }: { require: SubscriptionTier }) {
           <Lock className="h-6 w-6 text-amber-600" />
         </div>
         <CardTitle>
-          هذه الميزة متاحة في اشتراك {offre?.nom ?? require}{" "}
+          هذه الميزة متاحة في باقة {offre?.nom ?? require}{" "}
           <Crown className="mb-1 inline h-4 w-4 text-amber-500" />
         </CardTitle>
-        <CardDescription>بدّل اشتراكك مع المدرب واستفد بالخدمات الكاملة</CardDescription>
+        <CardDescription>قم بترقية باقتك مع المدرب للاستفادة من كافة الخدمات</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col items-center gap-3 text-center">
         {offre ? (
@@ -52,10 +52,10 @@ export function UpsellCard({ require }: { require: SubscriptionTier }) {
           </ul>
         ) : null}
         <div className="text-lg font-bold">
-          {offre?.prix} د.ت / شهر
+          {offre?.prix} د.ت / شهريًا
         </div>
         <Button asChild>
-          <Link href="/abonnement">اشتراكي</Link>
+          <Link href="/abonnement">عرض تفاصيل الاشتراك</Link>
         </Button>
         <TierBadge tier={require} />
       </CardContent>

@@ -59,7 +59,7 @@ export function ShareCardButton({
 
     ctx.fillStyle = "#a1a1aa";
     ctx.font = "44px Cairo, sans-serif";
-    ctx.fillText("قوّة ونتيجة", center, 375);
+    ctx.fillText("قوة ونتيجة مستمرة", center, 375);
 
     ctx.fillStyle = "#ffffff";
     ctx.font = "bold 72px Cairo, sans-serif";
@@ -69,24 +69,24 @@ export function ShareCardButton({
       const lost = deltaKg < 0;
       ctx.fillStyle = lost ? "#34d399" : "#fb7185";
       ctx.font = "bold 160px Cairo, sans-serif";
-      ctx.fillText(`${lost ? "" : "+"}${Math.abs(deltaKg).toFixed(1)} كغ`, center, 640);
+      ctx.fillText(`${lost ? "" : "+"}${Math.abs(deltaKg).toFixed(1)} كغم`, center, 640);
       ctx.fillStyle = "#d4d4d8";
       ctx.font = "56px Cairo, sans-serif";
-      ctx.fillText(lost ? "خسر" : "كسب", center, 760);
+      ctx.fillText(lost ? "فقدان وزن" : "زيادة كتلة", center, 760);
     }
 
     if (currentWeight !== null) {
       ctx.fillStyle = "#a1a1aa";
       ctx.font = "48px Cairo, sans-serif";
-      ctx.fillText(`الوزن الحالي: ${currentWeight.toFixed(1)} كغ`, center, 870);
+      ctx.fillText(`الوزن الحالي: ${currentWeight.toFixed(1)} كغم`, center, 870);
     }
 
     ctx.fillStyle = "#f4f4f5";
     ctx.font = "52px Cairo, sans-serif";
-    ctx.fillText(`سلسلة حضور: ${streak} يوم`, center, 980);
+    ctx.fillText(`سلسلة الالتزام: ${streak} يومًا`, center, 980);
 
     ctx.fillStyle = "#f4f4f5";
-    ctx.fillText(`أوسمة مفتوحة: ${badgesCount}`, center, 1060);
+    ctx.fillText(`الأوسمة المحققة: ${badgesCount}`, center, 1060);
 
     ctx.strokeStyle = "rgba(245,158,11,0.35)";
     ctx.lineWidth = 2;
@@ -97,7 +97,7 @@ export function ShareCardButton({
 
     ctx.fillStyle = "#d4d4d8";
     ctx.font = "40px Cairo, sans-serif";
-    ctx.fillText("مع مدربك — برنامج Coach Yosri", center, 1240);
+    ctx.fillText("مع مدربك الخاص — Coach Yosri", center, 1240);
 
     return new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
   };
@@ -109,7 +109,7 @@ export function ShareCardButton({
       if (!blob) return;
       const file = new File([blob], "coach-yosri-progression.png", { type: "image/png" });
       if (navigator.canShare?.({ files: [file] })) {
-        await navigator.share({ files: [file], title: "تقدّمي مع Coach Yosri" });
+        await navigator.share({ files: [file], title: "تقدمي الرياضي مع Coach Yosri" });
       } else {
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
@@ -117,10 +117,10 @@ export function ShareCardButton({
         a.download = "coach-yosri-progression.png";
         a.click();
         URL.revokeObjectURL(url);
-        toast.success("تم تنزيل الصورة — شاركها مع أصدقائك");
+        toast.success("تم تنزيل بطاقة الإنجاز — شاركها مع أصدقائك");
       }
     } catch (err) {
-      if ((err as Error).name !== "AbortError") toast.error("تعذر إنشاء الصورة");
+      if ((err as Error).name !== "AbortError") toast.error("تعذّر إنشاء بطاقة المشاركة");
     } finally {
       setBusy(false);
     }
@@ -129,7 +129,7 @@ export function ShareCardButton({
   return (
     <Button variant="outline" onClick={share} disabled={busy}>
       <Share2 />
-      شارك تقدمك
+      مشاركة بطاقة الإنجاز
     </Button>
   );
 }

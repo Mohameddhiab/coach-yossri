@@ -44,7 +44,7 @@ export function ForgotPasswordForm() {
     <Card className="w-full max-w-md border-border/60 shadow-xl shadow-black/5">
       <CardHeader className="items-center text-center">
         <Logo className="mb-2" />
-        <CardTitle className="text-xl">نسيت كلمة السر</CardTitle>
+        <CardTitle className="text-xl">نسيت كلمة المرور</CardTitle>
         <CardDescription>أدخل بريدك الإلكتروني وسنرسل لك رابط تغيير كلمة المرور</CardDescription>
       </CardHeader>
       <CardContent>
@@ -61,7 +61,7 @@ export function ForgotPasswordForm() {
             <Button asChild variant="outline" className="w-full">
               <Link href="/login">
                 <ArrowRight />
-                رجوع للدخول
+                العودة إلى تسجيل الدخول
               </Link>
             </Button>
           </div>
@@ -90,7 +90,7 @@ export function ForgotPasswordForm() {
                   href="/login"
                   className="text-xs font-semibold text-muted-foreground transition-colors hover:text-primary"
                 >
-                  رجوع لتسجيل الدخول
+                  العودة إلى تسجيل الدخول
                 </Link>
               </div>
             </form>

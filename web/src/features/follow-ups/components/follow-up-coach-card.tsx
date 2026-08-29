@@ -35,7 +35,7 @@ export function FollowUpCoachCard({ userId }: { userId: string }) {
 
   const handleSubmit = async () => {
     if (!periode.trim() || !bilan.trim()) {
-      toast.error("الفترة والتقييم مطلوبان");
+      toast.error("يُرجى إدخال الفترة والتقييم");
       return;
     }
     try {
@@ -44,22 +44,22 @@ export function FollowUpCoachCard({ userId }: { userId: string }) {
         bilan: bilan.trim(),
         ajustements: ajustements.trim() || null,
       });
-      toast.success("تم تسجيل التقييم ✓");
+      toast.success("تم تسجيل التقييم بنجاح");
       setPeriode("");
       setBilan("");
       setAjustements("");
       setOpen(false);
     } catch {
-      toast.error("تعذر تسجيل التقييم");
+      toast.error("تعذّر تسجيل التقييم — يُرجى المحاولة مرة أخرى");
     }
   };
 
   const handleDelete = async (id: string) => {
     try {
       await remove.mutateAsync(id);
-      toast.success("تم الحذف");
+      toast.success("تم حذف التقييم بنجاح");
     } catch {
-      toast.error("تعذر الحذف — حاول مرة أخرى");
+      toast.error("تعذّر الحذف — يُرجى المحاولة مرة أخرى");
     }
   };
 
@@ -71,12 +71,12 @@ export function FollowUpCoachCard({ userId }: { userId: string }) {
             <ClipboardList className="size-4 text-primary" />
             المتابعة الشخصية
           </CardTitle>
-          <CardDescription>تقييماتك و تعديلات البرنامج لهذا العضو</CardDescription>
+          <CardDescription>تقييماتك الدورية وتعديلات البرنامج لهذا المشترك</CardDescription>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button size="sm">
-              <Plus /> أضف تقييمًا
+              <Plus /> إضافة تقييم
             </Button>
           </DialogTrigger>
           <DialogContent>
@@ -89,7 +89,7 @@ export function FollowUpCoachCard({ userId }: { userId: string }) {
                 <Input
                   value={periode}
                   onChange={(e) => setPeriode(e.target.value)}
-                  placeholder="الأسبوع 1 — جانفي"
+                  placeholder="الأسبوع الأول — يناير"
                 />
               </div>
               <div className="space-y-1.5">
@@ -98,7 +98,7 @@ export function FollowUpCoachCard({ userId }: { userId: string }) {
                   value={bilan}
                   onChange={(e) => setBilan(e.target.value)}
                   rows={4}
-                  placeholder="التزام ممتاز، نقص 1.2 كغ هذا الشهر…"
+                  placeholder="التزام ممتاز، فقدان 1.2 كغم هذا الشهر…"
                 />
               </div>
               <div className="space-y-1.5">
@@ -107,7 +107,7 @@ export function FollowUpCoachCard({ userId }: { userId: string }) {
                   value={ajustements}
                   onChange={(e) => setAjustements(e.target.value)}
                   rows={3}
-                  placeholder="تقليل الكارب، إضافة كارديو…"
+                  placeholder="تقليل الكربوهيدرات، زيادة تمارين الكارديو…"
                 />
               </div>
               <div className="flex justify-end gap-2">
@@ -116,7 +116,7 @@ export function FollowUpCoachCard({ userId }: { userId: string }) {
                 </Button>
                 <Button onClick={handleSubmit} disabled={create.isPending}>
                   {create.isPending && <Loader2 className="size-4 animate-spin" />}
-                  سجّل
+                  حفظ التقييم
                 </Button>
               </div>
             </div>
@@ -130,7 +130,7 @@ export function FollowUpCoachCard({ userId }: { userId: string }) {
             <Skeleton className="h-16 rounded-xl" />
           </div>
         ) : !rows?.length ? (
-          <EmptyState title="لا يوجد تقييمات حاليًا" description="سجّل أول تقييم للعضو." />
+          <EmptyState title="لا توجد تقييمات حاليًا" description="سجّل أول تقييم لهذا المشترك." />
         ) : (
           <div className="space-y-3">
             {[...rows]
@@ -154,7 +154,7 @@ export function FollowUpCoachCard({ userId }: { userId: string }) {
                   <p className="whitespace-pre-line text-sm">{f.bilan}</p>
                   {f.ajustements ? (
                     <p className="mt-2 whitespace-pre-line rounded-lg bg-muted p-2 text-sm text-muted-foreground">
-                      تعديلات : {f.ajustements}
+                      التعديلات المقترحة: {f.ajustements}
                     </p>
                   ) : null}
                 </div>

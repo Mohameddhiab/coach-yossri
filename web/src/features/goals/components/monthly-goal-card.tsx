@@ -23,9 +23,9 @@ export function MonthlyGoalCard({ userId }: { userId: string }) {
   const doCheckin = async () => {
     try {
       await checkin.mutateAsync();
-      toast.success("تم تسجيلت حصتك — واصل! 💪");
+      toast.success("تم تسجيل حضورك اليوم بنجاح — استمر! 💪");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "خطأ");
+      toast.error(err instanceof Error ? err.message : "حدث خطأ أثناء التسجيل");
     }
   };
 
@@ -34,7 +34,7 @@ export function MonthlyGoalCard({ userId }: { userId: string }) {
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-base">
           <Flame className="size-4 text-primary" />
-          تحدي الشهر
+          تحدّي الشهر
         </CardTitle>
         <CardDescription>{goal.titre}</CardDescription>
       </CardHeader>
@@ -47,7 +47,7 @@ export function MonthlyGoalCard({ userId }: { userId: string }) {
             {streak > 0 && (
               <span className="flex items-center gap-1 font-semibold text-amber-500">
                 <Flame className="size-3.5" />
-                {streak} يوم متتالي
+                {streak} {streak === 1 ? "يوم متواصل" : "أيام متتالية"}
               </span>
             )}
           </div>
@@ -61,7 +61,7 @@ export function MonthlyGoalCard({ userId }: { userId: string }) {
         {completed ? (
           <p className="flex items-center gap-2 rounded-lg bg-emerald-500/10 px-3 py-2 text-sm font-semibold text-emerald-600 dark:text-emerald-400">
             <CheckCheck className="size-4" />
-            كمّلت هدف الشهر — برافو!
+            أتممت هدف الشهر بنجاح — أحسنت! 🎯
           </p>
         ) : (
           <Button
@@ -70,12 +70,12 @@ export function MonthlyGoalCard({ userId }: { userId: string }) {
             disabled={checkin.isPending || checkedToday}
           >
             <CheckCheck />
-            {checkedToday ? "سجّلت حصتك اليوم" : "حضرت حصة اليوم"}
+            {checkedToday ? "تم تسجيل حضورك اليوم" : "تسجيل حضور تمرين اليوم"}
           </Button>
         )}
         {goal.checkins.length > 0 && (
           <p className="text-xs text-muted-foreground">
-            آخر حصة: {formatDate(goal.checkins[goal.checkins.length - 1])}
+            آخر تمرين مسجل: {formatDate(goal.checkins[goal.checkins.length - 1])}
           </p>
         )}
       </CardContent>

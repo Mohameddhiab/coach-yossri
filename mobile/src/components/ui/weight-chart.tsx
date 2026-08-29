@@ -50,9 +50,9 @@ export function WeightChart({ logs, height = 220 }: { logs: WeightLog[]; height?
       </Svg>
       <View style={styles.legend}>
         <Text style={{ color: colors.muted, fontSize: 11 }}>
-          {sorted[0].poids_kg.toFixed(1)} كغ → {sorted[sorted.length - 1].poids_kg.toFixed(1)} كغ
+          {sorted[0].poids_kg.toFixed(1)} كغم → {sorted[sorted.length - 1].poids_kg.toFixed(1)} كغم
         </Text>
-        <Text style={{ color: colors.muted, fontSize: 11 }}>{sorted.length} قياس</Text>
+        <Text style={{ color: colors.muted, fontSize: 11 }}>{sorted.length} قياسًا</Text>
       </View>
     </View>
   );

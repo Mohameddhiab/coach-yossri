@@ -52,7 +52,7 @@ export function MorningGreeting() {
         {streak > 0 && (
           <div className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary">
             <CalendarCheck className="size-3.5" />
-            سلسلة حضورك: {streak} يوم
+            سلسلة حضورك: {streak} يومًا
           </div>
         )}
         <div className="mt-5 grid grid-cols-2 gap-2">
@@ -73,7 +73,7 @@ export function MorningGreeting() {
           className="mt-4 text-xs text-muted-foreground underline-offset-4 hover:underline"
           onClick={() => setDismissed(true)}
         >
-          انساه لليوم
+          تجاهل التنبيه اليوم
         </button>
       </div>
     </div>

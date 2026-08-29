@@ -59,9 +59,11 @@ export class CreateUserUseCase {
     }
 
     // Valider l'abonnement AVANT de créer l'utilisateur pour éviter 500 + création partielle
-    let subData:
-      | { dateDebut: Date; dateFin: Date; tier: SubscriptionTier }
-      | null = null;
+    let subData: {
+      dateDebut: Date;
+      dateFin: Date;
+      tier: SubscriptionTier;
+    } | null = null;
     if (input.dateDebut && input.dateFin) {
       const d1 = new Date(input.dateDebut);
       const d2 = new Date(input.dateFin);
@@ -76,7 +78,11 @@ export class CreateUserUseCase {
         : 'ONLINE';
       subData = { dateDebut: d1, dateFin: d2, tier };
     } else if (input.dateDebut || input.dateFin) {
-      fail(400, 'VALIDATION', 'يُرجى إدخال تاريخي البداية والنهاية معًا أو تركهما فارغين');
+      fail(
+        400,
+        'VALIDATION',
+        'يُرجى إدخال تاريخي البداية والنهاية معًا أو تركهما فارغين',
+      );
     }
 
     const password = generatePassword();

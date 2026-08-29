@@ -37,8 +37,8 @@ import { ExpiredScreen } from "@/components/expired-screen";
 import { F } from "@/fonts";
 
 const MONTHS_AR = [
-  "جانفي", "فيفري", "مارس", "أفريل", "ماي", "جوان",
-  "جويلية", "أوت", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر",
+  "يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو",
+  "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر",
 ];
 
 export default function ProgressionScreen() {
@@ -63,7 +63,7 @@ export default function ProgressionScreen() {
         goalQuery.refetch();
       }}
     >
-      <Text style={[styles.screenTitle, { color: colors.text }]}>تقدّمي</Text>
+      <Text style={[styles.screenTitle, { color: colors.text }]}>التقدم وتتبع الأداء</Text>
       <WeightSection />
       <TargetSection />
       <GoalSection />
@@ -136,23 +136,23 @@ function WeightSection() {
       {sorted.length >= 2 ? (
         <WeightChart logs={sorted} />
       ) : (
-        <EmptyState title="سجّل وزنك الأول" description="زيد وزنك اليوم وابدأ تتبع تقدمك." />
+        <EmptyState title="سجّل قياس وزنك الأول" description="أضف وزنك اليوم وابدأ بمتابعة تقدمك." />
       )}
 
       <View style={styles.addRow}>
         <Input
           style={styles.weightInput}
-          placeholder="الوزن بالكغ"
+          placeholder="الوزن بالكغم"
           keyboardType="decimal-pad"
           value={poids}
           onChangeText={setPoids}
         />
         <Button loading={addWeight.isPending} onPress={submit} disabled={!poids}>
-          زيد
+          إضافة
         </Button>
       </View>
       {saved ? (
-        <Text style={[styles.saved, { color: colors.success }]}>تسجّل الحفظ ✓</Text>
+        <Text style={[styles.saved, { color: colors.success }]}>تم حفظ الوزن بنجاح ✓</Text>
       ) : null}
 
       {sorted.length > 0 ? (
@@ -161,7 +161,7 @@ function WeightSection() {
             <View key={log.id} style={[styles.logRow, { borderBottomColor: colors.border }]}>
               <View>
                 <Text style={[styles.logWeight, { color: colors.text }]}>
-                  {log.poids_kg.toFixed(1)} كغ
+                  {log.poids_kg.toFixed(1)} كغم
                 </Text>
                 <Text style={[styles.logDate, { color: colors.muted }]}>
                   {formatDate(log.date)}
@@ -205,10 +205,10 @@ function TargetSection() {
           <View style={styles.targetInfo}>
             <Text style={[styles.cardTitle, { color: colors.text }]}>هدف الوزن</Text>
             <Text style={[styles.targetMeta, { color: colors.muted }]}>
-              ما كاينش هدف بعد — حدد هدفك باش نتبعو معاك
+              لم تحدد هدفًا بعد — حدد وزنك المستهدف لنتابع تقدمك معك
             </Text>
             <View style={styles.targetActions}>
-              <Button onPress={() => setEditing(true)}>زيد هدف</Button>
+              <Button onPress={() => setEditing(true)}>إضافة هدف</Button>
             </View>
           </View>
         </View>
@@ -225,7 +225,7 @@ function TargetSection() {
         <ProgressRing
           progress={progress}
           size={112}
-          centerLabel={target ? `${target.poids_kg} كغ` : "—"}
+          centerLabel={target ? `${target.poids_kg} كغم` : "—"}
           centerSub="الهدف"
         />
         <View style={styles.targetInfo}>
@@ -240,7 +240,7 @@ function TargetSection() {
               </Text>
               <View style={styles.targetActions}>
                 <Button variant="outline" size="sm" onPress={() => setEditing(true)}>
-                  بدّل
+                  تعديل
                 </Button>
                 <Button
                   variant="ghost"
@@ -248,7 +248,7 @@ function TargetSection() {
                   onPress={() => deleteTarget.mutate()}
                   loading={deleteTarget.isPending}
                 >
-                  امسح
+                  حذف
                 </Button>
               </View>
             </>
@@ -259,7 +259,7 @@ function TargetSection() {
       {editing ? (
         <View style={styles.editCol}>
           <Input
-            label="الوزن المستهدف (كغ)"
+            label="الوزن المستهدف (كغم)"
             keyboardType="decimal-pad"
             value={kg}
             onChangeText={setKg}
@@ -333,12 +333,12 @@ function GoalSection() {
           centerSub="حصص"
         />
         <View style={styles.goalInfo}>
-          <Badge label={today ? "حصتك اليوم محسوبة ✓" : "مازال ما سجّلتش حصتك اليوم"} variant={today ? "active" : "trial"} />
+          <Badge label={today ? "تم تسجيل حضورك اليوم بنجاح ✓" : "لم تسجّل حضورك اليوم بعد"} variant={today ? "active" : "trial"} />
           <Text style={[styles.targetMeta, { color: colors.muted }]}>
-            سلسلة حالية: {streak} يوم
+            سلسلة حالية: {streak} يومًا
           </Text>
           <Text style={[styles.targetMeta, { color: colors.muted }]}>
-            أفضل سلسلة: {best} يوم
+            أفضل سلسلة: {best} يومًا
           </Text>
           <Button
             size="sm"
@@ -346,7 +346,7 @@ function GoalSection() {
             loading={checkin.isPending}
             onPress={() => checkin.mutate()}
           >
-            {today ? "تم اليوم" : "سجّل حصتي"}
+            {today ? "تم التسجيل اليوم" : "تسجيل الحضور اليوم"}
           </Button>
         </View>
       </View>

@@ -16,12 +16,12 @@ import { apiClient } from "@/shared/lib/api-client";
 
 const schema = z
   .object({
-    password: z.string().min(12, "كلمة السر قصيرة (12 حرفاً على الأقل)"),
-    confirm: z.string().min(1, "أكّد كلمة السر"),
+    password: z.string().min(12, "كلمة المرور قصيرة (١٢ حرفًا على الأقل)"),
+    confirm: z.string().min(1, "يُرجى تأكيد كلمة المرور"),
   })
   .refine((v) => v.password === v.confirm, {
     path: ["confirm"],
-    message: "كلمتا السر غير متطابقتين",
+    message: "كلمتا المرور غير متطابقتين",
   });
 
 type FormValues = z.infer<typeof schema>;
@@ -43,7 +43,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
         <CardHeader className="items-center text-center">
           <Logo className="mb-2" />
           <CardTitle className="text-xl">رابط غير صحيح</CardTitle>
-          <CardDescription>الرابط ناقص — أعد طلب تغيير كلمة السر</CardDescription>
+          <CardDescription>الرابط غير مكتمل — يُرجى إعادة طلب تغيير كلمة المرور</CardDescription>
         </CardHeader>
         <CardContent>
           <Button asChild variant="outline" className="w-full">
@@ -67,7 +67,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
         router.push("/login");
       }, 2500);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "صار خطأ — أعد المحاولة");
+      setError(err instanceof Error ? err.message : "حدث خطأ — يُرجى المحاولة مرة أخرى");
     } finally {
       setSubmitting(false);
     }
@@ -77,8 +77,8 @@ export function ResetPasswordForm({ token }: { token: string }) {
     <Card className="w-full max-w-md border-border/60 shadow-xl shadow-black/5">
       <CardHeader className="items-center text-center">
         <Logo className="mb-2" />
-        <CardTitle className="text-xl">كلمة سر جديدة</CardTitle>
-        <CardDescription>اكتب كلمة السر الجديدة وأكّدها</CardDescription>
+        <CardTitle className="text-xl">كلمة مرور جديدة</CardTitle>
+        <CardDescription>أدخل كلمة المرور الجديدة وأكّدها</CardDescription>
       </CardHeader>
       <CardContent>
         {done ? (
@@ -87,9 +87,9 @@ export function ResetPasswordForm({ token }: { token: string }) {
               <CheckCircle2 className="size-7 text-primary" />
             </div>
             <p className="text-sm font-semibold">
-              تبدّلت كلمة السر بنجاح 💪
+              تم تغيير كلمة المرور بنجاح 💪
             </p>
-            <p className="text-sm text-muted-foreground">تحويلك لتسجيل الدخول…</p>
+            <p className="text-sm text-muted-foreground">جارٍ تحويلك إلى صفحة تسجيل الدخول…</p>
           </div>
         ) : (
           <Form {...form}>
@@ -99,7 +99,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>كلمة السر الجديدة</FormLabel>
+                    <FormLabel>كلمة المرور الجديدة</FormLabel>
                     <FormControl>
                       <Input type="password" dir="ltr" placeholder="••••••••" {...field} />
                     </FormControl>
@@ -112,7 +112,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
                 name="confirm"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>تأكيد كلمة السر</FormLabel>
+                    <FormLabel>تأكيد كلمة المرور</FormLabel>
                     <FormControl>
                       <Input type="password" dir="ltr" placeholder="••••••••" {...field} />
                     </FormControl>
@@ -127,12 +127,12 @@ export function ResetPasswordForm({ token }: { token: string }) {
               )}
               <Button type="submit" className="w-full" disabled={submitting}>
                 {submitting ? <Loader2 className="animate-spin" /> : <KeyRound />}
-                تغيير كلمة السر
+                تغيير كلمة المرور
               </Button>
               <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
                 <LogIn className="size-3.5" />
                 <Link href="/login" className="font-semibold transition-colors hover:text-primary">
-                  رجوع لتسجيل الدخول
+                  العودة إلى تسجيل الدخول
                 </Link>
               </div>
             </form>

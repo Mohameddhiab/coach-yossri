@@ -26,7 +26,7 @@ export default function NewMemberScreen() {
   const submit = async () => {
     setError(null);
     if (!email.trim()) {
-      setError("الإيميل خاطي");
+      setError("يُرجى إدخال بريد إلكتروني صالح");
       return;
     }
     try {
@@ -41,12 +41,12 @@ export default function NewMemberScreen() {
         montant: montant ? Number(montant) : undefined,
       });
       Alert.alert(
-        "تصيّر الحساب",
-        `الإيميل: ${res.user.email}\nكلمة السر المؤقتة: ${res.password}\nأبلغ بيها العضو باش يدخل.`,
-        [{ text: "ماشي", onPress: () => router.back() }],
+        "تم إنشاء الحساب بنجاح",
+        `البريد الإلكتروني: ${res.user.email}\nكلمة المرور المؤقتة: ${res.password}\nيُرجى تزويد المشترك بهذه البيانات لتسجيل الدخول.`,
+        [{ text: "حسنًا", onPress: () => router.back() }],
       );
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "صار خطأ");
+      setError(err instanceof ApiError ? err.message : "حدث خطأ أثناء إنشاء الحساب");
     }
   };
 
@@ -55,14 +55,14 @@ export default function NewMemberScreen() {
       <Card>
         <Text style={[styles.hint, { color: colors.muted }]}>
           {essai
-            ? "العضو بيشوف وصول تجريبي لـ 7 أيام."
-            : "دخّل تواريخ الاشتراك (صيغة AAAA-MM-DD) ولا خليهم فارغين باش تتصرّى الحساب فقط."}
+            ? "سيحصل المشترك على وصول تجريبي لمدة ٧ أيام."
+            : "أدخل تواريخ الاشتراك (بصيغة YYYY-MM-DD) أو اتركها فارغة لإنشاء الحساب فقط دون تفعيل فوري."}
         </Text>
 
-        <Input label="الإيميل *" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" />
+        <Input label="البريد الإلكتروني *" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" />
         <Input label="الاسم" value={nom} onChangeText={setNom} />
         <Input label="اللقب" value={prenom} onChangeText={setPrenom} />
-        <Input label="الهاتف" value={telephone} onChangeText={setTelephone} keyboardType="phone-pad" />
+        <Input label="رقم الهاتف" value={telephone} onChangeText={setTelephone} keyboardType="phone-pad" />
 
         <View style={styles.toggleRow}>
           <Text style={{ color: colors.text, fontFamily: F.semibold, fontSize: 14 }}>اشتراك تجريبي (7 أيام)</Text>
@@ -79,14 +79,14 @@ export default function NewMemberScreen() {
           <>
             <Input label="تاريخ البداية (AAAA-MM-DD)" value={dateDebut} onChangeText={setDateDebut} placeholder="2026-08-01" />
             <Input label="تاريخ النهاية (AAAA-MM-DD)" value={dateFin} onChangeText={setDateFin} placeholder="2026-09-01" />
-            <Input label="المبلغ (دينار)" value={montant} onChangeText={setMontant} keyboardType="numeric" />
+            <Input label="المبلغ (دينار تونسي)" value={montant} onChangeText={setMontant} keyboardType="numeric" />
           </>
         ) : null}
 
         {error ? <Text style={{ color: colors.destructive, fontSize: 12, fontFamily: F.regular }}>{error}</Text> : null}
 
         <Button onPress={submit} loading={create.isPending}>
-          صيّر العضو
+          إنشاء حساب المشترك
         </Button>
       </Card>
     </Screen>
