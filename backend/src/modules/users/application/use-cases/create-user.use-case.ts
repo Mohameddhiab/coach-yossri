@@ -58,6 +58,27 @@ export class CreateUserUseCase {
       fail(400, 'EMAIL_TAKEN', 'هذا البريد موجود مسبقاً');
     }
 
+    // Valider l'abonnement AVANT de créer l'utilisateur pour éviter 500 + création partielle
+    let subData:
+      | { dateDebut: Date; dateFin: Date; tier: SubscriptionTier }
+      | null = null;
+    if (input.dateDebut && input.dateFin) {
+      const d1 = new Date(input.dateDebut);
+      const d2 = new Date(input.dateFin);
+      if (Number.isNaN(d1.getTime()) || Number.isNaN(d2.getTime())) {
+        fail(400, 'VALIDATION', 'تاريخ البداية أو النهاية غير صحيح');
+      }
+      if (d2 <= d1) {
+        fail(400, 'VALIDATION', 'يجب أن يكون تاريخ النهاية بعد تاريخ البداية');
+      }
+      const tier: SubscriptionTier = isSubscriptionTier(input.tier)
+        ? input.tier
+        : 'ONLINE';
+      subData = { dateDebut: d1, dateFin: d2, tier };
+    } else if (input.dateDebut || input.dateFin) {
+      fail(400, 'VALIDATION', 'يُرجى إدخال تاريخي البداية والنهاية معًا أو تركهما فارغين');
+    }
+
     const password = generatePassword();
     const user = await this.users.create({
       email: email.toLowerCase(),
@@ -71,30 +92,17 @@ export class CreateUserUseCase {
       createdAt: new Date(),
     });
 
-    if (input.dateDebut && input.dateFin) {
-      const d1 = new Date(input.dateDebut);
-      const d2 = new Date(input.dateFin);
-      if (Number.isNaN(d1.getTime()) || Number.isNaN(d2.getTime())) {
-        fail(400, 'VALIDATION', 'تاريخ البداية أو النهاية غير صحيح');
-      }
-      if (d2 <= d1) {
-        fail(400, 'VALIDATION', 'يجب أن يكون تاريخ النهاية بعد تاريخ البداية');
-      }
-      const tier: SubscriptionTier = isSubscriptionTier(input.tier)
-        ? input.tier
-        : 'ONLINE';
+    if (subData) {
       await this.subs.create({
         userId: user.id,
-        dateDebut: d1,
-        dateFin: d2,
+        dateDebut: subData.dateDebut,
+        dateFin: subData.dateFin,
         montant: input.montant,
-        tier,
+        tier: subData.tier,
         modePaiement: 'ESPECE',
         statut: 'ACTIF',
         createdBy: input.coachId,
       });
-    } else if (input.dateDebut || input.dateFin) {
-      fail(400, 'VALIDATION', 'يُرجى إدخال تاريخي البداية والنهاية معًا أو تركهما فارغين');
     }
 
     try {
