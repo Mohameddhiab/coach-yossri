@@ -37,7 +37,7 @@ export class ListCoachUsersUseCase {
   ) {}
 
   async execute(search: string, status: UserStatusFilter) {
-    const rawUsers = await this.users.listByRole('USER');
+    const rawUsers = await this.users.listByRole();
     const query = search.trim().toLowerCase();
 
     const enriched = await Promise.all(

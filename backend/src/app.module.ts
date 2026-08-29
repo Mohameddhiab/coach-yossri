@@ -21,6 +21,7 @@ import { WorkoutPlansModule } from './modules/workout-plans/workout-plans.module
 import { ExercisesModule } from './modules/exercises/exercises.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { FollowUpsModule } from './modules/follow-ups/follow-ups.module';
+import { StatsModule } from './modules/stats/stats.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { FollowUpsModule } from './modules/follow-ups/follow-ups.module';
     ExercisesModule,
     ChatModule,
     FollowUpsModule,
+    StatsModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],

@@ -5,7 +5,7 @@ export const USER_REPOSITORY = Symbol('UserRepository');
 export interface UserRepository {
   findByEmail(email: string): Promise<(User & { passwordHash: string }) | null>;
   findById(id: string): Promise<User | null>;
-  listByRole(role: 'USER'): Promise<User[]>;
+  listByRole(): Promise<User[]>;
   create(data: {
     email: string;
     nom: string;
