@@ -14,6 +14,7 @@ import { JwtAuthGuard } from '@/shared/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@/shared/common/guards/roles.guard';
 import { SubscriptionGuard } from '@/shared/common/guards/subscription.guard';
 import { CoachOwnershipGuard } from '@/shared/common/guards/coach-ownership.guard';
+import { fail } from '@/shared/common/errors/domain-exception';
 import { Roles } from '@/shared/common/decorators/roles.decorator';
 import {
   CurrentUser,
@@ -76,12 +77,20 @@ export class UsersController {
   @Post()
   @Roles('COACH')
   async create(@CurrentUser() auth: AuthUser, @Body() dto: CreateUserDto) {
+    let dateNaissance: Date | null = null;
+    if (dto.date_naissance) {
+      const d = new Date(dto.date_naissance);
+      if (Number.isNaN(d.getTime())) {
+        fail(400, 'VALIDATION', 'تاريخ الميلاد غير صحيح');
+      }
+      dateNaissance = d;
+    }
     const result = await this.createUseCase.execute({
       email: dto.email,
       nom: dto.nom ?? '',
       prenom: dto.prenom ?? '',
       telephone: dto.telephone ?? '',
-      dateNaissance: dto.date_naissance ? new Date(dto.date_naissance) : null,
+      dateNaissance,
       referredBy: dto.referred_by ?? null,
       tier: dto.tier,
       dateDebut: dto.date_debut,

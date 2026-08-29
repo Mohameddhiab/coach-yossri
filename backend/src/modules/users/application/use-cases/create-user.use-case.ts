@@ -72,19 +72,29 @@ export class CreateUserUseCase {
     });
 
     if (input.dateDebut && input.dateFin) {
+      const d1 = new Date(input.dateDebut);
+      const d2 = new Date(input.dateFin);
+      if (Number.isNaN(d1.getTime()) || Number.isNaN(d2.getTime())) {
+        fail(400, 'VALIDATION', 'تاريخ البداية أو النهاية غير صحيح');
+      }
+      if (d2 <= d1) {
+        fail(400, 'VALIDATION', 'يجب أن يكون تاريخ النهاية بعد تاريخ البداية');
+      }
       const tier: SubscriptionTier = isSubscriptionTier(input.tier)
         ? input.tier
         : 'ONLINE';
       await this.subs.create({
         userId: user.id,
-        dateDebut: new Date(input.dateDebut),
-        dateFin: new Date(input.dateFin),
+        dateDebut: d1,
+        dateFin: d2,
         montant: input.montant,
         tier,
         modePaiement: 'ESPECE',
         statut: 'ACTIF',
         createdBy: input.coachId,
       });
+    } else if (input.dateDebut || input.dateFin) {
+      fail(400, 'VALIDATION', 'يُرجى إدخال تاريخي البداية والنهاية معًا أو تركهما فارغين');
     }
 
     try {
