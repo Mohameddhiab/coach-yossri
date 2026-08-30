@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
   Award,
   Briefcase,
@@ -35,6 +36,7 @@ import {
   type LandingPlan,
 } from "@/lib/coach-info";
 import { useReveal } from "../hooks/use-reveal";
+import { API_BASE_URL } from "@/shared/lib/api-client";
 
 type RevealVariant = "up" | "start" | "zoom";
 
@@ -417,35 +419,35 @@ function FeaturesSection() {
 const CERTIFICATES = [
   {
     file: "fitness-trainer.jpeg",
-    title: "Fitness Trainer",
-    desc: "شهادة مدرب لياقة بدنية معتمد — تخصص القوة والتحمل وبناء الأجسام وفق معايير دولية.",
+    title: "مدرب لياقة بدنية معتمد",
+    desc: "شهادة معتمدة في تدريب اللياقة البدنية، مؤهّلة لبناء برامج القوة والتحمل وبناء الأجسام وفق أسس علمية.",
   },
   {
     file: "floor-coach.jpeg",
-    title: "Floor Coach",
-    desc: "شهادة مدرب أرضي — خبرة ميدانية في توجيه الحصص، تصحيح الحركة وضمان السلامة.",
+    title: "مدرب داخل القاعة",
+    desc: "شهادة في توجيه الحصص داخل القاعة: تصحيح الحركة، قيادة التدريب وضمان السلامة.",
   },
   {
     file: "personal-trainer.jpeg",
-    title: "Personal Trainer",
-    desc: "شهادة مدرب شخصي — متابعة فردية، برمجة أحمال وتغذية مخصصة لكل مشترك.",
+    title: "مدرب شخصي",
+    desc: "شهادة في التدريب الفردي: متابعة خاصة وبرنامج مخصص لكل مشترك حسب هدفه.",
   },
   {
     file: "ifbb-certificate.jpeg",
-    title: "IFBB Certificate",
-    desc: "شهادة IFBB الدولية — أعلى اعتماد في كمال الأجسام واللياقة البدنية.",
+    title: "شهادة IFBB دولية",
+    desc: "اعتماد دولي من الاتحاد الدولي لكمال الأجسام واللياقة البدنية.",
   },
 ] as const;
 
 function CertificatesGallery() {
   const [selected, setSelected] = useState<string | null>(null);
   return (
-    <section id="certificates" className="scroll-mt-20 space-y-6 py-14">
-      <SectionLabel>05 / الشهادات المصورة</SectionLabel>
+    <section id="certifications" className="scroll-mt-20 space-y-6 py-14">
+      <SectionLabel>04 / الشهادات</SectionLabel>
       <SectionTitle icon={<Award className="size-5" />}>شهادات موثّقة — بالصور</SectionTitle>
       <Reveal>
         <p className="max-w-2xl text-sm text-muted-foreground">
-          كل شهادة باسمها الأصلي (اسم الملف) مع شرح — اضغط للتكبير. الصور من <code className="rounded bg-muted px-1 py-0.5 text-xs">public/certifacte</code> (git).
+          اضغط على أي شهادة لعرضها بالحجم الكامل.
         </p>
       </Reveal>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -463,17 +465,14 @@ function CertificatesGallery() {
                   className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                   loading="lazy"
                 />
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-                <span className="pointer-events-none absolute bottom-2 start-2 rounded-full bg-background/90 px-2.5 py-1 text-xs font-bold shadow-sm transition-transform duration-300 group-hover:scale-105">
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/0 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                <span className="pointer-events-none absolute bottom-2 start-2 rounded-full bg-background/90 px-2.5 py-1 text-xs font-bold shadow-sm">
                   {c.title}
                 </span>
               </div>
               <CardContent className="space-y-1 p-4">
                 <div className="font-bold leading-tight">{c.title}</div>
                 <p className="text-xs leading-relaxed text-muted-foreground">{c.desc}</p>
-                <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary">
-                  <ImageIcon className="size-3" /> {c.file}
-                </span>
               </CardContent>
             </Card>
           </Reveal>
@@ -551,72 +550,134 @@ function ResultsSection() {
 }
 
 function PricingSection({ whatsappUrl }: { whatsappUrl: string }) {
-  const waFor = (plan: LandingPlan) =>
+  const { data: remoteSeats } = useQuery({
+    queryKey: ["premium-seats"],
+    queryFn: async () => {
+      const res = await fetch(`${API_BASE_URL}/premium-seats`);
+      if (!res.ok) throw new Error("premium seats unavailable");
+      return (await res.json()) as { total: number; remaining: number; full: boolean };
+    },
+    staleTime: 60_000,
+    retry: 1,
+  });
+
+  const waFor = (plan: LandingPlan, messagePrefix?: string) =>
     `${whatsappUrl}?text=${encodeURIComponent(
-      `أهلاً مدرب، أرغب في الاستفسار عن باقة ${plan.name}`,
+      `${messagePrefix ?? "أهلاً مدرب، أرغب في الاستفسار عن باقة"} ${plan.name}`,
     )}`;
 
   return (
     <section id="plans" className="scroll-mt-20 space-y-6 py-14">
-      <SectionLabel>04 / الباقات</SectionLabel>
+      <SectionLabel>05 / الباقات</SectionLabel>
       <SectionTitle icon={<Award className="size-5" />}>
         اختر مستوى المتابعة الذي يناسبك
       </SectionTitle>
 
       <div className="grid gap-4 lg:grid-cols-2 max-w-2xl mx-auto">
-        {LANDING_PLANS.map((plan, index) => (
-          <Reveal key={plan.id} delay={index * 100} variant="start">
-            <Card
-              className={`relative h-full transition-all duration-300 hover:-translate-y-1.5 ${
-                plan.highlight
-                  ? "border-primary/60 shadow-[0_20px_60px_-20px] shadow-primary/40"
-                  : "hover:border-primary/40"
-              }`}
-            >
-              {plan.highlight && (
-                <span className="absolute -top-3 start-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 text-xs font-black text-primary-foreground">
-                  الأكثر طلباً
-                </span>
-              )}
-              <CardContent className="flex h-full flex-col gap-4 p-6">
-                <div className="space-y-1">
-                  <h3 className="text-xl font-black">{plan.name}</h3>
-                  <p className="text-xs text-muted-foreground">{plan.tagline}</p>
-                </div>
-                <div className="flex flex-wrap gap-1.5">
-                  <Badge variant="secondary" className="text-xs">
-                    {plan.places}
-                  </Badge>
-                  <Badge variant="outline" className="text-xs">
-                    {plan.delivery}
-                  </Badge>
-                </div>
-                <div className="flex items-end gap-1.5">
-                  <span className="amber-gradient-text text-4xl font-black tabular-nums">
-                    {plan.price}
+        {LANDING_PLANS.map((plan, index) => {
+          const seats = plan.seats
+            ? {
+                total: remoteSeats?.total ?? plan.seats.total,
+                remaining: remoteSeats?.remaining ?? plan.seats.remaining,
+              }
+            : null;
+          const full = !!seats && seats.remaining <= 0;
+
+          return (
+            <Reveal key={plan.id} delay={index * 100} variant="start">
+              <Card
+                className={`relative h-full transition-all duration-300 hover:-translate-y-1.5 ${
+                  plan.highlight
+                    ? "border-primary/60 shadow-[0_20px_60px_-20px] shadow-primary/40"
+                    : "hover:border-primary/40"
+                }`}
+              >
+                {plan.highlight && (
+                  <span className="absolute -top-3 start-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 text-xs font-black text-primary-foreground">
+                    الأكثر طلباً
                   </span>
-                  <span className="pb-1 text-sm font-bold text-muted-foreground">
-                    DT / شهرياً
-                  </span>
-                </div>
-                <ul className="flex-1 space-y-2 text-sm">
-                  {plan.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2">
-                      <Check className="mt-0.5 size-4 shrink-0 text-primary" />
-                      <span className="leading-snug">{f}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Button asChild className="w-full" variant={plan.highlight ? "default" : "outline"}>
-                  <a href={waFor(plan)} target="_blank" rel="noopener noreferrer">
-                    <MessageCircle />
-                    اختر الباقة
-                  </a>
-                </Button>
-              </CardContent>
-            </Card>
-          </Reveal>
-        ))}
+                )}
+                <CardContent className="flex h-full flex-col gap-4 p-6">
+                  <div className="space-y-1">
+                    <h3 className="text-xl font-black">{plan.name}</h3>
+                    <p className="text-xs text-muted-foreground">{plan.tagline}</p>
+                  </div>
+                  {seats ? (
+                    <div className="space-y-1.5">
+                      <div className="flex flex-wrap gap-1.5">
+                        <Badge variant={full ? "destructive" : "secondary"} className="text-xs">
+                          {full
+                            ? "مكتمل"
+                            : `${seats.total} مكان — ${seats.remaining} أماكن متبقية`}
+                        </Badge>
+                        <Badge variant="outline" className="text-xs">
+                          {plan.delivery}
+                        </Badge>
+                      </div>
+                      <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                        <div
+                          className={`h-full rounded-full transition-all ${
+                            full ? "bg-destructive" : "bg-primary"
+                          }`}
+                          style={{
+                            width: `${Math.round(
+                              (Math.max(seats.total - seats.remaining, 0) / Math.max(seats.total, 1)) *
+                                100,
+                            )}%`,
+                          }}
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-wrap gap-1.5">
+                      <Badge variant="secondary" className="text-xs">
+                        {plan.places}
+                      </Badge>
+                      <Badge variant="outline" className="text-xs">
+                        {plan.delivery}
+                      </Badge>
+                    </div>
+                  )}
+                  <div className="flex items-end gap-1.5">
+                    <span className="amber-gradient-text text-4xl font-black tabular-nums">
+                      {plan.price}
+                    </span>
+                    <span className="pb-1 text-sm font-bold text-muted-foreground">
+                      DT / شهرياً
+                    </span>
+                  </div>
+                  <ul className="flex-1 space-y-2 text-sm">
+                    {plan.features.map((f) => (
+                      <li key={f} className="flex items-start gap-2">
+                        <Check className="mt-0.5 size-4 shrink-0 text-primary" />
+                        <span className="leading-snug">{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  {full ? (
+                    <Button asChild variant="outline" className="w-full">
+                      <a
+                        href={waFor(plan, "أهلاً مدرب، أرغب بمزيد من المعلومات حول الحجز في باقة")}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <MessageCircle />
+                        اتصل بالمدرب للمزيد من المعلومات
+                      </a>
+                    </Button>
+                  ) : (
+                    <Button asChild className="w-full" variant={plan.highlight ? "default" : "outline"}>
+                      <a href={waFor(plan)} target="_blank" rel="noopener noreferrer">
+                        <MessageCircle />
+                        اختر الباقة
+                      </a>
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+            </Reveal>
+          );
+        })}
       </div>
     </section>
   );
@@ -767,7 +828,7 @@ function FinalCta({ whatsappUrl }: { whatsappUrl: string }) {
 }
 
 export function LandingPage() {
-  const { contact, certifications, experience } = COACH_INFO;
+  const { contact, experience } = COACH_INFO;
   const whatsappUrl = `https://wa.me/${contact.whatsapp.replace(/\D/g, "")}`;
   const mainRef = useReveal<HTMLDivElement>();
   const contentRef = useReveal<HTMLDivElement>();
@@ -776,7 +837,6 @@ export function LandingPage() {
   const navLinks = [
     { href: "#about", label: "من أنا" },
     { href: "#certifications", label: "الشهادات" },
-    { href: "#certificates", label: "الشهادات المصورة" },
     { href: "#experience", label: "الخبرة" },
     { href: "#method", label: "الطريقة" },
     { href: "#features", label: "المميزات" },
@@ -959,26 +1019,7 @@ export function LandingPage() {
           </Reveal>
         </section>
 
-        {/* CERTIFICATIONS */}
-        <section id="certifications" className="scroll-mt-20 space-y-6 py-14">
-          <SectionTitle icon={<Award className="size-5" />}>الشهادات</SectionTitle>
-          <div className="grid gap-4 sm:grid-cols-3">
-            {certifications.map((cert, index) => (
-              <Reveal key={cert.label} delay={index * 120} variant="start">
-                <Card className="group h-full transition-all duration-300 hover:-translate-y-1.5 hover:border-primary/40 hover:shadow-[0_16px_48px_-16px] hover:shadow-primary/30">
-                  <CardContent className="flex h-full flex-col items-center gap-3 p-6 text-center">
-                    <span className="text-4xl transition-transform duration-300 group-hover:scale-125 group-hover:-rotate-6">
-                      {cert.emoji}
-                    </span>
-                    <div className="font-bold leading-snug">{cert.label}</div>
-                  </CardContent>
-                </Card>
-              </Reveal>
-            ))}
-          </div>
-        </section>
-
-        {/* CERTIFICATES GALLERY — images git public/certifacte */}
+        {/* CERTIFICATES */}
         <CertificatesGallery />
 
         {/* EXPERIENCE */}

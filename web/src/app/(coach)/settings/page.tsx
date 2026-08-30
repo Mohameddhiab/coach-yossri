@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Bell, Loader2, RotateCcw, Save, User2, Zap } from "lucide-react";
+import { Bell, Loader2, RotateCcw, Save, User2, Users, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -22,6 +22,8 @@ interface CoachSettings {
   rappel_interval_jours: number;
   send_motivation: boolean;
   message_templates: string[];
+  total_seats: number;
+  remaining_seats: number;
 }
 
 interface Draft {
@@ -29,9 +31,14 @@ interface Draft {
   rappel_interval_jours: number;
   send_motivation: boolean;
   templatesText: string;
+  total_seats: number;
+  remaining_seats: number;
 }
 
 const clampInterval = (n: number) => Math.min(365, Math.max(1, Math.round(n) || 7));
+const clampTotal = (n: number) => Math.min(1000, Math.max(1, Math.round(n) || 15));
+const clampRemaining = (n: number, total: number) =>
+  Math.min(total, Math.max(0, Math.round(n) || 0));
 
 type Edits = Partial<Draft>;
 
@@ -58,6 +65,8 @@ export default function SettingsPage() {
         rappel_interval_jours: settings.rappel_interval_jours,
         send_motivation: settings.send_motivation,
         templatesText: (settings.message_templates ?? []).join("\n"),
+        total_seats: settings.total_seats,
+        remaining_seats: settings.remaining_seats,
       }
     : null;
 
@@ -69,7 +78,9 @@ export default function SettingsPage() {
     (value.motivation_message !== base.motivation_message ||
       value.rappel_interval_jours !== base.rappel_interval_jours ||
       value.send_motivation !== base.send_motivation ||
-      value.templatesText !== base.templatesText);
+      value.templatesText !== base.templatesText ||
+      value.total_seats !== base.total_seats ||
+      value.remaining_seats !== base.remaining_seats);
 
   useEffect(() => {
     if (!isDirty) return;
@@ -100,6 +111,11 @@ export default function SettingsPage() {
         .map((l) => l.trim())
         .filter(Boolean)
         .slice(0, 20),
+      total_seats: clampTotal(value.total_seats),
+      remaining_seats: clampRemaining(
+        value.remaining_seats,
+        clampTotal(value.total_seats),
+      ),
     });
   };
 
@@ -198,6 +214,85 @@ export default function SettingsPage() {
                 }))
               }
             />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Users className="size-4 text-primary" />
+            أماكن باقة بريم كوتش
+          </CardTitle>
+          <CardDescription>
+            عدد أماكن باقة «بريميوم كوتش» الظاهرة على صفحة الوصول — خفّض «المتبقية» عند كل حجز جديد؛ عند الصفر تظهر «مكتمل» وزر الاتصال بالمدرب.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label>إجمالي الأماكن</Label>
+              <Input
+                type="number"
+                min={1}
+                max={1000}
+                inputMode="numeric"
+                dir="ltr"
+                className="w-32 tabular-nums"
+                value={value.total_seats}
+                onChange={(e) => {
+                  const n = Number(e.target.value);
+                  setEdits((prev) => ({
+                    ...prev,
+                    total_seats: Number.isFinite(n) ? n : 1,
+                  }));
+                }}
+                onBlur={() =>
+                  setEdits((prev) => ({
+                    ...prev,
+                    total_seats: clampTotal(prev.total_seats ?? value.total_seats),
+                    remaining_seats: clampRemaining(
+                      prev.remaining_seats ?? value.remaining_seats,
+                      clampTotal(prev.total_seats ?? value.total_seats),
+                    ),
+                  }))
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>الأماكن المتبقية</Label>
+              <Input
+                type="number"
+                min={0}
+                inputMode="numeric"
+                dir="ltr"
+                className="w-32 tabular-nums"
+                value={value.remaining_seats}
+                onChange={(e) => {
+                  const n = Number(e.target.value);
+                  setEdits((prev) => ({
+                    ...prev,
+                    remaining_seats: Number.isFinite(n) ? n : 0,
+                  }));
+                }}
+                onBlur={() =>
+                  setEdits((prev) => ({
+                    ...prev,
+                    remaining_seats: clampRemaining(
+                      prev.remaining_seats ?? value.remaining_seats,
+                      clampTotal(prev.total_seats ?? value.total_seats),
+                    ),
+                  }))
+                }
+              />
+            </div>
+          </div>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <span className="rounded bg-muted px-1.5 py-0.5 font-bold">{value.total_seats}</span>
+            <span>مكان إجمالي</span>
+            <span className="opacity-50">•</span>
+            <span className="rounded bg-muted px-1.5 py-0.5 font-bold">{value.remaining_seats}</span>
+            <span>متبقية</span>
           </div>
         </CardContent>
       </Card>

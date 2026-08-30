@@ -29,6 +29,10 @@ export interface LandingPlan {
   highlight?: boolean;
   price: number;
   features: string[];
+  seats?: {
+    total: number;
+    remaining: number;
+  };
 }
 
 export interface LandingFaq {
@@ -67,12 +71,14 @@ export const LANDING_PLANS: LandingPlan[] = [
     id: "premium-coach",
     name: "بريميوم كوتش",
     tagline: "متابعة شخصية كاملة",
-    places: "متاحة حالياً — 5 أماكن",
+    places: "متاحة حالياً",
     delivery: "التجهيز خلال 24 ساعة",
     highlight: true,
     price: 150,
+    seats: { total: 15, remaining: 4 },
     features: [
       "جميع ميزات باقة أونلاين",
+      "تدريب مباشر مع المدرب",
       "محادثة مباشرة مع المدرب",
       "متابعة شخصية يومية",
       "تعديلات أسبوعية بناءً على استجابة جسمك",
