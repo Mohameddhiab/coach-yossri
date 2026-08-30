@@ -12,6 +12,8 @@ export interface CoachRepository {
         | 'rappelIntervalJours'
         | 'sendMotivation'
         | 'messageTemplates'
+        | 'totalSeats'
+        | 'remainingSeats'
       >
     >,
   ): Promise<CoachSettings>;

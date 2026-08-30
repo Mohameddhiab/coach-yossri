@@ -12,10 +12,12 @@ import {
 import {
   IsArray,
   IsBoolean,
+  IsInt,
   IsNumber,
   IsOptional,
   IsString,
   MaxLength,
+  Min,
   MinLength,
 } from 'class-validator';
 import { JwtAuthGuard } from '@/shared/common/guards/jwt-auth.guard';
@@ -43,6 +45,8 @@ class SaveSettingsDto {
   @IsArray()
   @IsString({ each: true })
   message_templates?: string[];
+  @IsOptional() @IsInt() @Min(1) total_seats?: number;
+  @IsOptional() @IsInt() @Min(0) remaining_seats?: number;
 }
 
 class NoteDto {
@@ -74,6 +78,8 @@ export class CoachController {
       rappel_interval_jours: s.rappelIntervalJours,
       send_motivation: s.sendMotivation,
       message_templates: s.messageTemplates,
+      total_seats: s.totalSeats,
+      remaining_seats: s.remainingSeats,
       updated_at: s.updatedAt.toISOString(),
     };
   }
@@ -81,17 +87,28 @@ export class CoachController {
   @Put('coach/settings')
   @Roles('COACH')
   async saveSettings(@Body() dto: SaveSettingsDto) {
+    const current = await this.coach.settings();
+    const totalSeats =
+      dto.total_seats !== undefined ? dto.total_seats : current.totalSeats;
+    const remainingSeats =
+      dto.remaining_seats !== undefined
+        ? dto.remaining_seats
+        : current.remainingSeats;
     const s = await this.coach.saveSettings({
       motivationMessage: dto.motivation_message,
       rappelIntervalJours: dto.rappel_interval_jours,
       sendMotivation: dto.send_motivation,
       messageTemplates: dto.message_templates,
+      totalSeats,
+      remainingSeats: Math.min(Math.max(remainingSeats, 0), totalSeats),
     });
     return {
       motivation_message: s.motivationMessage,
       rappel_interval_jours: s.rappelIntervalJours,
       send_motivation: s.sendMotivation,
       message_templates: s.messageTemplates,
+      total_seats: s.totalSeats,
+      remaining_seats: s.remainingSeats,
       updated_at: s.updatedAt.toISOString(),
     };
   }

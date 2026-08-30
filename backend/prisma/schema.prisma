@@ -278,6 +278,8 @@ model CoachSettings {
   rappelIntervalJours Int      @default(7)
   sendMotivation      Boolean  @default(true)
   messageTemplates    Json     @default("[]")
+  totalSeats          Int      @default(15)
+  remainingSeats      Int      @default(4)
   updatedAt           DateTime @updatedAt
 
   @@map("coach_settings")

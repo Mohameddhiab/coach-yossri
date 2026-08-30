@@ -15,6 +15,8 @@ const DEFAULT_SETTINGS: Omit<CoachSettings, 'id' | 'updatedAt'> = {
     'ركز على هدفك هذا الشهر 🎯',
     'شرب الماء مهم بعد التمرين 💧',
   ],
+  totalSeats: 15,
+  remainingSeats: 4,
 };
 
 @Injectable()
@@ -34,6 +36,8 @@ export class PrismaCoachRepository implements CoachRepository {
         messageTemplates: Array.isArray(first.messageTemplates)
           ? (first.messageTemplates as string[])
           : [],
+        totalSeats: first.totalSeats,
+        remainingSeats: first.remainingSeats,
         updatedAt: first.updatedAt,
       };
     }
@@ -49,6 +53,8 @@ export class PrismaCoachRepository implements CoachRepository {
       rappelIntervalJours: row.rappelIntervalJours,
       sendMotivation: row.sendMotivation,
       messageTemplates: row.messageTemplates as string[],
+      totalSeats: row.totalSeats,
+      remainingSeats: row.remainingSeats,
       updatedAt: row.updatedAt,
     };
   }
@@ -65,6 +71,8 @@ export class PrismaCoachRepository implements CoachRepository {
         | 'rappelIntervalJours'
         | 'sendMotivation'
         | 'messageTemplates'
+        | 'totalSeats'
+        | 'remainingSeats'
       >
     >,
   ): Promise<CoachSettings> {
@@ -90,6 +98,12 @@ export class PrismaCoachRepository implements CoachRepository {
         ...(patch.messageTemplates !== undefined
           ? { messageTemplates: patch.messageTemplates }
           : {}),
+        ...(patch.totalSeats !== undefined
+          ? { totalSeats: patch.totalSeats }
+          : {}),
+        ...(patch.remainingSeats !== undefined
+          ? { remainingSeats: patch.remainingSeats }
+          : {}),
       },
     });
     return {
@@ -98,6 +112,8 @@ export class PrismaCoachRepository implements CoachRepository {
       rappelIntervalJours: row.rappelIntervalJours,
       sendMotivation: row.sendMotivation,
       messageTemplates: row.messageTemplates as string[],
+      totalSeats: row.totalSeats,
+      remainingSeats: row.remainingSeats,
       updatedAt: row.updatedAt,
     };
   }

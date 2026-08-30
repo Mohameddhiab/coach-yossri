@@ -125,6 +125,8 @@ export interface CoachSettings {
   rappelIntervalJours: number;
   sendMotivation: boolean;
   messageTemplates: string[];
+  totalSeats: number;
+  remainingSeats: number;
   updatedAt: Date;
 }
 
