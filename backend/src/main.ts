@@ -55,6 +55,6 @@ async function bootstrap() {
   });
   const port = Number(process.env.PORT ?? 3000);
   await app.listen(port);
-  console.log(`9AWI API ready on http://localhost:${port}/api`);
+  console.log(`Coach Yosri API ready on http://localhost:${port}/api`);
 }
 void bootstrap();

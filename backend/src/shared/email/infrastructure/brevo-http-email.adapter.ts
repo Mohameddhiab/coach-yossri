@@ -13,7 +13,7 @@ export class BrevoHttpEmailAdapter implements IEmailSender {
 
   constructor() {
     const match = /^\s*(.*?)\s*<([^>]+)>/.exec(process.env.MAIL_FROM ?? '');
-    this.fromName = match?.[1]?.trim() || '9AWI';
+    this.fromName = match?.[1]?.trim() || 'Coach Yosri';
     this.fromEmail =
       match?.[2]?.trim() ??
       process.env.MAIL_FROM?.trim() ??

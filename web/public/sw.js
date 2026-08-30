@@ -1,4 +1,4 @@
-const CACHE = "9awi-v4";
+const CACHE = "coachyosri-v1";
 const PRECACHE = ["/", "/manifest.webmanifest", "/icons/icon-192.png"];
 
 self.addEventListener("install", (event) => {

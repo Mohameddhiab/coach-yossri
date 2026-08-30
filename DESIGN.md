@@ -1,4 +1,4 @@
-# 9AWI — Design Document
+# Coach Yosri — Design Document
 ### Plateforme de coaching nutrition & suivi pour coach de musculation
 
 > *"Saha w 9uwa, m3a coach-ek"* — Santé et force, avec ton coach.
@@ -7,7 +7,7 @@
 
 ## 1. Vue d'ensemble
 
-**9AWI** est une plateforme privée (pas d'inscription publique) où un **coach (admin)** gère ses abonnés en salle de musculation. Le coach crée les comptes de ses clients, leur assigne un **programme alimentaire personnalisé**, et suit leur **progression physique** (poids, mensurations, photos) dans le temps — indépendamment de la salle où ils s'entraînent (qui peut changer chaque mois).
+**Coach Yosri** est une plateforme privée (pas d'inscription publique) où un **coach (admin)** gère ses abonnés en salle de musculation. Le coach crée les comptes de ses clients, leur assigne un **programme alimentaire personnalisé**, et suit leur **progression physique** (poids, mensurations, photos) dans le temps — indépendamment de la salle où ils s'entraînent (qui peut changer chaque mois).
 
 Le paiement se fait **en espèces, hors app** ; l'app sert uniquement à gérer l'accès (actif/expiré) et l'historique.
 
@@ -233,8 +233,8 @@ Le coach peut dupliquer un `MealPlan` existant (le sien ou celui d'un autre user
 
 ## 10. Nom & Branding
 
-**9AWI** (قاوي) — désigne en darja tunisienne quelqu'un de fort, costaud. Facile à retenir, se prête bien à un logo (ex: haltère stylisé + typographie bold).
+**Coach Yosri / كوتش يسري** — d'après le nom du coach fondateur, avec la mention « قاوي » (darja tunisienne, quelqu'un de fort, costaud) en clin d'œil à l'héritage. Logo : haltère stylisé + typographie bold.
 
 - Tagline : *"Saha w 9uwa, m3a coach-ek"*
 - Alternatives si besoin de varier : **Sahtek** (ta santé), **T9awa** (deviens fort)
-- Domaine possible : `9awi.tn`, `9awi.app`, ou `getqawi.com`
+- Domaine possible : `coachyosri.tn`, `coachyosri.app`, ou `getcoachyosri.com`

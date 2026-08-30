@@ -54,7 +54,7 @@ export function XpBadgesCard() {
 
   useEffect(() => {
     if (!badges || !me) return;
-    const key = `9awi_badges_${me.user.id}`;
+    const key = `coachyosri_badges_${me.user.id}`;
     let known: string[] = [];
     try {
       known = JSON.parse(localStorage.getItem(key) ?? "[]") as string[];

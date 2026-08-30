@@ -20,7 +20,7 @@ export class NodemailerEmailAdapter implements IEmailSender {
     this.configured = Boolean(host && user && pass);
     this.from =
       process.env.MAIL_FROM ??
-      (user ? `9AWI <${user}>` : '9AWI <no-reply@localhost>');
+      (user ? `Coach Yosri <${user}>` : 'Coach Yosri <no-reply@localhost>');
 
     if (!this.configured) {
       this.logger.warn(

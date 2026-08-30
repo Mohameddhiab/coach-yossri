@@ -1,25 +1,25 @@
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: 9awi-postgres
+    container_name: coachyosri-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-9awi}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-9awi_dev_pw}
-      POSTGRES_DB: ${POSTGRES_DB:-9awi}
+      POSTGRES_USER: ${POSTGRES_USER:-coachyosri}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-coachyosri_dev_pw}
+      POSTGRES_DB: ${POSTGRES_DB:-coachyosri}
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-9awi} -d ${POSTGRES_DB:-9awi}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-coachyosri} -d ${POSTGRES_DB:-coachyosri}"]
       interval: 5s
       timeout: 5s
       retries: 10
 
   redis:
     image: redis:7-alpine
-    container_name: 9awi-redis
+    container_name: coachyosri-redis
     restart: unless-stopped
     ports:
       - "6379:6379"
@@ -33,12 +33,12 @@ services:
 
   backend:
     build: ./backend
-    container_name: 9awi-backend
+    container_name: coachyosri-backend
     restart: unless-stopped
     env_file:
       - ./backend/.env
     environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER:-9awi}:${POSTGRES_PASSWORD:-9awi_dev_pw}@postgres:5432/${POSTGRES_DB:-9awi}?schema=public
+      DATABASE_URL: postgresql://${POSTGRES_USER:-coachyosri}:${POSTGRES_PASSWORD:-coachyosri_dev_pw}@postgres:5432/${POSTGRES_DB:-coachyosri}?schema=public
       REDIS_URL: redis://redis:6379
       PORT: 3001
     ports:
@@ -51,7 +51,7 @@ services:
 
   web:
     build: ./web
-    container_name: 9awi-web
+    container_name: coachyosri-web
     restart: unless-stopped
     environment:
       SERVER_API_URL: http://backend:3001/api
@@ -66,7 +66,7 @@ services:
       context: ./mobile
       args:
         EXPO_PUBLIC_API_URL: http://localhost:3001/api
-    container_name: 9awi-mobile-web
+    container_name: coachyosri-mobile-web
     restart: unless-stopped
     ports:
       - "8080:80"

@@ -1,25 +1,25 @@
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: 9awi-postgres
+    container_name: coachyosri-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: 9awi
-      POSTGRES_PASSWORD: 9awi_dev_pw
-      POSTGRES_DB: 9awi
+      POSTGRES_USER: coachyosri
+      POSTGRES_PASSWORD: coachyosri_dev_pw
+      POSTGRES_DB: coachyosri
     ports:
       - '5432:5432'
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U 9awi -d 9awi']
+      test: ['CMD-SHELL', 'pg_isready -U coachyosri -d coachyosri']
       interval: 5s
       timeout: 5s
       retries: 10
 
   redis:
     image: redis:7-alpine
-    container_name: 9awi-redis
+    container_name: coachyosri-redis
     restart: unless-stopped
     ports:
       - '6379:6379'

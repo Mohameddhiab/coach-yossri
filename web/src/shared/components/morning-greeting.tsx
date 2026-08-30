@@ -16,7 +16,7 @@ export function MorningGreeting() {
 
   useEffect(() => {
     if (!userId) return;
-    const key = `9awi_greeting_${userId}`;
+    const key = `coachyosri_greeting_${userId}`;
     const today = new Date().toISOString().slice(0, 10);
     if (localStorage.getItem(key) !== today) {
       localStorage.setItem(key, today);
@@ -25,7 +25,7 @@ export function MorningGreeting() {
 
   const markedToday =
     typeof window !== "undefined" && userId
-      ? localStorage.getItem(`9awi_greeting_${userId}`) === new Date().toISOString().slice(0, 10)
+      ? localStorage.getItem(`coachyosri_greeting_${userId}`) === new Date().toISOString().slice(0, 10)
       : false;
 
   const { data: goal } = useGoal(userId ?? "");

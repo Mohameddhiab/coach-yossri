@@ -30,7 +30,7 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
-const QUEUE_KEY = "9awi_pending_weights";
+const QUEUE_KEY = "coachyosri_pending_weights";
 
 interface PendingWeight {
   userId: string;

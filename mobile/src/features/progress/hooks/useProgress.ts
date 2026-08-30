@@ -33,7 +33,7 @@ export function deleteWeightTarget(userId: string) {
 
 /* ------------------- File hors-ligne pour les poids ------------------- */
 
-const PENDING_KEY = "9awi_pending_weights";
+const PENDING_KEY = "coachyosri_pending_weights";
 
 export interface PendingWeight {
   poids_kg: number;

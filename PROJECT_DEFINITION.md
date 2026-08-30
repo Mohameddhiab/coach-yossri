@@ -1,4 +1,4 @@
-# 9AWI — Définition du projet pour génération d'idées créatives
+# Coach Yosri / كوتش يسري — Définition du projet pour génération d'idées créatives
 
 > Document à donner tel quel à une autre IA pour obtenir des idées créatives d'amélioration du produit.
 
@@ -6,7 +6,7 @@
 
 ## 1. Concept du produit
 
-**9AWI** (« قاوي » = *sois fort* en arabe, avec le mot « قوّة »/force) est une **plateforme privée de coaching nutrition & suivi physique** pour un coach de musculation en Tunisie.
+**Coach Yosri / كوتش يسري** (nom d'origine « قاوي » = *sois fort* en arabe, avec le mot « قوّة »/force) est une **plateforme privée de coaching nutrition & suivi physique** pour un coach de musculation en Tunisie.
 
 Rien n'est public : **pas d'inscription en ligne**. Le coach crée les comptes de ses abonnés en salle, leur génère un mot de passe, et gère leur **abonnement payé en espèces** (hors app). L'abonné consulte son **plan alimentaire personnalisé**, enregistre son **poids régulièrement**, et suit sa **progression** (courbe, photos). Si son abonnement expire, il **perd l'accès à ses données** (écran bloqué) jusqu'au renouvellement.
 

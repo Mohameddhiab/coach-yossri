@@ -1,6 +1,6 @@
 import * as SecureStore from "expo-secure-store";
 
-const TOKEN_KEY = "9awi_access_token";
+const TOKEN_KEY = "coachyosri_access_token";
 
 export async function getToken(): Promise<string | null> {
   try {

@@ -4,7 +4,7 @@ import { Request } from 'express';
 import { fail } from '../errors/domain-exception';
 import type { AuthUser } from '../decorators/current-user.decorator';
 
-export const ACCESS_COOKIE = '9awi_access';
+export const ACCESS_COOKIE = 'coachyosri_access';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {

@@ -11,7 +11,7 @@ function daysAgo(n: number, hour = 9): Date {
 }
 
 async function main() {
-  console.log('Seeding 9awi database…');
+  console.log('Seeding Coach Yosri database…');
   const passwordHash = async (plain: string) => bcrypt.hash(plain, 10);
 
   await prisma.$transaction([

@@ -1,8 +1,8 @@
-# 9AWI CI/CD Pipeline
+# Coach Yosri CI/CD Pipeline
 
 ## Overview
 
-Automated CI/CD pipeline for the 9AWI fitness coaching platform.
+Automated CI/CD pipeline for the Coach Yosri fitness coaching platform.
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐

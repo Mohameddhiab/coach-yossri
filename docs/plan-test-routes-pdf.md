@@ -46,7 +46,7 @@ Si `POST /users` renvoie `400 EMAIL_TAKEN` ou `400 VALIDATION` (ex: `telephone` 
 - `web/src/app/(coach)/users/[id]/page.tsx:560` `WorkoutPlanDayView` + `605` `MealPlanDayView` — même manque
 
 **Attendu:**
-- Bouton `تحميل PDF` pour **chaque** plan (meal + workout) côté `User /plan` et `Coach /users/[id]`, fichier nommé `9awi-plan-{nom}-{jour}.pdf` ou `9awi-{userId}-{date}.pdf`, avec images `guide-assets` `bench-press` etc. et `WEEK_DAY_LABELS`
+- Bouton `تحميل PDF` pour **chaque** plan (meal + workout) côté `User /plan` et `Coach /users/[id]`, fichier nommé `coachyosri-plan-{nom}-{jour}.pdf` ou `coachyosri-{userId}-{date}.pdf`, avec images `guide-assets` `bench-press` etc. et `WEEK_DAY_LABELS`
 
 ---
 
@@ -56,7 +56,7 @@ Si `POST /users` renvoie `400 EMAIL_TAKEN` ou `400 VALIDATION` (ex: `telephone` 
 
 | Méthode | Route | Rôle | Payload | Attendu | Fichier |
 |---|---|---|---|---|---|
-| `POST` | `/auth/login` | anon | `yosricoach@gmail.com/Yosri@Coach2026!` | `201` + `Set-Cookie 9awi_access; Secure; SameSite=None` `auth.controller.ts:98` + `CORS` `main.ts:10` | `auth.controller.ts:114` |
+| `POST` | `/auth/login` | anon | `yosricoach@gmail.com/Yosri@Coach2026!` | `201` + `Set-Cookie coachyosri_access; Secure; SameSite=None` `auth.controller.ts:98` + `CORS` `main.ts:10` | `auth.controller.ts:114` |
 | `POST` | `/auth/login` | anon | mauvais mdp | `401 INVALID_CREDENTIALS` |  |
 | `GET` | `/auth/me` | COACH `credentials:include` | - | `200` `toUserApi` | `auth.controller.ts:157` |
 | `GET` | `/auth/me` | anon | - | `401` | `JwtAuthGuard` |
@@ -69,13 +69,13 @@ Si `POST /users` renvoie `400 EMAIL_TAKEN` ou `400 VALIDATION` (ex: `telephone` 
 | `POST` | `/users/:id/workout-plan` | COACH | `titre, exercises[]` | `201` | `workout-plans.controller.ts:15` |
 | `GET` | `/users/:id/workout-plan` | COACH/USER | - | `200` ou `404` |  |
 | `GET` | `/exercises/wger/search?term=` | auth | - | `200` | `exercises.controller.ts:15` |
-| `POST` | `/auth/refresh` | cookie `9awi_refresh` | - | `201` + nouveau `9awi_access; SameSite=None` `auth.controller.ts:131` |  |
+| `POST` | `/auth/refresh` | cookie `coachyosri_refresh` | - | `201` + nouveau `coachyosri_access; SameSite=None` `auth.controller.ts:131` |  |
 
 ### 3.2 Frontend (Playwright `web/tests/e2e/`)
 
 **Auth & guards `web/src/proxy.ts:54` `web/src/app/page.tsx:10`:**
 - `/` sans cookie → `LandingPage` `landing-page.tsx:677`; avec `COACH` cookie → redirect `/dashboard`; avec `USER` → `/plan`
-- `/login` `login-form.tsx:36` `zod` email/password → `useAuth login` `auth-context.tsx:47` `apiClient POST /auth/login` `auth-context.tsx:54` copie `9awi_access` `vercel.app` `Max-Age=900` → `router.push` `dashboard` vs `plan` selon `user.role`
+- `/login` `login-form.tsx:36` `zod` email/password → `useAuth login` `auth-context.tsx:47` `apiClient POST /auth/login` `auth-context.tsx:54` copie `coachyosri_access` `vercel.app` `Max-Age=900` → `router.push` `dashboard` vs `plan` selon `user.role`
 - `/dashboard` sans `COACH` → redirect `/plan` `proxy.ts:85`; sans auth → `/login` `proxy.ts:66`
 - `logout` `auth-context.tsx:53` → `POST /auth/logout` + `document.cookie Max-Age=0` + `queryClient.clear()`
 
@@ -84,7 +84,7 @@ Si `POST /users` renvoie `400 EMAIL_TAKEN` ou `400 VALIDATION` (ex: `telephone` 
 - Cas d'erreur: `email existant` → `toast.error` doit afficher `EMAIL_TAKEN` message, pas générique; `telephone` trop court → `FormMessage` `33`; `date_fin <= date_debut` → `superRefine 48`
 
 **Plans & PDF:**
-- `User → /plan` `plan/page.tsx:43` `todayWeekDay` → `WorkoutPlanDayView` `workout-plan-day-view.tsx:14` avec `AnimatedExerciseImage` `guide-assets/bench-press/frame-1.png` + `MealPlanDayView` `macros` → bouton `FileDown` `plan/page.tsx:5` → click → `download` `9awi-plan-...pdf` contient `getGuideImageUrl` `exercise-guide-map.ts:102`
+- `User → /plan` `plan/page.tsx:43` `todayWeekDay` → `WorkoutPlanDayView` `workout-plan-day-view.tsx:14` avec `AnimatedExerciseImage` `guide-assets/bench-press/frame-1.png` + `MealPlanDayView` `macros` → bouton `FileDown` `plan/page.tsx:5` → click → `download` `coachyosri-plan-...pdf` contient `getGuideImageUrl` `exercise-guide-map.ts:102`
 - `Coach → /users/[id]` `560` `605` même vérif + export depuis onglet coach
 
 **Checklist manuelle rapide (30 min) à faire avant chaque deploy:**
@@ -163,7 +163,7 @@ Si `POST /users` renvoie `400 EMAIL_TAKEN` ou `400 VALIDATION` (ex: `telephone` 
 ## 8) Questions ouvertes pour toi
 
 1. Mot de passe affiché: juste `code` copiable `create-user-form.tsx:119` ou aussi envoi par email `sendWelcome` `create-user.use-case.ts:91` (actuellement `console` en prod `065977a`)?
-2. PDF: un seul PDF combiné `meal + workout` ou 2 fichiers séparés `9awi-exercices.pdf` / `9awi-repas.pdf` ?
+2. PDF: un seul PDF combiné `meal + workout` ou 2 fichiers séparés `coachyosri-exercices.pdf` / `coachyosri-repas.pdf` ?
 3. Tests: `mobile` inclus (`expo` `mobile/src/app/login.tsx:2`) ou seulement `web` + `backend` ?
 4. Données de test: utiliser `yosricoach@gmail.com` existant ou créer un `seed:test-user` isolé ?
 5. Faut-il committer les `24 fichiers` `M` `prettier` restants ensemble ou lot séparé ?

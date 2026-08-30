@@ -1,19 +1,34 @@
-export const BRAND = {
-  name: 'كوتش يسري',
-  tagline: 'منصة التدريب الرياضي الاحترافية',
-  accent: '#F59E0B',
-  accentDark: '#1A1202',
-  bg: '#0B0C0F',
-  card: '#1C1D21',
-  border: '#2A2D33',
-  text: '#ECEDEF',
-  muted: '#9BA0A8',
-  subtle: '#6B7078',
-  logoUrl: 'https://coach-yossri.vercel.app/icons/logo-1024.png',
-} as const;
+/**
+ * layout.ts — Design system commun à tous les emails "كوتش يسري"
+ * -----------------------------------------------------------------
+ * Objectifs de cette version :
+ *  - Rendu correct sur Outlook (VML), Gmail, Apple Mail, mobile (RTL inclus)
+ *  - Identité "industrial/sport" cohérente : fond sombre, accent or (#FBBF24),
+ *    bande signature en haut de la carte, badge de marque
+ *  - Hiérarchie claire : eyebrow → titre → corps → bloc info/CTA → footer
+ *  - Dark mode natif géré (meta color-scheme)
+ */
 
-export function esc(value: string): string {
-  return value
+const FONT_STACK = "'Tajawal','Segoe UI',Tahoma,Geneva,Arial,sans-serif";
+
+const COLORS = {
+  bgPage: '#0A0B0D',
+  bgCard: '#16171B',
+  border: '#232429',
+  surface: '#1D1E23',
+  surfaceBorder: '#2A2D33',
+  accent: '#FBBF24',
+  accentDark: '#F59E0B',
+  textPrimary: '#ECEDEF',
+  textBody: '#C7C9CE',
+  textSecondary: '#9BA0A8',
+  textMuted: '#6B7078',
+  textFaint: '#4B4F57',
+};
+
+/** Échappe une chaîne pour une insertion HTML sûre. */
+export function esc(str: string): string {
+  return String(str ?? '')
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
@@ -21,26 +36,54 @@ export function esc(value: string): string {
     .replace(/'/g, '&#39;');
 }
 
-export function ctaButton(href: string, label: string): string {
+/**
+ * Bouton d'action principal — pattern "bulletproof button" :
+ * dégradé + coins arrondis pour les clients modernes, secours VML pour Outlook.
+ */
+export function ctaButton(url: string, label: string): string {
+  const safeUrl = esc(url);
+  const safeLabel = esc(label);
   return `
-  <tr><td align="center" style="padding:8px 0 4px;">
-    <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${esc(href)}" style="height:48px;v-text-anchor:middle;" arcsize="12%" stroke="f" fillcolor="#F59E0B"><w:anchorlock/><center style="color:#1A1202;font-family:Tahoma,Arial,sans-serif;font-weight:bold;font-size:15px;">${esc(label)}</center></v:roundrect><![endif]-->
-    <a href="${esc(href)}" target="_blank" class="btn" style="display:inline-block;background-color:#F59E0B;color:#1A1202;font-size:15px;font-weight:800;text-decoration:none;padding:14px 44px;border-radius:12px;box-shadow:0 4px 14px rgba(245,158,11,.28);">
-      ${esc(label)}
-    </a>
-  </td></tr>`;
+  <tr>
+    <td align="center" style="padding:30px 32px 6px;">
+      <!--[if mso]>
+      <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word"
+        href="${safeUrl}" style="height:52px;v-text-anchor:middle;width:270px;" arcsize="14%"
+        fillcolor="${COLORS.accent}" stroke="f">
+        <center style="color:#14150F;font-family:Tahoma,sans-serif;font-size:15px;font-weight:700;">${safeLabel}</center>
+      </v:roundrect>
+      <![endif]-->
+      <!--[if !mso]><!-->
+      <a href="${safeUrl}" target="_blank"
+        style="display:inline-block;background:linear-gradient(135deg,${COLORS.accent},${COLORS.accentDark});
+        color:#14150F;font-family:${FONT_STACK};font-size:15px;font-weight:800;text-decoration:none;
+        padding:16px 42px;border-radius:10px;letter-spacing:.2px;
+        box-shadow:0 8px 20px rgba(251,191,36,.25);">
+        ${safeLabel}
+      </a>
+      <!--<![endif]-->
+    </td>
+  </tr>`;
 }
 
-export function infoBox(html: string): string {
+/** Bloc "carte dans la carte" pour mettre en avant une information clé (identifiants, délai, alerte...). */
+export function infoBox(innerHtml: string): string {
   return `
-  <tr><td style="padding:0 32px 4px;">
-    <div style="background:#232429;border:1px solid #2A2D33;border-radius:12px;padding:14px 16px;">
-      ${html}
-    </div>
-  </td></tr>`;
+  <tr>
+    <td class="pad" style="padding:22px 32px 0;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+        style="background:${COLORS.surface};border:1px solid ${COLORS.surfaceBorder};border-radius:12px;">
+        <tr><td style="padding:18px 20px;">
+          ${innerHtml}
+        </td></tr>
+      </table>
+    </td>
+  </tr>`;
 }
 
-export interface EmailLayoutOptions {
+interface EmailLayoutOptions {
+  /** Petit label au-dessus du titre (ex: "الأمان", "خطة جديدة"). Optionnel. */
+  eyebrow?: string;
   title: string;
   preheader: string;
   bodyHtml: string;
@@ -48,84 +91,124 @@ export interface EmailLayoutOptions {
 }
 
 export function renderEmailLayout({
+  eyebrow,
   title,
   preheader,
   bodyHtml,
-  noteHtml,
+  noteHtml = '',
 }: EmailLayoutOptions): string {
+  const year = new Date().getFullYear();
+
   return `<!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="color-scheme" content="dark" />
-<meta name="supported-color-schemes" content="dark" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="color-scheme" content="dark light">
+<meta name="supported-color-schemes" content="dark light">
 <title>${esc(title)}</title>
+<!--[if mso]>
+<noscript><xml>
+<o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings>
+</xml></noscript>
+<![endif]-->
 <style>
+  body,table,td,a{-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;}
+  table,td{mso-table-lspace:0pt;mso-table-rspace:0pt;}
+  img{-ms-interpolation-mode:bicubic;border:0;height:auto;line-height:100%;outline:none;text-decoration:none;}
+  body{margin:0;padding:0;width:100%!important;background:${COLORS.bgPage};}
+  a{color:${COLORS.accent};}
   @media only screen and (max-width:600px){
-    .card{width:100% !important;border-radius:0 !important;}
-    .pad{padding-left:20px !important;padding-right:20px !important;}
-    .btn{width:100% !important;box-sizing:border-box !important;}
+    .container{width:100%!important;}
+    .pad{padding-left:20px!important;padding-right:20px!important;}
+    h1{font-size:20px!important;}
   }
 </style>
 </head>
-<body style="margin:0;padding:0;background-color:#0B0C0F;font-family:'Segoe UI',Tahoma,Arial,sans-serif;-webkit-font-smoothing:antialiased;">
-  <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:#0B0C0F;">
-    ${esc(preheader)}‌&nbsp;&zwnj;&nbsp;
+<body style="margin:0;padding:0;background:${COLORS.bgPage};">
+  <div style="display:none;max-height:0;overflow:hidden;opacity:0;mso-hide:all;">
+    ${esc(preheader)}&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;
   </div>
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#0B0C0F;padding:36px 16px;">
-    <tr><td align="center">
-      <table role="presentation" width="100%" class="card" cellpadding="0" cellspacing="0" style="max-width:560px;background-color:#1C1D21;border-radius:18px;border:1px solid #2A2D33;overflow:hidden;">
+  <center style="width:100%;background:${COLORS.bgPage};">
+    <!--[if mso]>
+    <table role="presentation" width="600" align="center" cellpadding="0" cellspacing="0"><tr><td>
+    <![endif]-->
+    <table role="presentation" class="container" width="100%" cellpadding="0" cellspacing="0"
+      style="max-width:600px;margin:0 auto;">
 
-        <!-- Header / marque -->
-        <tr><td align="center" style="padding:30px 32px 6px;">
-          <img
-            src="${BRAND.logoUrl}"
-            alt="${esc(BRAND.name)}"
-            width="64"
-            height="64"
-            style="display:block;width:64px;height:64px;border-radius:16px;border:1px solid #2A2D33;box-shadow:0 6px 18px rgba(0,0,0,.35);"
-          />
-          <div style="font-size:21px;font-weight:900;color:#ECEDEF;margin-top:12px;">${BRAND.name}</div>
-          <div style="font-size:12px;color:#9BA0A8;margin-top:4px;letter-spacing:.2px;">${BRAND.tagline}</div>
-        </td></tr>
+      <!-- Badge de marque -->
+      <tr>
+        <td align="center" style="padding:36px 20px 20px;">
+          <span style="display:inline-flex;align-items:center;gap:10px;padding:7px 18px 7px 10px;
+            border:1px solid rgba(251,191,36,.35);border-radius:999px;background:rgba(251,191,36,.08);
+            font-family:${FONT_STACK};font-size:13px;font-weight:700;color:${COLORS.accent};letter-spacing:.2px;">
+            <img src="https://coach-yossri.vercel.app/icons/logo-1024.png" alt="Coach Yosri" width="26" height="26"
+              style="display:inline-block;width:26px;height:26px;border-radius:8px;vertical-align:middle;border:0;" />
+            🏋️‍♂️ كوتش يسري
+          </span>
+        </td>
+      </tr>
 
-        <!-- Titre -->
-        <tr><td class="pad" style="padding:22px 32px 4px;">
-          <h1 style="margin:0;font-size:21px;line-height:1.5;color:#ECEDEF;">${esc(title)}</h1>
-        </td></tr>
+      <!-- Carte -->
+      <tr>
+        <td class="pad" style="padding:0 20px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+            style="background:${COLORS.bgCard};border:1px solid ${COLORS.border};border-radius:16px;overflow:hidden;">
 
-        <!-- Corps -->
-        <tr><td class="pad" style="padding:10px 32px 8px;font-size:14px;line-height:2;color:#C9CCD2;">
-          ${bodyHtml}
-        </td></tr>
+            <!-- Bande signature -->
+            <tr><td height="4" style="height:4px;line-height:4px;font-size:0;background:${COLORS.accent};">&nbsp;</td></tr>
 
-        <!-- Note (optionnel) -->
-        ${noteHtml ?? ''}
+            <tr>
+              <td class="pad" style="padding:38px 32px 0;text-align:center;">
+                ${
+                  eyebrow
+                    ? `<span style="font-family:${FONT_STACK};font-size:12px;font-weight:700;
+                        color:${COLORS.accent};letter-spacing:.4px;">${esc(eyebrow)}</span>
+                       <div style="height:10px;line-height:10px;font-size:0;">&nbsp;</div>`
+                    : ''
+                }
+                <h1 style="margin:0;font-family:${FONT_STACK};font-size:22px;line-height:1.45;
+                  font-weight:800;color:${COLORS.textPrimary};">${esc(title)}</h1>
+              </td>
+            </tr>
 
-        <!-- Sécurité -->
-        <tr><td class="pad" style="padding:18px 32px 22px;">
-          <div style="border-top:1px solid #2A2D33;padding-top:16px;">
-            <p style="margin:0;font-size:12px;line-height:1.9;color:#9BA0A8;">
-              إذا لم تطلب هذا الإجراء، يمكنك تجاهل هذه الرسالة بأمان — لم يتم إجراء أي تعديل على حسابك.
-            </p>
-            <p style="margin:8px 0 0;font-size:12px;color:#6B7078;">
-              هذه رسالة تلقائية من منصة ${BRAND.name} — لا ترد على هذا البريد.
-            </p>
-          </div>
-        </td></tr>
-      </table>
+            <tr>
+              <td class="pad" style="padding:18px 32px 0;font-family:${FONT_STACK};font-size:15px;
+                line-height:1.95;color:${COLORS.textBody};text-align:right;">
+                ${bodyHtml}
+              </td>
+            </tr>
 
-      <!-- Pied de page -->
-      <table role="presentation" cellpadding="0" cellspacing="0" style="max-width:560px;margin:20px auto 0;">
-        <tr><td align="center" style="padding:0 16px;">
-          <p style="margin:0;font-size:11px;line-height:1.8;color:#6B7078;">
-            © 2026 ${BRAND.name} — ${BRAND.tagline}
-          </p>
-        </td></tr>
-      </table>
-    </td></tr>
-  </table>
+            ${noteHtml}
+
+            <tr><td class="pad" style="padding:34px 32px 0;">
+              <div style="height:1px;line-height:1px;font-size:0;background:${COLORS.border};">&nbsp;</div>
+            </td></tr>
+
+            <tr>
+              <td class="pad" style="padding:20px 32px 30px;text-align:center;font-family:${FONT_STACK};
+                font-size:12px;line-height:1.85;color:${COLORS.textMuted};">
+                هذه رسالة تلقائية من منصة <b style="color:${COLORS.textSecondary};">كوتش يسري</b> — يرجى عدم الرد عليها مباشرة.<br>
+                لأي استفسار، تواصل معنا مباشرة عبر التطبيق.
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+
+      <!-- Footer global -->
+      <tr>
+        <td align="center" style="padding:22px 20px 40px;font-family:${FONT_STACK};font-size:12px;color:${COLORS.textFaint};">
+          © ${year} كوتش يسري — جميع الحقوق محفوظة
+        </td>
+      </tr>
+    </table>
+    <!--[if mso]>
+    </td></tr></table>
+    <![endif]-->
+  </center>
 </body>
 </html>`;
 }

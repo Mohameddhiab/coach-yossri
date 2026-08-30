@@ -51,7 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // pour que proxy.ts (decodeAccess) autorise /dashboard et /plan.
     if (data.access_token && typeof document !== "undefined") {
       const secure = location.protocol === "https:" ? "; Secure" : "";
-      document.cookie = `9awi_access=${data.access_token}; Path=/; Max-Age=900; SameSite=Lax${secure}`;
+      document.cookie = `coachyosri_access=${data.access_token}; Path=/; Max-Age=900; SameSite=Lax${secure}`;
     }
     setUser(data.user);
     return data.user;
@@ -64,7 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // serveur injoignable — on déconnecte quand même localement
     } finally {
       if (typeof document !== "undefined") {
-        document.cookie = "9awi_access=; Path=/; Max-Age=0; SameSite=Lax";
+        document.cookie = "coachyosri_access=; Path=/; Max-Age=0; SameSite=Lax";
       }
       setUser(null);
       queryClient.clear();

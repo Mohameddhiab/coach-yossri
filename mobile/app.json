@@ -1,11 +1,11 @@
 {
   "expo": {
     "name": "Coach Yosri",
-    "slug": "9awi",
+    "slug": "coachyosri",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "qawi",
+    "scheme": "coachyosri",
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon",

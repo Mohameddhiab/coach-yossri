@@ -44,7 +44,7 @@ export async function apiClient<T>(
           const data = (await refreshRes.clone().json()) as { access_token?: string };
           if (data?.access_token && typeof document !== "undefined") {
             const secure = location.protocol === "https:" ? "; Secure" : "";
-            document.cookie = `9awi_access=${data.access_token}; Path=/; Max-Age=900; SameSite=Lax${secure}`;
+            document.cookie = `coachyosri_access=${data.access_token}; Path=/; Max-Age=900; SameSite=Lax${secure}`;
           }
         } catch {}
         res = await doFetch();

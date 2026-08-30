@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const THEME_KEY = "9awi_theme";
+const THEME_KEY = "coachyosri_theme";
 
 export function ThemeToggle() {
   const [theme, setTheme] = useState<"dark" | "light">(() => {

@@ -1,4 +1,4 @@
-# 9AWI Production Deployment Guide
+# Coach Yosri Production Deployment Guide
 ## Vercel + Render + Supabase + Upstash (Free 24/7)
 
 ---
@@ -8,7 +8,7 @@
 1. Go to [supabase.com](https://supabase.com) → Sign up with GitHub
 2. Click **New Project**:
    - Organization: Create new or select existing
-   - Project name: `9awi-prod`
+   - Project name: `coachyosri-prod`
    - Database password: Generate strong password (save it!)
    - Region: Closest to your users (e.g., `EU West` for Tunisia)
 3. Wait for project creation (2-3 minutes)
@@ -26,12 +26,12 @@
 
 1. Go to [upstash.com](https://upstash.com) → Sign up with GitHub
 2. Click **Create Database**:
-   - Name: `9awi-redis`
+   - Name: `coachyosri-redis`
    - Region: Same as Supabase
    - Type: **Regional** (free tier)
 3. Go to **Details**:
    - **Redis URL**: `rediss://...` → `REDIS_URL` in backend `.env.production`
-4. Free tier: 10,000 commands/day, 100 MB storage (enough for 9AWI)
+4. Free tier: 10,000 commands/day, 100 MB storage (enough for Coach Yosri)
 
 ---
 
@@ -40,7 +40,7 @@
 1. Go to [render.com](https://render.com) → Sign up with GitHub
 2. Click **New → Web Service**:
    - Connect GitHub repo: `Mohameddhiab/coach-yossri`
-   - Name: `9awi-backend`
+   - Name: `coachyosri-backend`
    - Runtime: `Docker`
    - Region: Same as Supabase
    - Instance: **Free** (512 MB RAM, sleeps after 15 min)
@@ -53,7 +53,7 @@
      - `WEB_APP_URL` → `https://your-app.vercel.app`
      - `COOKIE_SECURE` → `true`
 4. Go to **Settings**:
-   - Build command: `docker build -t 9awi-backend .`
+   - Build command: `docker build -t coachyosri-backend .`
    - Dockerfile path: `backend/Dockerfile`
    - Health check path: `/api/health`
 5. Click **Deploy** (first deploy takes 3-5 minutes)
@@ -73,7 +73,7 @@
 4. Click **Deploy** (first deploy takes 2-3 minutes)
 5. After deploy:
    - Go to **Settings → Domains**:
-   - Add custom domain (optional): `9awi.tn`
+   - Add custom domain (optional): `coachyosri.tn`
    - Note: `https://your-app.vercel.app`
 
 ---
@@ -83,11 +83,11 @@
 1. Go to [uptimerobot.com](https://uptimerobot.com) → Sign up
 2. Click **Add New Monitor**:
    - Monitor type: `HTTP(s)`
-   - Friendly name: `9awi-backend`
+   - Friendly name: `coachyosri-backend`
    - URL: `https://your-backend.onrender.com/api/health`
    - Monitoring interval: `5 minutes`
 3. Click **Create Monitor**
-4. Free tier: 50 monitors, enough for 9AWI
+4. Free tier: 50 monitors, enough for Coach Yosri
 
 ---
 
@@ -104,7 +104,7 @@ curl -X POST https://your-backend.onrender.com/api/exercises/seed-curated
 ```
 
 Or use Render Shell:
-1. Go to Render Dashboard → 9awi-backend → **Shell**
+1. Go to Render Dashboard → coachyosri-backend → **Shell**
 2. Run:
 ```bash
 npx prisma migrate deploy
@@ -166,7 +166,7 @@ npx ts-node prisma/seed-curated.ts
 ## Troubleshooting
 
 ### Backend not responding
-1. Check Render logs: Dashboard → 9awi-backend → Logs
+1. Check Render logs: Dashboard → coachyosri-backend → Logs
 2. Verify environment variables are set correctly
 3. Check if Supabase database is accessible
 
@@ -186,7 +186,7 @@ npx ts-node prisma/seed-curated.ts
 
 ## Next Steps (Optional)
 
-1. **Custom Domain**: Buy `9awi.tn` → Configure DNS to point to Vercel
+1. **Custom Domain**: Buy `coachyosri.tn` → Configure DNS to point to Vercel
 2. **Supabase Storage**: Create `exercise-images` bucket for user-uploaded images
 3. **SMTP**: Configure real email for password resets
 4. **Monitoring**: Add Sentry for error tracking

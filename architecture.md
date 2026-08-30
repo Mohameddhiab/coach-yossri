@@ -1,4 +1,4 @@
-# 9AWI — Architecture Technique
+# Coach Yosri — Architecture Technique
 ### Backend NestJS (Clean Architecture) + Frontend Next.js (Feature-Based)
 
 ---

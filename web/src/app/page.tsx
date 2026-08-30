@@ -9,7 +9,7 @@ const API_BASE_URL =
 
 export default async function Home() {
   const cookieStore = await cookies();
-  if (!cookieStore.has("9awi_access")) {
+  if (!cookieStore.has("coachyosri_access")) {
     return <LandingPage />;
   }
   let role: string | null = null;
