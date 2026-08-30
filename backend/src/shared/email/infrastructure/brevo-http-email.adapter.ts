@@ -75,6 +75,7 @@ export class BrevoHttpEmailAdapter implements IEmailSender {
           Accept: 'application/json',
           'Content-Type': 'application/json',
         },
+        signal: AbortSignal.timeout(8000),
         body: JSON.stringify({
           sender: { name: this.fromName, email: this.fromEmail },
           to: [{ email: message.to }],

@@ -14,11 +14,11 @@ export function checkinGoal(userId: string) {
   return apiClient<MonthlyGoal>("POST", `/users/${userId}/goal/checkin`);
 }
 
-export function useGoal(userId: string) {
+export function useGoal(userId: string, enabled = true) {
   return useQuery({
     queryKey: ["goal", userId],
     queryFn: () => getGoal(userId),
-    enabled: !!userId,
+    enabled: !!userId && enabled,
   });
 }
 

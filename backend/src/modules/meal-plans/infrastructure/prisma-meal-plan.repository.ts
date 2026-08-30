@@ -60,6 +60,29 @@ export class PrismaMealPlanRepository implements MealPlanRepository {
     return row ? this.mapPlan(row) : null;
   }
 
+  async activeVersionByUserIds(
+    userIds: string[],
+  ): Promise<{ userId: string; version: number }[]> {
+    if (userIds.length === 0) return [];
+    const rows = await this.prisma.mealPlan.findMany({
+      where: {
+        userId: { in: userIds },
+        statut: 'ACTIF',
+        isTemplate: false,
+      },
+      orderBy: { createdAt: 'desc' },
+      select: { userId: true, version: true },
+    });
+    const seen = new Set<string>();
+    const out: { userId: string; version: number }[] = [];
+    for (const r of rows) {
+      if (seen.has(r.userId)) continue;
+      seen.add(r.userId);
+      out.push({ userId: r.userId, version: r.version });
+    }
+    return out;
+  }
+
   async archiveActive(userId: string): Promise<void> {
     await this.prisma.mealPlan.updateMany({
       where: { userId, statut: 'ACTIF' },

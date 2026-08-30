@@ -6,6 +6,8 @@ export interface UserRepository {
   findByEmail(email: string): Promise<(User & { passwordHash: string }) | null>;
   findById(id: string): Promise<User | null>;
   listByRole(): Promise<User[]>;
+  listByCoach(coachId: string): Promise<User[]>;
+  countByCoach(coachId: string): Promise<number>;
   create(data: {
     email: string;
     nom: string;

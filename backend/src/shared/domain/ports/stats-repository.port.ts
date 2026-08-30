@@ -18,13 +18,16 @@ export interface MealPlanVersionRef {
   version: number;
 }
 
+/**
+ * Toutes les lectures sont bornées à un sous-ensemble de membres (WHERE userId IN …)
+ * au lieu de scanner les tables entières puis filtrer en mémoire.
+ */
 export interface StatsRepository {
-  allSubscriptions(): Promise<Subscription[]>;
-  allWeightLogs(): Promise<WeightLog[]>;
-  allWeightTargets(): Promise<WeightTarget[]>;
-  allGoals(): Promise<MonthlyGoal[]>;
-  allCheckIns(): Promise<CheckIn[]>;
-  activeMealPlanVersions(): Promise<MealPlanVersionRef[]>;
-  noteCounts(): Promise<CountByUser[]>;
-  mealPlanVersionOf(userId: string): Promise<{ version: number } | null>;
+  subscriptionsOf(userIds: string[]): Promise<Subscription[]>;
+  weightLogsOf(userIds: string[]): Promise<WeightLog[]>;
+  weightTargetsOf(userIds: string[]): Promise<WeightTarget[]>;
+  goalsOf(userIds: string[]): Promise<MonthlyGoal[]>;
+  checkInsOf(userIds: string[], since?: Date): Promise<CheckIn[]>;
+  noteCountsOf(userIds: string[]): Promise<CountByUser[]>;
+  mealPlanVersionsOf(userIds: string[]): Promise<MealPlanVersionRef[]>;
 }

@@ -125,11 +125,13 @@ export default function UserDetailPage() {
   const userId = params.id;
   const router = useRouter();
 
+  const [tab, setTab] = useState("overview");
+
   const { data: user, isLoading, isError, refetch, isRefetching } = useUser(userId);
-  const { data: plan } = usePlan(userId);
-  const { data: workout } = useWorkoutPlan(userId);
-  const { data: weightLogs } = useWeightLogs(userId);
-  const { data: goal } = useGoal(userId);
+  const { data: plan } = usePlan(userId, tab === "plan");
+  const { data: workout } = useWorkoutPlan(userId, tab === "plan");
+  const { data: weightLogs } = useWeightLogs(userId, tab === "progress");
+  const { data: goal } = useGoal(userId, tab === "progress");
   const { data: subscriptions } = useQuery({
     queryKey: ["subscriptions", userId],
     queryFn: () => listSubscriptions(userId),
@@ -327,7 +329,7 @@ export default function UserDetailPage() {
           </div>
         </div>
 
-        <Tabs defaultValue="overview" className="space-y-6">
+        <Tabs value={tab} onValueChange={setTab} className="space-y-6">
           <TabsList aria-label="أقسام الملف" className="h-auto w-full justify-start gap-1 overflow-x-auto rounded-2xl bg-muted/60 p-1.5 sm:w-auto">
             <TabsTrigger
               value="overview"

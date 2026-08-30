@@ -58,8 +58,8 @@ export class CheckInsController {
   @Get('check-ins/today')
   @Roles('COACH')
   @UseGuards(RolesGuard)
-  async today() {
-    const rows = await this.todayUseCase.execute();
+  async today(@CurrentUser() auth: AuthUser) {
+    const rows = await this.todayUseCase.execute(auth.userId);
     return rows.map((c) => ({
       id: c.id,
       user_id: c.userId,

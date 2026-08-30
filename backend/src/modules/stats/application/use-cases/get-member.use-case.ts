@@ -34,35 +34,32 @@ export class GetMemberUseCase {
 
     const [subs, weights, targets, goals, checkIns, notes, plan] =
       await Promise.all([
-        this.stats.allSubscriptions(),
-        this.stats.allWeightLogs(),
-        this.stats.allWeightTargets(),
-        this.stats.allGoals(),
-        this.stats.allCheckIns(),
-        this.stats.noteCounts(),
-        this.stats.mealPlanVersionOf(userId),
+        this.stats.subscriptionsOf([userId]),
+        this.stats.weightLogsOf([userId]),
+        this.stats.weightTargetsOf([userId]),
+        this.stats.goalsOf([userId]),
+        this.stats.checkInsOf([userId]),
+        this.stats.noteCountsOf([userId]),
+        this.stats.mealPlanVersionsOf([userId]),
       ]);
 
     const currentMonth = new Date().toISOString().slice(0, 7);
     const now = Date.now();
     const yes7 = now - 7 * 86400000;
 
-    const userCheckIns = checkIns.filter((c) => c.userId === userId);
+    const userCheckIns = checkIns;
 
     return buildMemberAnalytics({
       user,
-      subscriptionsOf: subs.filter((s) => s.userId === userId),
-      weightLogs: weights.filter((w) => w.userId === userId),
-      target: targets.find((t) => t.userId === userId) ?? null,
-      goal:
-        goals
-          .filter((g) => g.userId === userId)
-          .find((g) => g.mois === currentMonth) ?? null,
-      planVersion: plan?.version ?? null,
+      subscriptionsOf: subs,
+      weightLogs: weights,
+      target: targets[0] ?? null,
+      goal: goals.find((g) => g.mois === currentMonth) ?? null,
+      planVersion: plan[0]?.version ?? null,
       checkInCountTotal: userCheckIns.length,
       checkInCount7d: userCheckIns.filter((c) => c.checkedAt.getTime() >= yes7)
         .length,
-      followUps: notes.find((n) => n.userId === userId)?.count ?? 0,
+      followUps: notes[0]?.count ?? 0,
     });
   }
 }

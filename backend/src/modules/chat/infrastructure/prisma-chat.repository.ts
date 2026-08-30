@@ -69,15 +69,25 @@ export class PrismaChatRepository implements ChatRepository {
       },
       orderBy: { lastMessageAt: 'desc' },
     });
-    return Promise.all(
-      rows.map(async (r) => ({
-        ...this.mapConversation(r),
-        userName: r.member.nom,
-        userPrenom: r.member.prenom,
-        unreadCount: await this.unreadCount(r.id, r.userId),
-        lastMessage: r.messages[0]?.contenu ?? null,
-      })),
+    const unreads = await this.prisma.chatMessage.groupBy({
+      by: ['conversationId'],
+      where: {
+        conversation: { coachId },
+        lu: false,
+        NOT: { senderId: coachId },
+      },
+      _count: { id: true },
+    });
+    const unreadById = new Map(
+      unreads.map((u) => [u.conversationId, u._count.id]),
     );
+    return rows.map((r) => ({
+      ...this.mapConversation(r),
+      userName: r.member.nom,
+      userPrenom: r.member.prenom,
+      unreadCount: unreadById.get(r.id) ?? 0,
+      lastMessage: r.messages[0]?.contenu ?? null,
+    }));
   }
 
   async findByUsers(
@@ -156,6 +166,16 @@ export class PrismaChatRepository implements ChatRepository {
         conversationId,
         lu: false,
         NOT: { senderId: ownerId },
+      },
+    });
+  }
+
+  async unreadTotalForCoach(coachId: string): Promise<number> {
+    return this.prisma.chatMessage.count({
+      where: {
+        conversation: { coachId },
+        lu: false,
+        NOT: { senderId: coachId },
       },
     });
   }

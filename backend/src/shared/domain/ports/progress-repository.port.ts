@@ -13,6 +13,7 @@ export interface ProgressRepository {
   deleteWeight(logId: string): Promise<WeightLog | null>;
   findWeightById(logId: string): Promise<WeightLog | null>;
   lastWeight(userId: string): Promise<WeightLog | null>;
+  lastWeightByUserIds(userIds: string[]): Promise<WeightLog[]>;
   targetOf(userId: string): Promise<WeightTarget | null>;
   setTarget(userId: string, poidsKg: number, date: Date): Promise<WeightTarget>;
   deleteTarget(userId: string): Promise<void>;

@@ -30,7 +30,7 @@ export default function PointagePage() {
   const confirmRef = useRef<HTMLDivElement | null>(null);
   const createCheckIn = useCreateCheckIn();
   const { data: member, isLoading: memberLoading, error } = useResolveMember(scannedId);
-  const { data: today } = useTodayCheckIns(30000);
+  const { data: today } = useTodayCheckIns(60000);
 
   useEffect(() => {
     if (scannedId) {

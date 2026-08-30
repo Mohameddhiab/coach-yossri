@@ -132,6 +132,18 @@ export class PrismaCoachRepository implements CoachRepository {
     }));
   }
 
+  async noteCountsByUserIds(
+    userIds: string[],
+  ): Promise<{ userId: string; count: number }[]> {
+    if (userIds.length === 0) return [];
+    const grouped = await this.prisma.coachNote.groupBy({
+      by: ['userId'],
+      where: { userId: { in: userIds } },
+      _count: { id: true },
+    });
+    return grouped.map((g) => ({ userId: g.userId, count: g._count.id }));
+  }
+
   async addNote(
     coachId: string,
     userId: string,

@@ -23,6 +23,29 @@ export function listUsers(search: string, status: SubscriptionStatus | "TOUS") {
   return apiClient<UserWithSubscription[]>("GET", `/users${qs ? `?${qs}` : ""}`);
 }
 
+export interface UserListPage {
+  data: UserWithSubscription[];
+  counts: Record<string, number>;
+  total: number;
+  page: number;
+  page_size: number;
+  total_pages: number;
+}
+
+export function listUsersPaged(
+  search: string,
+  status: SubscriptionStatus | "TOUS",
+  page = 1,
+  pageSize = 50,
+) {
+  const params = new URLSearchParams();
+  if (search) params.set("search", search);
+  if (status !== "TOUS") params.set("status", status);
+  params.set("page", String(page));
+  params.set("page_size", String(pageSize));
+  return apiClient<UserListPage>("GET", `/users?${params.toString()}`);
+}
+
 export function getUser(id: string) {
   return apiClient<UserWithSubscription>("GET", `/users/${id}`);
 }

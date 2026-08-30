@@ -25,6 +25,11 @@ import { toUserWithSubscriptionApi } from '@/shared/mapping/api.mapper';
 
 export type UserStatusFilter = 'TOUS' | 'ACTIF' | 'EXPIRE' | 'EXPIRE_BIENTOT';
 
+export interface ListCoachUsersOptions {
+  page?: number;
+  page_size?: number;
+}
+
 @Injectable()
 export class ListCoachUsersUseCase {
   constructor(
@@ -36,28 +41,65 @@ export class ListCoachUsersUseCase {
     @Inject(MEAL_PLAN_REPOSITORY) private readonly plans: MealPlanRepository,
   ) {}
 
-  async execute(search: string, status: UserStatusFilter) {
-    const rawUsers = await this.users.listByRole();
+  async execute(
+    coachId: string,
+    search: string,
+    status: UserStatusFilter,
+    opts: ListCoachUsersOptions = {},
+  ) {
+    const { page, page_size } = opts;
+    const rawUsers = await this.users.listByCoach(coachId);
+    const ids = rawUsers.map((u) => u.id);
     const query = search.trim().toLowerCase();
 
-    const enriched = await Promise.all(
-      rawUsers.map(async (u) => {
-        const [subscription, lastWeight, plan, notes] = await Promise.all([
-          this.subs.latest(u.id),
-          this.progress.lastWeight(u.id),
-          this.plans.findActive(u.id),
-          this.coach.notesOf(u.id),
-        ]);
-        const api = toUserWithSubscriptionApi({
-          user: toUserApi(u),
-          subscription,
-          lastWeight,
-          planVersion: plan ? plan.version : null,
-          notesCount: notes.length,
-        });
-        return { api, u };
-      }),
-    );
+    // Enrichissement en 4 requêtes bornées au lieu de 4×N requêtes
+    const [subs, lastWeights, planVersions, noteCounts] = await Promise.all([
+      this.subs.latestByUserIds(ids),
+      this.progress.lastWeightByUserIds(ids),
+      this.plans.activeVersionByUserIds(ids),
+      this.coach.noteCountsByUserIds(ids),
+    ]);
+
+    const subById = new Map(subs.map((s) => [s.userId, s]));
+    const weightById = new Map(lastWeights.map((w) => [w.userId, w]));
+    const planById = new Map(planVersions.map((p) => [p.userId, p]));
+    const notesById = new Map(noteCounts.map((n) => [n.userId, n.count]));
+
+    const enriched = rawUsers.map((u) => {
+      const api = toUserWithSubscriptionApi({
+        user: toUserApi(u),
+        subscription: subById.get(u.id) ?? null,
+        lastWeight: weightById.get(u.id) ?? null,
+        planVersion: planById.get(u.id)?.version ?? null,
+        notesCount: notesById.get(u.id) ?? 0,
+      });
+      return { api, u };
+    });
+
+    // Compteurs par statut (sur l'effectif complet, indépendant de la recherche)
+    const counts: Record<string, number> = {
+      TOUS: enriched.length,
+      ACTIF: 0,
+      EXPIRE_BIENTOT: 0,
+      EXPIRE: 0,
+    };
+    for (const { api } of enriched) {
+      const s = getSubscriptionStatus(
+        api.subscription
+          ? {
+              dateDebut: new Date(api.subscription.date_debut),
+              dateFin: new Date(api.subscription.date_fin),
+              pauseStart: api.subscription.pause_start
+                ? new Date(api.subscription.pause_start)
+                : null,
+              pauseDays: api.subscription.pause_days,
+            }
+          : null,
+      );
+      if (s === 'ACTIF' || s === 'EXPIRE' || s === 'EXPIRE_BIENTOT') {
+        counts[s] += 1;
+      }
+    }
 
     let rows = enriched;
     if (query) {
@@ -86,11 +128,29 @@ export class ListCoachUsersUseCase {
       });
     }
 
-    return rows
-      .sort(
-        (a, b) =>
-          new Date(b.u.createdAt).getTime() - new Date(a.u.createdAt).getTime(),
-      )
-      .map((r) => r.api);
+    rows.sort(
+      (a, b) =>
+        new Date(b.u.createdAt).getTime() - new Date(a.u.createdAt).getTime(),
+    );
+
+    const total = rows.length;
+    let data = rows.map((r) => r.api);
+
+    if (page !== undefined) {
+      const pageSize = Math.max(1, Math.min(100, page_size ?? 50));
+      const currentPage = Math.max(1, page);
+      const offset = (currentPage - 1) * pageSize;
+      data = data.slice(offset, offset + pageSize);
+      return {
+        data,
+        counts,
+        total,
+        page: currentPage,
+        page_size: pageSize,
+        total_pages: Math.max(1, Math.ceil(total / pageSize)),
+      };
+    }
+
+    return data;
   }
 }

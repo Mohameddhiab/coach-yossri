@@ -25,11 +25,11 @@ export class PrismaCheckInRepository implements CheckInRepository {
     return rows.map((r) => this.map(r));
   }
 
-  async listToday(): Promise<CheckInWithUser[]> {
+  async listToday(coachId: string): Promise<CheckInWithUser[]> {
     const start = new Date();
     start.setHours(0, 0, 0, 0);
     const rows = await this.prisma.checkIn.findMany({
-      where: { checkedAt: { gte: start } },
+      where: { checkedAt: { gte: start }, coachId },
       orderBy: { checkedAt: 'desc' },
       include: { user: { select: { nom: true, prenom: true } } },
     });

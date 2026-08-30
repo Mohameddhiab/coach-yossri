@@ -24,7 +24,7 @@ import { OfflineBanner } from "@/shared/components/offline-banner";
 import { useAuth } from "@/shared/lib/auth-context";
 import { computeAlerts } from "@/shared/lib/insights";
 import { useUsers } from "@/features/users/hooks/useUsers";
-import { useConversations } from "@/features/chat/hooks/useChat";
+import { useCoachShell } from "@/features/coach/hooks/useCoachShell";
 import { cn } from "@/lib/utils";
 
 export const COACH_NAV: {
@@ -71,8 +71,8 @@ function SidebarContent() {
   const { data: users } = useUsers("", "TOUS");
   const alertsCount = users ? computeAlerts(users).length : 0;
 
-  const { data: conversations } = useConversations(30000);
-  const unread = (conversations ?? []).reduce((sum, c) => sum + c.unread_count, 0);
+  const { data: shell } = useCoachShell(60000);
+  const unread = shell?.unread ?? 0;
 
   return (
     <div className="flex h-full flex-col bg-sidebar">

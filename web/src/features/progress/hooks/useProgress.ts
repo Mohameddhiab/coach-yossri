@@ -8,11 +8,11 @@ import {
   listWeightLogs,
 } from "@/features/progress/api/progress.api";
 
-export function useWeightLogs(userId: string) {
+export function useWeightLogs(userId: string, enabled = true) {
   return useQuery({
     queryKey: ["weight-logs", userId],
     queryFn: () => listWeightLogs(userId),
-    enabled: !!userId,
+    enabled: !!userId && enabled,
   });
 }
 

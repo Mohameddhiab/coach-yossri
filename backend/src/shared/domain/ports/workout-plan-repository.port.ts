@@ -97,6 +97,7 @@ export interface ChatRepository {
   ): Promise<ChatMessage>;
   markRead(conversationId: string, viewerId: string): Promise<void>;
   unreadCount(conversationId: string, ownerId: string): Promise<number>;
+  unreadTotalForCoach(coachId: string): Promise<number>;
 }
 
 export const FOLLOWUP_REPOSITORY = Symbol('FollowUpRepository');

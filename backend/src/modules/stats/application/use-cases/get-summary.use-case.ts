@@ -1,19 +1,12 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import type { Subscription } from '@/shared/domain/entities';
-import {
-  STATS_REPOSITORY,
-  type StatsRepository,
-} from '@/shared/domain/ports/stats-repository.port';
 import { latestSubscription } from '@/shared/domain/stats';
 import { getSubscriptionStatus } from '@/shared/domain/subscription-status';
 import { StatsData } from '../stats-data';
 
 @Injectable()
 export class GetSummaryUseCase {
-  constructor(
-    @Inject(STATS_REPOSITORY) private readonly stats: StatsRepository,
-    private readonly data: StatsData,
-  ) {}
+  constructor(private readonly data: StatsData) {}
 
   async execute(coachId: string) {
     const ctx = await this.data.load(coachId);
@@ -61,10 +54,11 @@ export class GetSummaryUseCase {
 
     let revenue30j = 0;
     const subs30: Subscription[] = [];
-    for (const s of await this.stats.allSubscriptions()) {
-      if (!ctx.memberIds.has(s.userId)) continue;
-      if (s.createdAt.getTime() >= yes30) revenue30j += s.montant;
-      subs30.push(s);
+    for (const list of ctx.subsByUser.values()) {
+      for (const s of list) {
+        if (s.createdAt.getTime() >= yes30) revenue30j += s.montant;
+        subs30.push(s);
+      }
     }
 
     const total = ctx.members.length;

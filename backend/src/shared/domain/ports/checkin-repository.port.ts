@@ -10,5 +10,5 @@ export interface CheckInWithUser extends CheckIn {
 export interface CheckInRepository {
   create(userId: string, coachId: string): Promise<CheckIn>;
   listByUser(userId: string, limit?: number): Promise<CheckIn[]>;
-  listToday(): Promise<CheckInWithUser[]>;
+  listToday(coachId: string): Promise<CheckInWithUser[]>;
 }

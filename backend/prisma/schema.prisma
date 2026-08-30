@@ -99,6 +99,7 @@ model User {
   conversationsAsCoach  Conversation[] @relation("ConvCoach")
   conversationsAsMember Conversation[] @relation("ConvMember")
 
+  @@index([coachId])
   @@map("users")
 }
 

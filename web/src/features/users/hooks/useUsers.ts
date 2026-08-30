@@ -1,3 +1,4 @@
+import { keepPreviousData } from "@tanstack/react-query";
 import {
   useMutation,
   useQuery,
@@ -12,6 +13,7 @@ import {
   getUser,
   listNotes,
   listUsers,
+  listUsersPaged,
   resendVerifyEmail,
   resetPassword,
   updateUser,
@@ -22,6 +24,19 @@ export function useUsers(search: string, status: SubscriptionStatus | "TOUS") {
   return useQuery({
     queryKey: ["users", search, status],
     queryFn: () => listUsers(search, status),
+  });
+}
+
+export function useUsersPaged(
+  search: string,
+  status: SubscriptionStatus | "TOUS",
+  page = 1,
+  pageSize = 50,
+) {
+  return useQuery({
+    queryKey: ["users", "paged", search, status, page, pageSize],
+    queryFn: () => listUsersPaged(search, status, page, pageSize),
+    placeholderData: keepPreviousData,
   });
 }
 

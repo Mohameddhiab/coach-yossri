@@ -34,6 +34,9 @@ export class NodemailerEmailAdapter implements IEmailSender {
       port,
       secure,
       auth: { user, pass },
+      connectionTimeout: 8000,
+      greetingTimeout: 8000,
+      socketTimeout: 15000,
     });
     this.verify(this.transporter);
   }

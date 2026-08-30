@@ -68,6 +68,18 @@ export class PrismaUserRepository implements UserRepository {
     return rows.map((r) => this.map(r));
   }
 
+  async listByCoach(coachId: string): Promise<User[]> {
+    const rows = await this.prisma.user.findMany({
+      where: { role: 'USER', coachId },
+      orderBy: { createdAt: 'desc' },
+    });
+    return rows.map((r) => this.map(r));
+  }
+
+  async countByCoach(coachId: string): Promise<number> {
+    return this.prisma.user.count({ where: { role: 'USER', coachId } });
+  }
+
   async create(data: Parameters<UserRepository['create']>[0]): Promise<User> {
     const row = await this.prisma.user.create({ data });
     return this.map(row);

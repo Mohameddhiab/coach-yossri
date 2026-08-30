@@ -13,6 +13,40 @@ export class ApiError extends Error {
   }
 }
 
+let refreshPromise: Promise<boolean> | null = null;
+
+function refreshSession(): Promise<boolean> {
+  if (!refreshPromise) {
+    refreshPromise = (async () => {
+      try {
+        const refreshRes = await fetch(`${API_BASE_URL}/auth/refresh`, {
+          method: "POST",
+          credentials: "include",
+        });
+        if (refreshRes.ok) {
+          // Refresh a posé un nouveau cookie HttpOnly sur onrender.com → copie sur vercel.app pour le proxy
+          try {
+            const data = (await refreshRes.clone().json()) as {
+              access_token?: string;
+            };
+            if (data?.access_token && typeof document !== "undefined") {
+              const secure = location.protocol === "https:" ? "; Secure" : "";
+              document.cookie = `coachyosri_access=${data.access_token}; Path=/; Max-Age=900; SameSite=Lax${secure}`;
+            }
+          } catch {}
+          return true;
+        }
+        return false;
+      } catch {
+        return false;
+      } finally {
+        refreshPromise = null;
+      }
+    })();
+  }
+  return refreshPromise;
+}
+
 export async function apiClient<T>(
   method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE",
   path: string,
@@ -33,24 +67,9 @@ export async function apiClient<T>(
   let res = await doFetch();
 
   if (res.status === 401 && path !== "/auth/refresh") {
-    try {
-      const refreshRes = await fetch(`${API_BASE_URL}/auth/refresh`, {
-        method: "POST",
-        credentials: "include",
-      });
-      if (refreshRes.ok) {
-        // Refresh a posé un nouveau cookie HttpOnly sur onrender.com → copie sur vercel.app pour le proxy
-        try {
-          const data = (await refreshRes.clone().json()) as { access_token?: string };
-          if (data?.access_token && typeof document !== "undefined") {
-            const secure = location.protocol === "https:" ? "; Secure" : "";
-            document.cookie = `coachyosri_access=${data.access_token}; Path=/; Max-Age=900; SameSite=Lax${secure}`;
-          }
-        } catch {}
-        res = await doFetch();
-      }
-    } catch {
-      // refresh failed — fall through to error
+    const refreshed = await refreshSession();
+    if (refreshed) {
+      res = await doFetch();
     }
   }
 

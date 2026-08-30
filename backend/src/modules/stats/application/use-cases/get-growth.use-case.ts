@@ -1,18 +1,12 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { monthlyKeys, latestSubscription } from '@/shared/domain/stats';
 import { effectiveDateFin } from '@/shared/domain/subscription-status';
-import {
-  STATS_REPOSITORY,
-  type StatsRepository,
-} from '@/shared/domain/ports/stats-repository.port';
+import type { Subscription } from '@/shared/domain/entities';
 import { StatsData } from '../stats-data';
 
 @Injectable()
 export class GetGrowthUseCase {
-  constructor(
-    @Inject(STATS_REPOSITORY) private readonly stats: StatsRepository,
-    private readonly data: StatsData,
-  ) {}
+  constructor(private readonly data: StatsData) {}
 
   async execute(coachId: string, monthsRaw?: string) {
     const months = Math.max(1, Math.min(24, Number(monthsRaw) || 12));
@@ -49,9 +43,8 @@ export class GetGrowthUseCase {
       }
     }
 
-    const subs = (await this.stats.allSubscriptions()).filter((s) =>
-      ctx.memberIds.has(s.userId),
-    );
+    const subs: Subscription[] = [];
+    for (const list of ctx.subsByUser.values()) subs.push(...list);
     for (const s of subs) {
       const bucket = byKey.get(s.createdAt.toISOString().slice(0, 7));
       if (bucket) bucket.revenus += s.montant;

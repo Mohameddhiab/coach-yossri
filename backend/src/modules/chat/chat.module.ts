@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import {
   PrismaChatRepositoryProvider,
   PrismaFollowUpRepositoryProvider,
@@ -14,6 +14,7 @@ import {
 } from './application/use-cases/chat.use-cases';
 import { ChatController } from './presentation/chat.controller';
 
+@Global()
 @Module({
   controllers: [ChatController],
   providers: [
@@ -27,5 +28,6 @@ import { ChatController } from './presentation/chat.controller';
     SendMessageToCoachUseCase,
     MarkConversationReadUseCase,
   ],
+  exports: [PrismaChatRepositoryProvider, PrismaFollowUpRepositoryProvider],
 })
 export class ChatModule {}

@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { EMAIL_SENDER, type IEmailSender } from './domain/email-sender.port';
 import { renderPasswordResetEmail } from './templates/password-reset';
 import { renderWelcomeEmail } from './templates/welcome';
@@ -9,55 +9,71 @@ const APP_URL =
   process.env.WEB_APP_URL?.replace(/\/+$/, '') ??
   'https://coach-yossri.vercel.app';
 
+/**
+ * L'envoi d'emails est détaché du flux de la requête : on répond immédiatement
+ * et l'adaptateur (Brevo/SMTP) exécute l'envoi en tâche de fond. Les adaptateurs
+ * gèrent déjà leurs propres erreurs et ne rejettent jamais.
+ */
 @Injectable()
 export class EmailService {
+  private readonly logger = new Logger('EmailService');
+
   constructor(@Inject(EMAIL_SENDER) private readonly sender: IEmailSender) {}
 
-  async sendPasswordReset(
-    to: string,
-    name: string,
-    resetUrl: string,
-  ): Promise<void> {
-    await this.sender.send({
-      to,
-      templateName: 'password-reset',
-      subject: 'إعادة تعيين كلمة المرور — كوتش يسري',
-      html: renderPasswordResetEmail(name, resetUrl),
-    });
+  sendPasswordReset(to: string, name: string, resetUrl: string): Promise<void> {
+    this.schedule(
+      this.sender.send({
+        to,
+        templateName: 'password-reset',
+        subject: 'إعادة تعيين كلمة المرور — كوتش يسري',
+        html: renderPasswordResetEmail(name, resetUrl),
+      }),
+    );
+    return Promise.resolve();
   }
 
-  async sendWelcome(
-    to: string,
-    prenom: string,
-    password: string,
-  ): Promise<void> {
-    await this.sender.send({
-      to,
-      templateName: 'welcome',
-      subject: 'مرحباً بك في منصة كوتش يسري 💪',
-      html: renderWelcomeEmail(prenom, to, password, `${APP_URL}/login`),
-    });
+  sendWelcome(to: string, prenom: string, password: string): Promise<void> {
+    this.schedule(
+      this.sender.send({
+        to,
+        templateName: 'welcome',
+        subject: 'مرحباً بك في منصة كوتش يسري 💪',
+        html: renderWelcomeEmail(prenom, to, password, `${APP_URL}/login`),
+      }),
+    );
+    return Promise.resolve();
   }
 
-  async sendNewPlan(to: string, titre: string): Promise<void> {
-    await this.sender.send({
-      to,
-      templateName: 'new-plan',
-      subject: 'خطتك التدريبية والغذائية الجديدة جاهزة 🍽️',
-      html: renderNewPlanEmail(titre, APP_URL),
-    });
+  sendNewPlan(to: string, titre: string): Promise<void> {
+    this.schedule(
+      this.sender.send({
+        to,
+        templateName: 'new-plan',
+        subject: 'خطتك التدريبية والغذائية الجديدة جاهزة 🍽️',
+        html: renderNewPlanEmail(titre, APP_URL),
+      }),
+    );
+    return Promise.resolve();
   }
 
-  async sendVerifyEmail(
-    to: string,
-    name: string,
-    confirmUrl: string,
-  ): Promise<void> {
-    await this.sender.send({
-      to,
-      templateName: 'verify-email',
-      subject: 'أكّد بريدك الإلكتروني — كوتش يسري',
-      html: renderVerifyEmail(name, confirmUrl),
+  sendVerifyEmail(to: string, name: string, confirmUrl: string): Promise<void> {
+    this.schedule(
+      this.sender.send({
+        to,
+        templateName: 'verify-email',
+        subject: 'أكّد بريدك الإلكتروني — كوتش يسري',
+        html: renderVerifyEmail(name, confirmUrl),
+      }),
+    );
+    return Promise.resolve();
+  }
+
+  private schedule(promise: Promise<void>): void {
+    void promise.catch((error) => {
+      this.logger.error(
+        'envoi email échoué',
+        error instanceof Error ? error.message : String(error),
+      );
     });
   }
 }

@@ -9,11 +9,11 @@ import {
   type PlanInput,
 } from "@/features/meal-plans/api/mealPlans.api";
 
-export function usePlan(userId: string) {
+export function usePlan(userId: string, enabled = true) {
   return useQuery({
     queryKey: ["plan", userId],
     queryFn: () => getPlan(userId),
-    enabled: !!userId,
+    enabled: !!userId && enabled,
   });
 }
 

@@ -35,6 +35,10 @@ import {
   USER_REPOSITORY,
   type UserRepository,
 } from '@/shared/domain/ports/user-repository.port';
+import {
+  CHAT_REPOSITORY,
+  type ChatRepository,
+} from '@/shared/domain/ports/workout-plan-repository.port';
 import { fail } from '@/shared/common/errors/domain-exception';
 
 class SaveSettingsDto {
@@ -67,7 +71,18 @@ export class CoachController {
   constructor(
     @Inject(COACH_REPOSITORY) private readonly coach: CoachRepository,
     @Inject(USER_REPOSITORY) private readonly users: UserRepository,
+    @Inject(CHAT_REPOSITORY) private readonly chat: ChatRepository,
   ) {}
+
+  @Get('coach/shell')
+  @Roles('COACH')
+  async shell(@CurrentUser() auth: AuthUser) {
+    const [members, unread] = await Promise.all([
+      this.users.countByCoach(auth.userId),
+      this.chat.unreadTotalForCoach(auth.userId),
+    ]);
+    return { members, unread };
+  }
 
   @Get('coach/settings')
   @Roles('COACH')

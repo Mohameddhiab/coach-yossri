@@ -16,6 +16,7 @@ export interface CreateSubscriptionInput {
 
 export interface SubscriptionRepository {
   latest(userId: string): Promise<Subscription | null>;
+  latestByUserIds(userIds: string[]): Promise<Subscription[]>;
   list(userId: string): Promise<Subscription[]>;
   create(input: CreateSubscriptionInput): Promise<Subscription>;
   pause(subId: string, pauseStart: Date): Promise<Subscription | null>;

@@ -52,13 +52,21 @@ export class PrismaStatsRepository implements StatsRepository {
     };
   }
 
-  async allSubscriptions(): Promise<Subscription[]> {
-    const rows = await this.prisma.subscription.findMany();
+  async subscriptionsOf(userIds: string[]): Promise<Subscription[]> {
+    if (userIds.length === 0) return [];
+    const rows = await this.prisma.subscription.findMany({
+      where: { userId: { in: userIds } },
+      orderBy: { createdAt: 'desc' },
+    });
     return rows.map((r) => this.mapSubscription(r));
   }
 
-  async allWeightLogs(): Promise<WeightLog[]> {
-    const rows = await this.prisma.weightLog.findMany();
+  async weightLogsOf(userIds: string[]): Promise<WeightLog[]> {
+    if (userIds.length === 0) return [];
+    const rows = await this.prisma.weightLog.findMany({
+      where: { userId: { in: userIds } },
+      orderBy: { date: 'asc' },
+    });
     return rows.map((r) => ({
       id: r.id,
       userId: r.userId,
@@ -68,8 +76,11 @@ export class PrismaStatsRepository implements StatsRepository {
     }));
   }
 
-  async allWeightTargets(): Promise<WeightTarget[]> {
-    const rows = await this.prisma.weightTarget.findMany();
+  async weightTargetsOf(userIds: string[]): Promise<WeightTarget[]> {
+    if (userIds.length === 0) return [];
+    const rows = await this.prisma.weightTarget.findMany({
+      where: { userId: { in: userIds } },
+    });
     return rows.map((r) => ({
       id: r.id,
       userId: r.userId,
@@ -78,8 +89,11 @@ export class PrismaStatsRepository implements StatsRepository {
     }));
   }
 
-  async allGoals(): Promise<MonthlyGoal[]> {
-    const rows = await this.prisma.monthlyGoal.findMany();
+  async goalsOf(userIds: string[]): Promise<MonthlyGoal[]> {
+    if (userIds.length === 0) return [];
+    const rows = await this.prisma.monthlyGoal.findMany({
+      where: { userId: { in: userIds } },
+    });
     return rows.map((r) => ({
       id: r.id,
       userId: r.userId,
@@ -91,8 +105,15 @@ export class PrismaStatsRepository implements StatsRepository {
     }));
   }
 
-  async allCheckIns(): Promise<CheckIn[]> {
-    const rows = await this.prisma.checkIn.findMany();
+  async checkInsOf(userIds: string[], since?: Date): Promise<CheckIn[]> {
+    if (userIds.length === 0) return [];
+    const rows = await this.prisma.checkIn.findMany({
+      where: {
+        userId: { in: userIds },
+        ...(since ? { checkedAt: { gte: since } } : {}),
+      },
+      orderBy: { checkedAt: 'asc' },
+    });
     return rows.map((r) => ({
       id: r.id,
       userId: r.userId,
@@ -101,28 +122,27 @@ export class PrismaStatsRepository implements StatsRepository {
     }));
   }
 
-  async activeMealPlanVersions(): Promise<MealPlanVersionRef[]> {
-    const rows = await this.prisma.mealPlan.findMany({
-      where: { statut: 'ACTIF', isTemplate: false },
-      select: { userId: true, version: true },
-    });
-    return rows;
-  }
-
-  async noteCounts(): Promise<CountByUser[]> {
+  async noteCountsOf(userIds: string[]): Promise<CountByUser[]> {
+    if (userIds.length === 0) return [];
     const grouped = await this.prisma.coachNote.groupBy({
       by: ['userId'],
+      where: { userId: { in: userIds } },
       _count: { id: true },
     });
     return grouped.map((g) => ({ userId: g.userId, count: g._count.id }));
   }
 
-  async mealPlanVersionOf(userId: string): Promise<{ version: number } | null> {
-    const row = await this.prisma.mealPlan.findFirst({
-      where: { userId, statut: 'ACTIF', isTemplate: false },
-      orderBy: { createdAt: 'desc' },
-      select: { version: true },
+  async mealPlanVersionsOf(userIds: string[]): Promise<MealPlanVersionRef[]> {
+    if (userIds.length === 0) return [];
+    const rows = await this.prisma.mealPlan.findMany({
+      where: {
+        userId: { in: userIds },
+        statut: 'ACTIF',
+        isTemplate: false,
+      },
+      orderBy: [{ createdAt: 'desc' }],
+      select: { userId: true, version: true },
     });
-    return row ?? null;
+    return rows;
   }
 }

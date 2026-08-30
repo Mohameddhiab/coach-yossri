@@ -45,6 +45,9 @@ export interface CreateMealPlanInput {
 
 export interface MealPlanRepository {
   findActive(userId: string): Promise<MealPlanWithMeals | null>;
+  activeVersionByUserIds(
+    userIds: string[],
+  ): Promise<{ userId: string; version: number }[]>;
   archiveActive(userId: string): Promise<void>;
   create(input: CreateMealPlanInput, meals: Meal[]): Promise<MealPlanWithMeals>;
   updatePlanAndMeals(

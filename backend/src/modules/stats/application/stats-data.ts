@@ -28,24 +28,44 @@ export interface StatsContext {
   noteCountsByUser: Map<string, number>;
 }
 
+const CACHE_TTL_MS = 30_000;
+
 @Injectable()
 export class StatsData {
+  private readonly cache = new Map<string, { at: number; ctx: StatsContext }>();
+
   constructor(
     @Inject(STATS_REPOSITORY) private readonly stats: StatsRepository,
     @Inject(USER_REPOSITORY) private readonly users: UserRepository,
   ) {}
 
   async membersOf(coachId: string): Promise<User[]> {
-    const all = await this.users.listByRole();
-    return all.filter((u) => u.coachId === coachId);
+    return this.users.listByCoach(coachId);
+  }
+
+  clearCache(coachId?: string): void {
+    if (coachId) this.cache.delete(coachId);
+    else this.cache.clear();
   }
 
   async load(coachId: string): Promise<StatsContext> {
+    const now = Date.now();
+    const cached = this.cache.get(coachId);
+    if (cached && now - cached.at < CACHE_TTL_MS) {
+      return cached.ctx;
+    }
+
+    const ctx = await this.loadFresh(coachId);
+    this.cache.set(coachId, { at: now, ctx });
+    return ctx;
+  }
+
+  async loadFresh(coachId: string): Promise<StatsContext> {
     const members = await this.membersOf(coachId);
     const memberIds = new Set(members.map((m) => m.id));
+    const ids = [...memberIds];
 
     const [
-      ,
       allSubs,
       allWeights,
       allTargets,
@@ -54,14 +74,13 @@ export class StatsData {
       plans,
       notes,
     ] = await Promise.all([
-      Promise.resolve(),
-      this.stats.allSubscriptions(),
-      this.stats.allWeightLogs(),
-      this.stats.allWeightTargets(),
-      this.stats.allGoals(),
-      this.stats.allCheckIns(),
-      this.stats.activeMealPlanVersions(),
-      this.stats.noteCounts(),
+      this.stats.subscriptionsOf(ids),
+      this.stats.weightLogsOf(ids),
+      this.stats.weightTargetsOf(ids),
+      this.stats.goalsOf(ids),
+      this.stats.checkInsOf(ids),
+      this.stats.mealPlanVersionsOf(ids),
+      this.stats.noteCountsOf(ids),
     ]);
 
     const subsByUser = new Map<string, Subscription[]>();
@@ -78,19 +97,21 @@ export class StatsData {
       else map.set(key, [item]);
     };
 
-    for (const s of allSubs)
-      if (memberIds.has(s.userId)) push(subsByUser, s.userId, s);
-    for (const w of allWeights)
-      if (memberIds.has(w.userId)) push(weightsByUser, w.userId, w);
+    // versions: garder le plus récent par membre (liste triée desc)
+    const seenPlan = new Set<string>();
+    for (const p of plans) {
+      if (seenPlan.has(p.userId)) continue;
+      seenPlan.add(p.userId);
+      versionsByUser.set(p.userId, p.version);
+    }
+
+    for (const s of allSubs) push(subsByUser, s.userId, s);
+    for (const w of allWeights) push(weightsByUser, w.userId, w);
     for (const t of allTargets)
       if (memberIds.has(t.userId)) push(targetsByUser, t.userId, t);
-    for (const g of allGoals)
-      if (memberIds.has(g.userId)) push(goalsByUser, g.userId, g);
+    for (const g of allGoals) push(goalsByUser, g.userId, g);
     for (const c of allCheckIns) if (memberIds.has(c.userId)) checkIns.push(c);
-    for (const p of plans)
-      if (memberIds.has(p.userId)) versionsByUser.set(p.userId, p.version);
-    for (const n of notes)
-      if (memberIds.has(n.userId)) noteCountsByUser.set(n.userId, n.count);
+    for (const n of notes) noteCountsByUser.set(n.userId, n.count);
 
     return {
       members,

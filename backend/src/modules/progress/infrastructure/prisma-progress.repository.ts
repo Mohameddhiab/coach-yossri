@@ -102,6 +102,22 @@ export class PrismaProgressRepository implements ProgressRepository {
     return row ? this.mapWeight(row) : null;
   }
 
+  async lastWeightByUserIds(userIds: string[]): Promise<WeightLog[]> {
+    if (userIds.length === 0) return [];
+    const rows = await this.prisma.weightLog.findMany({
+      where: { userId: { in: userIds } },
+      orderBy: { date: 'desc' },
+    });
+    const seen = new Set<string>();
+    const out: WeightLog[] = [];
+    for (const r of rows) {
+      if (seen.has(r.userId)) continue;
+      seen.add(r.userId);
+      out.push(this.mapWeight(r));
+    }
+    return out;
+  }
+
   async targetOf(userId: string): Promise<WeightTarget | null> {
     const row = await this.prisma.weightTarget.findFirst({
       where: { userId },

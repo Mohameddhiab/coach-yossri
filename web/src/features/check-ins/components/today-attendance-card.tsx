@@ -25,7 +25,7 @@ export function TodayAttendanceCard({
 }: {
   activeCount: number;
 }) {
-  const { data: checkins } = useTodayCheckIns(30000);
+  const { data: checkins } = useTodayCheckIns(60000);
   const rows = [...(checkins ?? [])].sort((a, b) => b.checked_at.localeCompare(a.checked_at));
 
   return (

@@ -10,7 +10,7 @@ import {
   type ChatMessageApi,
 } from "@/features/chat/api/chat.api";
 
-const POLL_MS = 5000;
+const POLL_MS = 30000;
 
 export function useConversations(refreshMs: number = POLL_MS) {
   return useQuery({

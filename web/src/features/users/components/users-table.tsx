@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   ChevronLeft,
+  ChevronRight,
   Copy,
   Dumbbell,
   HeartPulse,
@@ -28,7 +29,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useUsers } from "@/features/users/hooks/useUsers";
+import { useUsersPaged } from "@/features/users/hooks/useUsers";
 import { SubscriptionBadge } from "@/features/subscriptions/components/subscription-badge";
 import { UserAvatar } from "@/shared/components/user-avatar";
 import { EmptyState } from "@/shared/components/empty-state";
@@ -40,6 +41,8 @@ import {
 } from "@/shared/lib/domain";
 import { computeEngagement } from "@/shared/lib/insights";
 import { cn } from "@/lib/utils";
+
+const PAGE_SIZE = 50;
 
 const STATUS_TABS: { value: SubscriptionStatus | "TOUS"; label: string }[] = [
   { value: "TOUS", label: "الكل" },
@@ -70,42 +73,33 @@ export function UsersTable() {
   const [status, setStatus] = useState<SubscriptionStatus | "TOUS">("TOUS");
   const [byEngagement, setByEngagement] = useState(false);
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
+  const [page, setPage] = useState(1);
 
   const {
-    data: allUsers,
+    data,
     isLoading,
     isError,
     refetch,
     isRefetching,
-  } = useUsers("", "TOUS");
-
-  const { data: filteredUsers } = useUsers(deferredSearch, status);
+    isFetching,
+  } = useUsersPaged(deferredSearch, status, page, PAGE_SIZE);
 
   useEffect(() => {
     const timer = setInterval(() => setPlaceholderIndex((index) => (index + 1) % 2), 3000);
     return () => clearInterval(timer);
   }, []);
 
-  // Compute live counts for each tab
-  const tabCounts = useMemo(() => {
-    if (!allUsers) return {};
-    const counts: Record<string, number> = { TOUS: allUsers.length };
-    for (const u of allUsers) {
-      const st = getSubscriptionStatus(u.subscription);
-      counts[st] = (counts[st] ?? 0) + 1;
-    }
-    return counts;
-  }, [allUsers]);
-
+  const total = data?.total ?? 0;
+  const totalPages = data?.total_pages ?? 1;
   const rows = useMemo(() => {
-    const list = filteredUsers ?? [];
+    const list = data?.data ?? [];
     if (byEngagement) {
       return [...list].sort(
         (a, b) => computeEngagement(b).score - computeEngagement(a).score,
       );
     }
     return list;
-  }, [byEngagement, filteredUsers]);
+  }, [byEngagement, data]);
 
   const copyPhone = (e: React.MouseEvent, tel: string) => {
     e.stopPropagation();
@@ -123,7 +117,10 @@ export function UsersTable() {
             placeholder={placeholderIndex === 0 ? "البحث بالاسم أو اسم العائلة…" : "البحث بالبريد أو الهاتف…"}
             aria-label="البحث عن مشترك"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
             className="pe-8 ps-9 rounded-xl border-border/80 bg-background/80"
           />
           {search && (
@@ -140,12 +137,15 @@ export function UsersTable() {
 
         <Tabs
           value={status}
-          onValueChange={(v: string) => setStatus(v as SubscriptionStatus | "TOUS")}
+          onValueChange={(v: string) => {
+            setStatus(v as SubscriptionStatus | "TOUS");
+            setPage(1);
+          }}
           className="w-full sm:w-auto"
         >
           <TabsList className="h-auto flex-wrap gap-1 rounded-xl bg-muted/70 p-1">
             {STATUS_TABS.map((t) => {
-              const count = tabCounts[t.value] ?? 0;
+              const count = data?.counts?.[t.value] ?? 0;
               return (
                 <TabsTrigger
                   key={t.value}
@@ -153,7 +153,7 @@ export function UsersTable() {
                   className="gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm"
                 >
                   <span>{t.label}</span>
-                  {allUsers && (
+                  {data && (
                     <span className="rounded-full bg-muted-foreground/15 px-1.5 py-0.2 text-xs tabular-nums">
                       {count}
                     </span>
@@ -180,7 +180,7 @@ export function UsersTable() {
 
         {!isLoading && !isError && (
           <span className="ms-auto hidden text-xs font-medium text-muted-foreground tabular-nums sm:inline-block">
-            {rows.length} مشترك معروض
+            {total} مشترك إجمالاً
           </span>
         )}
       </div>
@@ -450,6 +450,37 @@ export function UsersTable() {
               );
             })}
           </div>
+
+          {/* Pagination Footer */}
+          {totalPages > 1 && (
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border/80 bg-card/60 px-4 py-2.5">
+              <span className="text-xs font-medium text-muted-foreground tabular-nums">
+                الصفحة {page} من {totalPages}
+              </span>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1 rounded-xl font-semibold"
+                  disabled={page <= 1 || isFetching}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                >
+                  <ChevronLeft className="size-4" />
+                  السابق
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1 rounded-xl font-semibold"
+                  disabled={page >= totalPages || isFetching}
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                >
+                  التالي
+                  <ChevronRight className="size-4" />
+                </Button>
+              </div>
+            </div>
+          )}
         </>
       )}
     </div>

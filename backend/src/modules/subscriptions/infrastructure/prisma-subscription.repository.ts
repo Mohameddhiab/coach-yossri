@@ -49,6 +49,22 @@ export class PrismaSubscriptionRepository implements SubscriptionRepository {
     return row ? this.map(row) : null;
   }
 
+  async latestByUserIds(userIds: string[]): Promise<Subscription[]> {
+    if (userIds.length === 0) return [];
+    const rows = await this.prisma.subscription.findMany({
+      where: { userId: { in: userIds } },
+      orderBy: [{ dateFin: 'desc' }, { createdAt: 'desc' }],
+    });
+    const seen = new Set<string>();
+    const out: Subscription[] = [];
+    for (const r of rows) {
+      if (seen.has(r.userId)) continue;
+      seen.add(r.userId);
+      out.push(this.map(r));
+    }
+    return out;
+  }
+
   async list(userId: string): Promise<Subscription[]> {
     const rows = await this.prisma.subscription.findMany({
       where: { userId },

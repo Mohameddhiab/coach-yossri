@@ -70,10 +70,23 @@ export class UsersController {
 
   @Get()
   @Roles('COACH')
-  list(@Query('search') search?: string, @Query('status') status?: string) {
+  list(
+    @CurrentUser() auth: AuthUser,
+    @Query('search') search?: string,
+    @Query('status') status?: string,
+    @Query('page') page?: string,
+    @Query('page_size') pageSize?: string,
+  ) {
     const s = (status ?? 'TOUS') as
       'TOUS' | 'ACTIF' | 'EXPIRE' | 'EXPIRE_BIENTOT';
-    return this.listUseCase.execute(search ?? '', s);
+    const pageNum = page !== undefined ? Number(page) : undefined;
+    const sizeNum = pageSize !== undefined ? Number(pageSize) : undefined;
+    return this.listUseCase.execute(auth.userId, search ?? '', s, {
+      page:
+        pageNum !== undefined && !Number.isNaN(pageNum) ? pageNum : undefined,
+      page_size:
+        sizeNum !== undefined && !Number.isNaN(sizeNum) ? sizeNum : undefined,
+    });
   }
 
   @Post()

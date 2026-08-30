@@ -79,7 +79,7 @@ export class ListTodayCheckInsUseCase {
     @Inject(CHECKIN_REPOSITORY) private readonly checkins: CheckInRepository,
   ) {}
 
-  async execute() {
-    return this.checkins.listToday();
+  async execute(coachId: string) {
+    return this.checkins.listToday(coachId);
   }
 }
