@@ -144,8 +144,6 @@ export function renderEmailLayout({
           <span style="display:inline-flex;align-items:center;gap:10px;padding:7px 18px 7px 10px;
             border:1px solid rgba(251,191,36,.35);border-radius:999px;background:rgba(251,191,36,.08);
             font-family:${FONT_STACK};font-size:13px;font-weight:700;color:${COLORS.accent};letter-spacing:.2px;">
-            <img src="https://coach-yossri.vercel.app/icons/logo-1024.png" alt="Coach Yosri" width="26" height="26"
-              style="display:inline-block;width:26px;height:26px;border-radius:8px;vertical-align:middle;border:0;" />
             🏋️‍♂️ كوتش يسري
           </span>
         </td>
