@@ -23,6 +23,7 @@ import {
   useDeleteUser,
   usePauseSubscription,
   useResetPassword,
+  useResendVerifyEmail,
   useResumeSubscription,
   useSetGoal,
   useUpdateUser,
@@ -51,6 +52,7 @@ export default function MemberDetailScreen() {
   const updateUser = useUpdateUser();
   const deleteUser = useDeleteUser();
   const resetPassword = useResetPassword();
+  const resendVerifyEmail = useResendVerifyEmail();
   const addNote = useAddNote();
   const deleteNote = useDeleteNote();
   const addSub = useAddSubscription();
@@ -181,6 +183,15 @@ export default function MemberDetailScreen() {
     ]);
   };
 
+  const resendVerification = async () => {
+    try {
+      await resendVerifyEmail.mutateAsync(userId);
+      Alert.alert("تم الإرسال", "تم إعادة إرسال رابط تأكيد البريد الإلكتروني.", [{ text: "حسنًا" }]);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "تعذر إرسال الرابط — حاول مجددًا");
+    }
+  };
+
   const sortedSubs = [...(subs.data ?? [])].sort(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
   );
@@ -201,6 +212,19 @@ export default function MemberDetailScreen() {
             <Text style={[styles.meta, { color: colors.muted }]}>{member.email}</Text>
             {member.telephone ? (
               <Text style={[styles.meta, { color: colors.muted }]}>{member.telephone}</Text>
+            ) : null}
+            {member.email_verified === false ? (
+              <View style={styles.verifyRow}>
+                <Badge label="بريد غير مؤكد" variant="expired" />
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onPress={resendVerification}
+                  loading={resendVerifyEmail.isPending}
+                >
+                  إعادة إرسال التفعيل
+                </Button>
+              </View>
             ) : null}
           </View>
           <Badge label={badge.label} variant={badge.variant} />
@@ -547,6 +571,7 @@ const styles = StyleSheet.create({
   headerInfo: { flex: 1 },
   name: { fontSize: 17, fontFamily: F.bold },
   meta: { fontSize: 12, fontFamily: F.regular, marginTop: 2 },
+  verifyRow: { flexDirection: "row", alignItems: "center", gap: 8, marginTop: 6, flexWrap: "wrap" },
   statsRow: {
     flexDirection: "row",
     gap: 8,

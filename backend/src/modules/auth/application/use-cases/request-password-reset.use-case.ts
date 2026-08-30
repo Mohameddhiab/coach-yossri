@@ -46,7 +46,9 @@ export class RequestPasswordResetUseCase {
       expiresAt: new Date(Date.now() + TOKEN_TTL_MS),
     });
 
-    const webAppUrl = process.env.WEB_APP_URL ?? 'http://localhost:3000';
+    const webAppUrl = (
+      process.env.WEB_APP_URL ?? 'http://localhost:3000'
+    ).replace(/\/+$/, '');
     const resetUrl = `${webAppUrl}/reset-password?token=${token}`;
 
     try {

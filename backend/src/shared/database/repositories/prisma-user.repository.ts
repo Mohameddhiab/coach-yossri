@@ -22,6 +22,8 @@ export class PrismaUserRepository implements UserRepository {
     dateNaissance: Date | null;
     sexe: string | null;
     tailleCm: number | null;
+    emailVerified: boolean;
+    emailVerifiedAt: Date | null;
     coachId: string | null;
     referredBy: string | null;
     createdAt: Date;
@@ -36,6 +38,8 @@ export class PrismaUserRepository implements UserRepository {
       dateNaissance: row.dateNaissance,
       sexe: row.sexe as User['sexe'],
       tailleCm: row.tailleCm,
+      emailVerified: row.emailVerified,
+      emailVerifiedAt: row.emailVerifiedAt,
       coachId: row.coachId,
       referredBy: row.referredBy,
       createdAt: row.createdAt,
@@ -90,6 +94,13 @@ export class PrismaUserRepository implements UserRepository {
 
   async updatePassword(id: string, passwordHash: string): Promise<void> {
     await this.prisma.user.update({ where: { id }, data: { passwordHash } });
+  }
+
+  async markEmailVerified(id: string): Promise<void> {
+    await this.prisma.user.update({
+      where: { id },
+      data: { emailVerified: true, emailVerifiedAt: new Date() },
+    });
   }
 
   async delete(id: string): Promise<void> {

@@ -72,6 +72,8 @@ model User {
   dateNaissance DateTime?
   sexe          Sexe?
   tailleCm      Int?
+  emailVerified Boolean  @default(false)
+  emailVerifiedAt DateTime?
   coachId       String?
   coach         User?    @relation("CoachMembers", fields: [coachId], references: [id])
   members       User[]   @relation("CoachMembers")
@@ -79,18 +81,19 @@ model User {
   passwordHash  String
   createdAt     DateTime @default(now())
 
-  prefs         NotificationPrefs?
-  subscriptions Subscription[]
-  mealPlans     MealPlan[]
-  weightLogs    WeightLog[]
-  photos        ProgressPhoto[]
-  notes         CoachNote[]
-  goals         MonthlyGoal[]
-  weightTarget  WeightTarget?
-  resetTokens   PasswordResetToken[]
-  checkIns      CheckIn[]
-  workoutPlans  WorkoutPlan[]
-  followUps     FollowUp[]         @relation("FollowUpMember")
+  prefs          NotificationPrefs?
+  subscriptions  Subscription[]
+  mealPlans      MealPlan[]
+  weightLogs     WeightLog[]
+  photos         ProgressPhoto[]
+  notes          CoachNote[]
+  goals          MonthlyGoal[]
+  weightTarget   WeightTarget?
+  resetTokens    PasswordResetToken[]
+  verifyTokens   EmailVerificationToken[]
+  checkIns       CheckIn[]
+  workoutPlans   WorkoutPlan[]
+  followUps      FollowUp[]         @relation("FollowUpMember")
   followUpsGiven FollowUp[]        @relation("FollowUpCoach")
   conversationsAsCoach  Conversation[] @relation("ConvCoach")
   conversationsAsMember Conversation[] @relation("ConvMember")
@@ -109,6 +112,19 @@ model PasswordResetToken {
 
   @@index([userId])
   @@map("password_reset_tokens")
+}
+
+model EmailVerificationToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@map("email_verification_tokens")
 }
 
 model NotificationPrefs {

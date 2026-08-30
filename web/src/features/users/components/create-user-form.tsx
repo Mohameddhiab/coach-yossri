@@ -127,6 +127,9 @@ export function CreateUserForm({ onDone }: { onDone?: () => void }) {
         <div className="text-sm text-muted-foreground">
           تم إنشاء الحساب. هذه هي كلمة المرور المُنشأة — يُرجى تسليمها للمشترك (تظهر مرة واحدة فقط):
         </div>
+        <div className="text-xs text-muted-foreground">
+          تم إرسال رابط تأكيد البريد الإلكتروني إلى المشترك (صالح لمدة ٢٤ ساعة).
+        </div>
         <div className="mx-auto flex max-w-sm items-center gap-2 rounded-xl border border-primary/40 bg-primary/10 p-3">
           <code dir="ltr" className="flex-1 text-lg font-bold tracking-wider text-primary">
             {generated}

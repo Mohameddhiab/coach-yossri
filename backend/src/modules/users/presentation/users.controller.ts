@@ -26,6 +26,7 @@ import { GetUserUseCase } from '../application/use-cases/get-user.use-case';
 import { UpdateUserUseCase } from '../application/use-cases/update-user.use-case';
 import { DeleteUserUseCase } from '../application/use-cases/delete-user.use-case';
 import { ResetPasswordUseCase } from '../application/use-cases/reset-password.use-case';
+import { RequestEmailVerificationUseCase } from '@/modules/auth/application/use-cases/verify-email.use-case';
 import { GetCalorieNeedsUseCase } from '../application/use-cases/get-calorie-needs.use-case';
 import { toUserApi } from '@/shared/mapping/user.mapper';
 
@@ -64,6 +65,7 @@ export class UsersController {
     private readonly deleteUseCase: DeleteUserUseCase,
     private readonly resetUseCase: ResetPasswordUseCase,
     private readonly calorieNeedsUseCase: GetCalorieNeedsUseCase,
+    private readonly requestEmailVerification: RequestEmailVerificationUseCase,
   ) {}
 
   @Get()
@@ -149,5 +151,13 @@ export class UsersController {
   @UseGuards(CoachOwnershipGuard)
   resetPassword(@Param('userId') userId: string) {
     return this.resetUseCase.execute(userId);
+  }
+
+  @Post(':userId/verify-email/resend')
+  @Roles('COACH')
+  @UseGuards(CoachOwnershipGuard)
+  async resendVerifyEmail(@Param('userId') userId: string) {
+    await this.requestEmailVerification.execute(userId);
+    return { ok: true };
   }
 }

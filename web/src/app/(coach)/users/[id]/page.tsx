@@ -17,6 +17,8 @@ import {
   KeyRound,
   Mail,
   Phone,
+  Send,
+  ShieldAlert,
   Trash2,
   UtensilsCrossed,
 } from "lucide-react";
@@ -77,6 +79,7 @@ import { FollowUpCoachCard } from "@/features/follow-ups/components/follow-up-co
 import {
   useDeleteUser,
   useResetPassword,
+  useResendVerifyEmail,
   useUpdateUser,
   useUser,
 } from "@/features/users/hooks/useUsers";
@@ -133,6 +136,7 @@ export default function UserDetailPage() {
     enabled: !!userId,
   });
   const resetPassword = useResetPassword();
+  const resendVerifyEmail = useResendVerifyEmail();
   const deleteUser = useDeleteUser();
   const updateUser = useUpdateUser(userId);
 
@@ -206,6 +210,15 @@ export default function UserDetailPage() {
     }
   };
 
+  const handleResendVerify = async () => {
+    try {
+      await resendVerifyEmail.mutateAsync(userId);
+      toast.success("تم إعادة إرسال رابط التفعيل");
+    } catch {
+      toast.error("تعذر إرسال الرابط — حاول مرة أخرى");
+    }
+  };
+
   const handlePdfDownload = async (kind: "meal" | "workout") => {
     const el =
       kind === "meal"
@@ -268,6 +281,24 @@ export default function UserDetailPage() {
                     <Mail className="size-3.5 text-primary" />
                     {user.email}
                   </span>
+                  {!user.email_verified && (
+                    <span className="flex items-center gap-1">
+                      <Badge variant="outline" className="border-destructive/40 text-destructive">
+                        <ShieldAlert className="size-3" />
+                        بريد غير مؤكد
+                      </Badge>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={handleResendVerify}
+                        disabled={resendVerifyEmail.isPending}
+                        className="h-6 gap-1 text-xs"
+                      >
+                        <Send className="size-3" />
+                        {resendVerifyEmail.isPending ? "جارٍ الإرسال..." : "إعادة إرسال التفعيل"}
+                      </Button>
+                    </span>
+                  )}
                   <span className="flex items-center gap-1" dir="ltr">
                     <Phone className="size-3.5 text-primary" />
                     {user.telephone}
@@ -344,6 +375,11 @@ export default function UserDetailPage() {
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Mail className="size-4" />
                   <span dir="ltr">{user.email}</span>
+                  {!user.email_verified && (
+                    <Badge variant="outline" className="border-destructive/40 text-destructive">
+                      غير مؤكد
+                    </Badge>
+                  )}
                 </div>
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Phone className="size-4" />

@@ -12,6 +12,7 @@ import {
   getUser,
   listNotes,
   listUsers,
+  resendVerifyEmail,
   resetPassword,
   updateUser,
   type CreateUserInput,
@@ -62,6 +63,12 @@ export function useDeleteUser() {
 export function useResetPassword() {
   return useMutation({
     mutationFn: (id: string) => resetPassword(id),
+  });
+}
+
+export function useResendVerifyEmail() {
+  return useMutation({
+    mutationFn: (id: string) => resendVerifyEmail(id),
   });
 }
 

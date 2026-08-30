@@ -92,6 +92,16 @@ export function useResetPassword() {
   });
 }
 
+export function useResendVerifyEmail() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => apiClient<{ ok: boolean }>("POST", `/users/${id}/verify-email/resend`),
+    onSuccess: (_d, id) => {
+      qc.invalidateQueries({ queryKey: ["coach", "users", id] });
+    },
+  });
+}
+
 export function useCoachNotes(userId: string) {
   return useQuery({
     queryKey: ["coach", "users", userId, "notes"],

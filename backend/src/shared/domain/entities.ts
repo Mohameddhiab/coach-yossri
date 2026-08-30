@@ -20,6 +20,8 @@ export interface User {
   dateNaissance: Date | null;
   sexe: Sexe | null;
   tailleCm: number | null;
+  emailVerified: boolean;
+  emailVerifiedAt: Date | null;
   coachId: string | null;
   referredBy: string | null;
   createdAt: Date;

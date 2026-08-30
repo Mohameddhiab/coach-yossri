@@ -3,6 +3,7 @@
 import { OfflineBanner } from "@/shared/components/offline-banner";
 import { MorningGreeting } from "@/shared/components/morning-greeting";
 import { RenewalCountdownBanner } from "@/shared/components/renewal-countdown-banner";
+import { EmailVerificationBanner } from "@/shared/components/email-verification-banner";
 import { ExpiredScreen } from "@/features/subscriptions/components/expired-screen";
 import { UserShell } from "@/shared/components/shells/user-shell";
 import { useMySubscription } from "@/features/subscriptions/hooks/useSubscriptions";
@@ -30,6 +31,7 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
     <>
       <MorningGreeting />
       <OfflineBanner />
+      <EmailVerificationBanner />
       <RenewalCountdownBanner />
       <UserShell nav={navForTier(tier)}>{children}</UserShell>
     </>

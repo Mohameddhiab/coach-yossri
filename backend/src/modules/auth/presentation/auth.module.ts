@@ -8,7 +8,12 @@ import { GetMeUseCase } from '../application/use-cases/get-me.use-case';
 import { PrefsUseCase } from '../application/use-cases/prefs.use-case';
 import { RequestPasswordResetUseCase } from '../application/use-cases/request-password-reset.use-case';
 import { ResetPasswordUseCase } from '../application/use-cases/reset-password.use-case';
+import {
+  RequestEmailVerificationUseCase,
+  ConfirmEmailVerificationUseCase,
+} from '../application/use-cases/verify-email.use-case';
 import { PasswordResetTokenRepository } from '../infrastructure/password-reset-token.repository';
+import { EmailVerificationTokenRepository } from '../infrastructure/email-verification-token.repository';
 import { BcryptPasswordHasher } from '../infrastructure/bcrypt-password-hasher';
 import { JwtTokenService } from '../infrastructure/jwt-token.service';
 import { PASSWORD_HASHER } from '@/shared/domain/password';
@@ -38,8 +43,11 @@ import { TOKEN_SERVICE } from '@/shared/domain/token-service.port';
     PrefsUseCase,
     RequestPasswordResetUseCase,
     ResetPasswordUseCase,
+    RequestEmailVerificationUseCase,
+    ConfirmEmailVerificationUseCase,
     PasswordResetTokenRepository,
+    EmailVerificationTokenRepository,
   ],
-  exports: [PASSWORD_HASHER, TOKEN_SERVICE],
+  exports: [PASSWORD_HASHER, TOKEN_SERVICE, RequestEmailVerificationUseCase],
 })
 export class AuthModule {}

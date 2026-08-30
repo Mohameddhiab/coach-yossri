@@ -26,6 +26,8 @@ export interface User {
   prenom: string;
   telephone: string;
   date_naissance?: string | null;
+  email_verified: boolean;
+  email_verified_at?: string | null;
   coach_id: string | null;
   referred_by?: string | null;
   created_at: string;

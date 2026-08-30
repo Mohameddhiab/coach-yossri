@@ -94,9 +94,11 @@ export interface User {
   nom: string;
   prenom: string;
   telephone: string;
-  date_naissance?: string | null;
+date_naissance?: string | null;
   sexe?: Sexe | null;
   taille_cm?: number | null;
+  email_verified: boolean;
+  email_verified_at?: string | null;
   coach_id: string | null;
   referred_by?: string | null;
   created_at: string;

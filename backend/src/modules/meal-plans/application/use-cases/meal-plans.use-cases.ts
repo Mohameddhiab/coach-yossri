@@ -4,7 +4,39 @@ import {
   type MealPlanRepository,
   type MealPlanWithMeals,
 } from '@/shared/domain/ports/meal-plan-repository.port';
+import {
+  USER_REPOSITORY,
+  type UserRepository,
+} from '@/shared/domain/ports/user-repository.port';
+import { DEFAULT_PREFS } from '@/shared/domain/entities';
 import { fail } from '@/shared/common/errors/domain-exception';
+import { EmailService } from '@/shared/email/email.service';
+
+export async function notifyNewPlan(
+  users: UserRepository,
+  email: EmailService,
+  userId: string,
+  titre: string,
+): Promise<void> {
+  try {
+    const prefs = await users.prefsOf(userId);
+    if (prefs && prefs.nouveauPlan === false) {
+      return;
+    }
+    if (!prefs && DEFAULT_PREFS.nouveauPlan === false) {
+      return;
+    }
+    const user = await users.findById(userId);
+    if (user) {
+      await email.sendNewPlan(user.email, titre);
+    }
+  } catch (e) {
+    console.warn(
+      '[MealPlans] sendNewPlan failed:',
+      e instanceof Error ? e.message : String(e),
+    );
+  }
+}
 
 @Injectable()
 export class GetPlanUseCase {
@@ -21,6 +53,8 @@ export class GetPlanUseCase {
 export class CreatePlanUseCase {
   constructor(
     @Inject(MEAL_PLAN_REPOSITORY) private readonly plans: MealPlanRepository,
+    @Inject(USER_REPOSITORY) private readonly users: UserRepository,
+    private readonly email: EmailService,
   ) {}
 
   async execute(
@@ -46,12 +80,13 @@ export class CreatePlanUseCase {
     },
   ) {
     const meals = normalizeMeals(input.meals);
+    const titre = String(input.titre ?? '').trim() || 'خطة غذائية';
     await this.plans.archiveActive(userId);
-    return this.plans.create(
+    const created = await this.plans.create(
       {
         userId,
         coachId,
-        titre: String(input.titre ?? '').trim() || 'خطة غذائية',
+        titre,
         objectif:
           (input.objectif as 'PRISE_DE_MASSE' | 'SECHE' | 'MAINTIEN') ??
           'PRISE_DE_MASSE',
@@ -62,6 +97,8 @@ export class CreatePlanUseCase {
       },
       meals,
     );
+    await notifyNewPlan(this.users, this.email, userId, titre);
+    return created;
   }
 }
 
@@ -69,6 +106,8 @@ export class CreatePlanUseCase {
 export class UpdatePlanUseCase {
   constructor(
     @Inject(MEAL_PLAN_REPOSITORY) private readonly plans: MealPlanRepository,
+    @Inject(USER_REPOSITORY) private readonly users: UserRepository,
+    private readonly email: EmailService,
   ) {}
 
   async execute(
@@ -124,6 +163,7 @@ export class UpdatePlanUseCase {
       meals,
     );
     await this.plans.bumpVersion(plan.id, snapshot);
+    await notifyNewPlan(this.users, this.email, userId, updated.titre);
     return updated;
   }
 }
@@ -132,6 +172,8 @@ export class UpdatePlanUseCase {
 export class DuplicatePlanUseCase {
   constructor(
     @Inject(MEAL_PLAN_REPOSITORY) private readonly plans: MealPlanRepository,
+    @Inject(USER_REPOSITORY) private readonly users: UserRepository,
+    private readonly email: EmailService,
   ) {}
 
   async execute(coachId: string, userId: string, sourcePlanId: string) {
@@ -139,12 +181,13 @@ export class DuplicatePlanUseCase {
     if (!source) {
       fail(404, 'NOT_FOUND', 'الخطة المصدر غير موجودة');
     }
+    const titre = `نسخة من: ${source.titre}`;
     await this.plans.archiveActive(userId);
-    return this.plans.create(
+    const created = await this.plans.create(
       {
         userId,
         coachId,
-        titre: `نسخة من: ${source.titre}`,
+        titre,
         objectif: source.objectif,
         caloriesCible: source.caloriesCible,
         proteinesG: source.proteinesG,
@@ -153,6 +196,8 @@ export class DuplicatePlanUseCase {
       },
       source.meals,
     );
+    await notifyNewPlan(this.users, this.email, userId, titre);
+    return created;
   }
 }
 

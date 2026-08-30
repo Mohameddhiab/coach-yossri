@@ -8,6 +8,7 @@ import {
   Copy,
   Dumbbell,
   HeartPulse,
+  MailWarning,
   Phone,
   Search,
   UserCheck,
@@ -287,8 +288,19 @@ export function UsersTable() {
                                 {engagement.score}%
                               </span>
                             </div>
-                            <div className="truncate text-xs text-muted-foreground" dir="ltr">
-                              {user.email}
+                            <div className="flex items-center gap-1.5">
+                              <span className="truncate text-xs text-muted-foreground" dir="ltr">
+                                {user.email}
+                              </span>
+                              {!user.email_verified && (
+                                <span
+                                  title="بريد غير مؤكد"
+                                  className="text-destructive"
+                                  aria-label="بريد غير مؤكد"
+                                >
+                                  <MailWarning className="size-3.5" />
+                                </span>
+                              )}
                             </div>
                           </div>
                         </div>

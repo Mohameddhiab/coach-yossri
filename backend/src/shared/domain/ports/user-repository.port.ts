@@ -27,6 +27,7 @@ export interface UserRepository {
     >,
   ): Promise<User>;
   updatePassword(id: string, passwordHash: string): Promise<void>;
+  markEmailVerified(id: string): Promise<void>;
   delete(id: string): Promise<void>;
   prefsOf(userId: string): Promise<NotificationPrefs | null>;
   savePrefs(

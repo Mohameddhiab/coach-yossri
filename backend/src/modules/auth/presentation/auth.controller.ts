@@ -31,6 +31,10 @@ import { GetMeUseCase } from '../application/use-cases/get-me.use-case';
 import { PrefsUseCase } from '../application/use-cases/prefs.use-case';
 import { RequestPasswordResetUseCase } from '../application/use-cases/request-password-reset.use-case';
 import { ResetPasswordUseCase } from '../application/use-cases/reset-password.use-case';
+import {
+  RequestEmailVerificationUseCase,
+  ConfirmEmailVerificationUseCase,
+} from '../application/use-cases/verify-email.use-case';
 import { toUserApi } from '@/shared/mapping/user.mapper';
 import type { NotificationPrefs } from '@/shared/domain/entities';
 
@@ -77,6 +81,12 @@ export class ResetPasswordDto {
   newPassword!: string;
 }
 
+export class VerifyEmailDto {
+  @IsString()
+  @IsNotEmpty()
+  token!: string;
+}
+
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -87,6 +97,8 @@ export class AuthController {
     private readonly prefsUseCase: PrefsUseCase,
     private readonly requestPasswordResetUseCase: RequestPasswordResetUseCase,
     private readonly resetPasswordUseCase: ResetPasswordUseCase,
+    private readonly requestEmailVerificationUseCase: RequestEmailVerificationUseCase,
+    private readonly confirmEmailVerificationUseCase: ConfirmEmailVerificationUseCase,
   ) {}
 
   private setTokens(res: Response, accessToken: string, refreshToken: string) {
@@ -184,6 +196,22 @@ export class AuthController {
       ok: true,
       message: 'تم تغيير كلمة المرور، يمكنك تسجيل الدخول الآن',
     };
+  }
+
+  @Post('verify-email')
+  async verifyEmail(@Body() dto: VerifyEmailDto) {
+    await this.confirmEmailVerificationUseCase.execute(dto.token);
+    return {
+      ok: true,
+      message: 'تم تأكيد البريد الإلكتروني بنجاح',
+    };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('verify-email/resend')
+  async resendVerifyEmail(@CurrentUser() auth: AuthUser) {
+    await this.requestEmailVerificationUseCase.execute(auth.userId);
+    return { ok: true };
   }
 
   @UseGuards(JwtAuthGuard)

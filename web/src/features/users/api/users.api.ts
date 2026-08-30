@@ -48,6 +48,10 @@ export function resetPassword(id: string) {
   return apiClient<{ password: string }>("POST", `/users/${id}/reset-password`);
 }
 
+export function resendVerifyEmail(id: string) {
+  return apiClient<{ ok: boolean }>("POST", `/users/${id}/verify-email/resend`);
+}
+
 export function listNotes(userId: string) {
   return apiClient<CoachNote[]>("GET", `/users/${userId}/notes`);
 }
