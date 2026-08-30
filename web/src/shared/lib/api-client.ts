@@ -15,6 +15,19 @@ export class ApiError extends Error {
 
 let refreshPromise: Promise<boolean> | null = null;
 
+function getAccessToken(): string | null {
+  if (typeof document === "undefined") return null;
+  const m = document.cookie.match(/(?:^|; )coachyosri_access=([^;]*)/);
+  return m ? decodeURIComponent(m[1]) : null;
+}
+
+function buildHeaders(): Record<string, string> {
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  const token = getAccessToken();
+  if (token) headers.Authorization = `Bearer ${token}`;
+  return headers;
+}
+
 function refreshSession(): Promise<boolean> {
   if (!refreshPromise) {
     refreshPromise = (async () => {
@@ -22,6 +35,7 @@ function refreshSession(): Promise<boolean> {
         const refreshRes = await fetch(`${API_BASE_URL}/auth/refresh`, {
           method: "POST",
           credentials: "include",
+          headers: buildHeaders(),
         });
         if (refreshRes.ok) {
           // Refresh a posé un nouveau cookie HttpOnly sur onrender.com → copie sur vercel.app pour le proxy
@@ -55,9 +69,7 @@ export async function apiClient<T>(
   const doFetch = async () => {
     const res = await fetch(`${API_BASE_URL}${path}`, {
       method,
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: buildHeaders(),
       credentials: "include",
       body: body === undefined ? undefined : JSON.stringify(body),
     });

@@ -15,6 +15,7 @@ import { PageHeader } from "@/shared/components/page-header";
 import { PageLoader } from "@/shared/components/page-loader";
 import { StatCard } from "@/shared/components/stat-card";
 import { EmptyState } from "@/shared/components/empty-state";
+import { ErrorState } from "@/shared/components/error-state";
 import {
   MemberGrowthChart,
   SubscriptionStatusChart,
@@ -43,11 +44,27 @@ function ClickableStat({
 
 export default function DashboardPage() {
   const { user } = useAuth();
-  const { data: summary, isLoading: loadingSummary } = useSummary();
-  const { data: growth, isLoading: loadingGrowth } = useGrowth(12);
+  const { data: summary, isLoading: loadingSummary, isError: errorSummary, refetch: refetchSummary, isFetching: fetchingSummary } = useSummary();
+  const { data: growth, isLoading: loadingGrowth, isError: errorGrowth, refetch: refetchGrowth, isFetching: fetchingGrowth } = useGrowth(12);
   const { data: users } = useUsers("", "TOUS");
 
-  if (loadingSummary || loadingGrowth || !summary || !growth) return <PageLoader />;
+  if (loadingSummary || loadingGrowth) return <PageLoader />;
+  if (errorSummary || errorGrowth || !summary || !growth) {
+    const retrying = fetchingSummary || fetchingGrowth;
+    return (
+      <div className="space-y-6">
+        <ErrorState
+          title="تعذّر تحميل لوحة التحكم"
+          description="تحقق من اتصالك ثم أعد المحاولة."
+          onRetry={() => {
+            refetchSummary();
+            refetchGrowth();
+          }}
+          retrying={retrying}
+        />
+      </div>
+    );
+  }
 
   if (summary.total === 0) {
     return (
