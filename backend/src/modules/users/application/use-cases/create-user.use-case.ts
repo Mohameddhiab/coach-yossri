@@ -112,7 +112,7 @@ export class CreateUserUseCase {
     }
 
     try {
-      await this.email.sendWelcome(user.email, password);
+      await this.email.sendWelcome(user.email, user.prenom, password);
     } catch (e) {
       // L'email ne doit pas faire échouer la création utilisateur
       console.warn(

@@ -19,7 +19,8 @@ export class NodemailerEmailAdapter implements IEmailSender {
     const pass = process.env.SMTP_PASS ?? '';
     this.configured = Boolean(host && user && pass);
     this.from =
-      process.env.MAIL_FROM ?? (user ? `9AWI <${user}>` : '9AWI <no-reply@localhost>');
+      process.env.MAIL_FROM ??
+      (user ? `9AWI <${user}>` : '9AWI <no-reply@localhost>');
 
     if (!this.configured) {
       this.logger.warn(
@@ -39,12 +40,17 @@ export class NodemailerEmailAdapter implements IEmailSender {
 
   private verify(transporter: Transporter): void {
     setTimeout(() => {
-      this.logger.log(`[smtp] vérification de la connexion vers ${process.env.SMTP_HOST}...`);
+      this.logger.log(
+        `[smtp] vérification de la connexion vers ${process.env.SMTP_HOST}...`,
+      );
       const TIMEOUT_MS = 10_000;
       Promise.race([
         transporter.verify(),
         new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error(`timeout après ${TIMEOUT_MS}ms`)), TIMEOUT_MS),
+          setTimeout(
+            () => reject(new Error(`timeout après ${TIMEOUT_MS}ms`)),
+            TIMEOUT_MS,
+          ),
         ),
       ])
         .then(() => this.logger.log('[smtp] connexion SMTP OK'))

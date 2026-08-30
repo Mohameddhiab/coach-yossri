@@ -1,55 +1,32 @@
+import { ctaButton, esc, infoBox, renderEmailLayout } from './layout';
+
 export function renderPasswordResetEmail(
   name: string,
   resetUrl: string,
 ): string {
-  return `<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><title>تغيير كلمة المرور</title></head>
-<body style="margin:0;padding:0;background-color:#141518;font-family:'Segoe UI',Tahoma,Arial,sans-serif;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#141518;padding:32px 16px;">
-    <tr><td align="center">
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background-color:#1c1d21;border-radius:16px;border:1px solid #2a2c33;overflow:hidden;">
-        <tr><td style="padding:28px 32px 0;text-align:center;">
-          <div style="font-size:26px;font-weight:900;color:#f59e0b;">كوتش يسري 💪</div>
-          <div style="font-size:12px;color:#9ba0a8;margin-top:4px;">صحتك ولياقتك مع مدربك</div>
-        </td></tr>
-        <tr><td style="padding:24px 32px 8px;">
-          <h1 style="margin:0;font-size:20px;color:#ededf0;">إعادة تعيين كلمة المرور</h1>
-        </td></tr>
-        <tr><td style="padding:8px 32px 16px;">
-          <p style="margin:0;font-size:14px;line-height:1.8;color:#c9ccd2;">
-            مرحباً <b style="color:#fbbf24;">${name}</b>،
-            تلقينا طلباً لإعادة تعيين كلمة المرور الخاصة بحسابك.
-          </p>
-          <p style="margin:12px 0 0;font-size:14px;line-height:1.8;color:#c9ccd2;">
-            اضغط على الزر أدناه لتعيين كلمة مرور جديدة — الرابط صالح لمدة ساعة واحدة فقط.
-          </p>
-        </td></tr>
-        <tr><td align="center" style="padding:8px 32px 20px;">
-          <a href="${resetUrl}"
-             style="display:inline-block;background-color:#f59e0b;color:#1a1202;font-size:15px;font-weight:800;text-decoration:none;padding:13px 40px;border-radius:10px;">
-            تعيين كلمة مرور جديدة
-          </a>
-        </td></tr>
-        <tr><td style="padding:0 32px 24px;">
-          <p style="margin:0;font-size:12px;line-height:1.7;color:#9ba0a8;">
-            إذا لم يعمل الزر، انسخ الرابط التالي والصقه في المتصفح:
-          </p>
-          <p style="margin:8px 0 0;font-size:12px;direction:ltr;text-align:left;word-break:break-all;color:#6b7078;">
-            ${resetUrl}
-          </p>
-        </td></tr>
-        <tr><td style="padding:16px 32px;border-top:1px solid #2a2c33;">
-          <p style="margin:0;font-size:12px;line-height:1.7;color:#9ba0a8;">
-            إذا لم تطلب هذا الإجراء، يمكنك تجاهل هذه الرسالة بأمان — لم يتم إجراء أي تعديل على حسابك.
-          </p>
-        </td></tr>
-      </table>
-      <div style="max-width:480px;margin:16px auto 0;text-align:center;font-size:11px;color:#6b7078;">
-        © Coach Yosri — منصة التدريب الرياضي
-      </div>
-    </td></tr>
-  </table>
-</body>
-</html>`;
+  return renderEmailLayout({
+    title: 'إعادة تعيين كلمة المرور',
+    preheader: 'اضغط على الزر لتعيين كلمة مرور جديدة لحسابك في كوتش يسري',
+    bodyHtml: `
+      <p style="margin:0;">مرحباً <b style="color:#FBBF24;">${esc(name)}</b>،</p>
+      <p style="margin:14px 0 0;">
+        تلقينا طلباً لإعادة تعيين كلمة المرور الخاصة بحسابك في <b>منصة كوتش يسري</b>.
+        اضغط على الزر أدناه لتعيين كلمة مرور جديدة.
+      </p>`,
+    noteHtml:
+      infoBox(`
+        <span style="font-size:12px;color:#9BA0A8;display:block;margin-bottom:2px;">⏱ صلاحية الرابط</span>
+        <b style="font-size:13px;color:#FBBF24;">هذا الرابط صالح لمدة ساعة واحدة فقط.</b>
+        <span style="display:block;margin-top:8px;font-size:12px;color:#9BA0A8;">إذا انتهت الصلاحية، اطلب رابطاً جديداً من صفحة «نسيت كلمة المرور».</span>`) +
+      ctaButton(resetUrl, 'تعيين كلمة مرور جديدة') +
+      `
+      <tr><td class="pad" style="padding:6px 32px 0;">
+        <p style="margin:0;font-size:12px;line-height:1.8;color:#6B7078;">
+          إذا لم يعمل الزر أعلاه، انسخ الرابط التالي والصقه في المتصفح:
+        </p>
+        <p dir="ltr" style="margin:6px 0 0;font-size:12px;text-align:left;word-break:break-all;color:#8B9098;direction:ltr;background:#232429;border:1px solid #2A2D33;border-radius:8px;padding:10px 12px;">
+          ${esc(resetUrl)}
+        </p>
+      </td></tr>`,
+  });
 }

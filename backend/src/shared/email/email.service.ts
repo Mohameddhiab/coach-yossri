@@ -1,6 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { EMAIL_SENDER, type IEmailSender } from './domain/email-sender.port';
 import { renderPasswordResetEmail } from './templates/password-reset';
+import { renderWelcomeEmail } from './templates/welcome';
+import { renderNewPlanEmail } from './templates/new-plan';
+
+const APP_URL =
+  process.env.WEB_APP_URL?.replace(/\/+$/, '') ??
+  'https://coach-yossri.vercel.app';
 
 @Injectable()
 export class EmailService {
@@ -19,12 +25,16 @@ export class EmailService {
     });
   }
 
-  async sendWelcome(to: string, password: string): Promise<void> {
+  async sendWelcome(
+    to: string,
+    prenom: string,
+    password: string,
+  ): Promise<void> {
     await this.sender.send({
       to,
       templateName: 'welcome',
-      subject: 'مرحباً بك في منصة التدريب الرياضي 💪',
-      html: `<p>تم إنشاء حسابك بنجاح في المنصة التدريبية.</p><p>البريد الإلكتروني: ${to}<br/>كلمة المرور المؤقتة: <b>${password}</b></p><p>يُرجى تغيير كلمة المرور من صفحة الإعدادات بعد أول تسجيل دخول.</p>`,
+      subject: 'مرحباً بك في منصة كوتش يسري 💪',
+      html: renderWelcomeEmail(prenom, to, password, `${APP_URL}/login`),
     });
   }
 
@@ -33,7 +43,7 @@ export class EmailService {
       to,
       templateName: 'new-plan',
       subject: 'خطتك التدريبية والغذائية الجديدة جاهزة 🍽️',
-      html: `<p>قام المدرب بإعداد خطة جديدة لك: <b>${titre}</b></p><p>افتح التطبيق لمتابعة تفاصيل خطتك.</p>`,
+      html: renderNewPlanEmail(titre, APP_URL),
     });
   }
 }

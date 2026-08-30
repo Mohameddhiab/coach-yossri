@@ -14,7 +14,10 @@ export class BrevoHttpEmailAdapter implements IEmailSender {
   constructor() {
     const match = /^\s*(.*?)\s*<([^>]+)>/.exec(process.env.MAIL_FROM ?? '');
     this.fromName = match?.[1]?.trim() || '9AWI';
-    this.fromEmail = match?.[2]?.trim() ?? process.env.MAIL_FROM?.trim() ?? 'no-reply@localhost';
+    this.fromEmail =
+      match?.[2]?.trim() ??
+      process.env.MAIL_FROM?.trim() ??
+      'no-reply@localhost';
     this.configured = Boolean(process.env.BREVO_API_KEY && this.fromEmail);
 
     if (!this.configured) {
@@ -30,12 +33,17 @@ export class BrevoHttpEmailAdapter implements IEmailSender {
     setTimeout(() => {
       const started = Date.now();
       fetch(`${BREVO_API_URL}/account`, {
-        headers: { 'api-key': process.env.BREVO_API_KEY!, Accept: 'application/json' },
+        headers: {
+          'api-key': process.env.BREVO_API_KEY!,
+          Accept: 'application/json',
+        },
       })
         .then(async (res) => {
           if (!res.ok) {
             const body = await res.text().catch(() => '');
-            this.logger.error(`[brevo] clé API invalide (HTTP ${res.status}) — ${body.slice(0, 300)}`);
+            this.logger.error(
+              `[brevo] clé API invalide (HTTP ${res.status}) — ${body.slice(0, 300)}`,
+            );
             return;
           }
           this.logger.log(
@@ -83,7 +91,9 @@ export class BrevoHttpEmailAdapter implements IEmailSender {
         );
         return;
       }
-      this.logger.log(`[brevo] sent template=${message.templateName} to=${message.to}`);
+      this.logger.log(
+        `[brevo] sent template=${message.templateName} to=${message.to}`,
+      );
     } catch (error) {
       this.logger.error(
         `[brevo] failed template=${message.templateName} to=${message.to}`,
