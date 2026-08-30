@@ -9,6 +9,7 @@ export const BRAND = {
   text: '#ECEDEF',
   muted: '#9BA0A8',
   subtle: '#6B7078',
+  logoUrl: 'https://coach-yossri.vercel.app/icons/logo-1024.png',
 } as const;
 
 export function esc(value: string): string {
@@ -78,11 +79,13 @@ export function renderEmailLayout({
 
         <!-- Header / marque -->
         <tr><td align="center" style="padding:30px 32px 6px;">
-          <table role="presentation" cellpadding="0" cellspacing="0"><tr>
-            <td align="center" style="border-radius:14px;background:#F59E0B;padding:10px 14px;">
-              <span style="font-size:22px;font-weight:900;color:#1A1202;line-height:26px;">9AWI</span>
-            </td>
-          </tr></table>
+          <img
+            src="${BRAND.logoUrl}"
+            alt="${esc(BRAND.name)}"
+            width="64"
+            height="64"
+            style="display:block;width:64px;height:64px;border-radius:16px;border:1px solid #2A2D33;box-shadow:0 6px 18px rgba(0,0,0,.35);"
+          />
           <div style="font-size:21px;font-weight:900;color:#ECEDEF;margin-top:12px;">${BRAND.name}</div>
           <div style="font-size:12px;color:#9BA0A8;margin-top:4px;letter-spacing:.2px;">${BRAND.tagline}</div>
         </td></tr>
