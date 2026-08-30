@@ -74,6 +74,7 @@ model User {
   tailleCm      Int?
   emailVerified Boolean  @default(false)
   emailVerifiedAt DateTime?
+  lastLoginAt    DateTime?
   coachId       String?
   coach         User?    @relation("CoachMembers", fields: [coachId], references: [id])
   members       User[]   @relation("CoachMembers")

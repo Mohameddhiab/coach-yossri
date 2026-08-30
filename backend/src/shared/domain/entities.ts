@@ -22,6 +22,7 @@ export interface User {
   tailleCm: number | null;
   emailVerified: boolean;
   emailVerifiedAt: Date | null;
+  lastLoginAt: Date | null;
   coachId: string | null;
   referredBy: string | null;
   createdAt: Date;

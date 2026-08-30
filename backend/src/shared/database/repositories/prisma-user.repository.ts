@@ -24,6 +24,7 @@ export class PrismaUserRepository implements UserRepository {
     tailleCm: number | null;
     emailVerified: boolean;
     emailVerifiedAt: Date | null;
+    lastLoginAt: Date | null;
     coachId: string | null;
     referredBy: string | null;
     createdAt: Date;
@@ -40,6 +41,7 @@ export class PrismaUserRepository implements UserRepository {
       tailleCm: row.tailleCm,
       emailVerified: row.emailVerified,
       emailVerifiedAt: row.emailVerifiedAt,
+      lastLoginAt: row.lastLoginAt,
       coachId: row.coachId,
       referredBy: row.referredBy,
       createdAt: row.createdAt,
@@ -94,6 +96,10 @@ export class PrismaUserRepository implements UserRepository {
 
   async updatePassword(id: string, passwordHash: string): Promise<void> {
     await this.prisma.user.update({ where: { id }, data: { passwordHash } });
+  }
+
+  async touchLastLogin(id: string, at: Date): Promise<void> {
+    await this.prisma.user.update({ where: { id }, data: { lastLoginAt: at } });
   }
 
   async markEmailVerified(id: string): Promise<void> {

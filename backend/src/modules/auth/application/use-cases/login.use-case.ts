@@ -10,6 +10,7 @@ import {
   type UserRepository,
 } from '@/shared/domain/ports/user-repository.port';
 import type { User } from '@/shared/domain/entities';
+import { RequestEmailVerificationUseCase } from './verify-email.use-case';
 
 export interface LoginResult {
   user: User;
@@ -23,6 +24,7 @@ export class LoginUseCase {
     @Inject(USER_REPOSITORY) private readonly users: UserRepository,
     @Inject(PASSWORD_HASHER) private readonly hasher: PasswordHasher,
     @Inject(TOKEN_SERVICE) private readonly tokens: TokenService,
+    private readonly requestEmailVerification: RequestEmailVerificationUseCase,
   ) {}
 
   async execute(email: string, password: string): Promise<LoginResult> {
@@ -34,6 +36,31 @@ export class LoginUseCase {
     if (!ok) {
       fail(401, 'INVALID_CREDENTIALS', 'البريد أو كلمة السر غير صحيحة');
     }
+
+    const firstLogin = user.lastLoginAt === null;
+
+    try {
+      await this.users.touchLastLogin(user.id, new Date());
+    } catch (e) {
+      // ne jamais faire échouer le login à cause de la persistance de la date
+      console.warn(
+        '[Login] touchLastLogin failed:',
+        e instanceof Error ? e.message : String(e),
+      );
+    }
+
+    if (firstLogin && !user.emailVerified) {
+      try {
+        await this.requestEmailVerification.execute(user.id);
+      } catch (e) {
+        // échec non-bloquant : le membre pourra renvoyer le lien depuis l'app
+        console.warn(
+          '[Login] requestEmailVerification failed:',
+          e instanceof Error ? e.message : String(e),
+        );
+      }
+    }
+
     const auth = { userId: user.id, role: user.role };
     const [accessToken, refreshToken] = await Promise.all([
       this.tokens.signAccess(auth),

@@ -15,7 +15,6 @@ import {
 } from '@/shared/domain/ports/subscription-repository.port';
 import { EmailService } from '@/shared/email/email.service';
 import type { User } from '@/shared/domain/entities';
-import { RequestEmailVerificationUseCase } from '@/modules/auth/application/use-cases/verify-email.use-case';
 
 import { isSubscriptionTier } from '@/shared/domain/subscription-tier';
 import type { SubscriptionTier } from '@/shared/domain/domain-types';
@@ -47,7 +46,6 @@ export class CreateUserUseCase {
     private readonly subs: SubscriptionRepository,
     @Inject(PASSWORD_HASHER) private readonly hasher: PasswordHasher,
     private readonly email: EmailService,
-    private readonly requestEmailVerification: RequestEmailVerificationUseCase,
   ) {}
 
   async execute(input: CreateUserInput): Promise<CreateUserResult> {
@@ -119,16 +117,6 @@ export class CreateUserUseCase {
       // L'email ne doit pas faire échouer la création utilisateur
       console.warn(
         '[CreateUser] sendWelcome failed:',
-        e instanceof Error ? e.message : String(e),
-      );
-    }
-
-    try {
-      await this.requestEmailVerification.execute(user.id);
-    } catch (e) {
-      // Échec non-bloquant : le coach pourra renvoyer le lien de confirmation
-      console.warn(
-        '[CreateUser] requestEmailVerification failed:',
         e instanceof Error ? e.message : String(e),
       );
     }
