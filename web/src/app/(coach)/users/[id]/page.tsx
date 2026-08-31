@@ -643,7 +643,21 @@ export default function UserDetailPage() {
                   </Button>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-3">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <span>
+                    {workout.exercises.length} تمرين إجمالاً —{" "}
+                    {
+                      workout.exercises.filter(
+                        (e) => e.jour_semaine === todayWeekDay() || e.jour_semaine === "TOUS_LES_JOURS",
+                      ).length
+                    }{" "}
+                    اليوم ({WEEK_DAY_LABELS[todayWeekDay()]})
+                  </span>
+                  <Link href={`/users/${userId}/exercices`} className="ms-auto text-primary hover:underline font-semibold">
+                    عرض كل الأيام
+                  </Link>
+                </div>
                 <WorkoutPlanDayView day={todayWeekDay()} exercises={workout.exercises} />
               </CardContent>
             </Card>

@@ -214,7 +214,9 @@ export function normalizeExercises(
     const tempo = str(e.tempo);
     const series = str(rawSeries);
     const repos = str(rawRepos);
-    const key = `${jour}|${String(nom).trim().toLowerCase()}|${series ?? ''}|${str(e.repetitions) ?? ''}`;
+    const reps = str(e.repetitions);
+    const groupe = str(e.groupeMusculaire ?? e.groupe_musculaire);
+    const key = `${jour}|${String(nom).trim().toLowerCase()}|${series ?? ''}|${reps ?? ''}|${charge ?? ''}|${tempo ?? ''}|${repos ?? ''}|${groupe ?? ''}`;
     if (seen.has(key)) continue;
     seen.add(key);
     out.push({

@@ -8,6 +8,7 @@ interface Props {
   sizeClass?: string; // e.g. "size-28" or "size-16"
   intervalMs?: number; // default 550ms
   className?: string;
+  fallbackSrc?: string;
 }
 
 export function AnimatedExerciseImage({
@@ -16,6 +17,7 @@ export function AnimatedExerciseImage({
   sizeClass = "size-24",
   intervalMs = 550,
   className = "",
+  fallbackSrc,
 }: Props) {
   const [idx, setIdx] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -32,8 +34,12 @@ export function AnimatedExerciseImage({
     };
   }, [urls.length, intervalMs, prefersReduced, paused]);
 
+  const [failed, setFailed] = useState(0);
+
   // Preload the 3 frames
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setFailed(0);
     urls.forEach((u) => {
       const img = new window.Image();
       img.src = u;
@@ -41,10 +47,15 @@ export function AnimatedExerciseImage({
   }, [urls]);
 
   if (urls.length === 0) return null;
+  if (failed >= urls.length && fallbackSrc) {
+    // all guide frames failed → fallback single image
+    // eslint-disable-next-line @next/next/no-img-element
+    return <img src={fallbackSrc} alt={alt} className={`${sizeClass} object-contain invert p-1 ${className}`} loading="lazy" crossOrigin="anonymous" />;
+  }
   if (urls.length === 1) {
     return (
       // eslint-disable-next-line @next/next/no-img-element
-      <img src={urls[0]} alt={alt} className={`${sizeClass} object-contain invert p-1 ${className}`} loading="lazy" />
+      <img src={urls[0]} alt={alt} className={`${sizeClass} object-contain invert p-1 ${className}`} loading="lazy" onError={() => setFailed((c) => c + 1)} />
     );
   }
 
@@ -64,6 +75,7 @@ export function AnimatedExerciseImage({
           className={`absolute inset-0 h-full w-full object-contain invert p-1 transition-opacity duration-200 ${i === idx ? "opacity-100" : "opacity-0"}`}
           loading={i === 0 ? "eager" : "lazy"}
           draggable={false}
+          onError={() => setFailed((c) => c + 1)}
         />
       ))}
       {/* dots indicator */}

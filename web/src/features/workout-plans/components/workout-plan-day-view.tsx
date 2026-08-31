@@ -73,7 +73,7 @@ export function WorkoutPlanDayView({
                 {(() => {
                   const urls = getGuideImageUrls(e.nom);
                   if (urls.length === 3) {
-                    return <AnimatedExerciseImage urls={urls} alt={e.nom} sizeClass="size-16" intervalMs={650} />;
+                    return <AnimatedExerciseImage urls={urls} alt={e.nom} sizeClass="size-16" intervalMs={650} fallbackSrc={img ?? fallbackForCategory(findCurated(e.nom)?.category) ?? undefined} />;
                   }
                   return img ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -84,7 +84,18 @@ export function WorkoutPlanDayView({
                       loading="lazy"
                       crossOrigin="anonymous"
                       onError={(ev) => {
-                        (ev.target as HTMLImageElement).style.display = "none";
+                        const t = ev.target as HTMLImageElement;
+                        if (t.dataset.fallbackTried) {
+                          t.style.display = "none";
+                          return;
+                        }
+                        t.dataset.fallbackTried = "1";
+                        const fb = fallbackForCategory(findCurated(e.nom)?.category);
+                        if (fb && t.src !== fb) {
+                          t.src = fb;
+                        } else {
+                          t.style.display = "none";
+                        }
                       }}
                     />
                   ) : (
