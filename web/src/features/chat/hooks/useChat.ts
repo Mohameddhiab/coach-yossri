@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/shared/lib/auth-context";
 import {
@@ -11,12 +11,40 @@ import {
 } from "@/features/chat/api/chat.api";
 
 const POLL_MS = 30000;
+const VISIBLE_POLL_MS = 8000;
+
+function useVisible(): boolean {
+  const [visible, setVisible] = useState(() =>
+    typeof document !== "undefined" ? document.visibilityState === "visible" : true,
+  );
+  useEffect(() => {
+    const onVis = () => setVisible(document.visibilityState === "visible");
+    document.addEventListener("visibilitychange", onVis);
+    window.addEventListener("focus", onVis);
+    window.addEventListener("blur", onVis);
+    return () => {
+      document.removeEventListener("visibilitychange", onVis);
+      window.removeEventListener("focus", onVis);
+      window.removeEventListener("blur", onVis);
+    };
+  }, []);
+  return visible;
+}
+
+function useChatPollMs(fallbackMs: number): number {
+  const visible = useVisible();
+  return visible ? VISIBLE_POLL_MS : fallbackMs;
+}
 
 export function useConversations(refreshMs: number = POLL_MS) {
+  const pollMs = useChatPollMs(refreshMs);
   return useQuery({
     queryKey: ["conversations"],
     queryFn: listConversations,
-    refetchInterval: refreshMs,
+    refetchInterval: pollMs,
+    refetchIntervalInBackground: true,
+    refetchOnWindowFocus: true,
+    staleTime: 0,
   });
 }
 
@@ -29,11 +57,15 @@ export function useMyConversation(enabled = true) {
 }
 
 export function useMessages(conversationId: string | null, enabled = true) {
+  const pollMs = useChatPollMs(POLL_MS);
   return useQuery({
     queryKey: ["messages", conversationId],
     queryFn: () => getMessages(conversationId as string),
     enabled: !!conversationId && enabled,
-    refetchInterval: POLL_MS,
+    refetchInterval: pollMs,
+    refetchIntervalInBackground: true,
+    refetchOnWindowFocus: true,
+    staleTime: 0,
   });
 }
 

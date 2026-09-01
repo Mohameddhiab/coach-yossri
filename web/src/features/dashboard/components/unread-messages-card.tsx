@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useConversations } from "@/features/chat/hooks/useChat";
 
 export function UnreadMessagesCard() {
-  const { data: conversations } = useConversations(30000);
+  const { data: conversations } = useConversations();
   const unreadRows = (conversations ?? [])
     .filter((c) => c.unread_count > 0)
     .sort((a, b) => (b.last_message_at ?? "").localeCompare(a.last_message_at ?? ""));
