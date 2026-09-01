@@ -741,7 +741,8 @@ export default function UserDetailPage() {
         <div
           ref={mealPdfRef}
           aria-hidden="true"
-          className="pointer-events-none fixed inset-x-0 top-0 -z-10 opacity-0"
+          className="pointer-events-none fixed -left-[10000px] top-0 opacity-100"
+          style={{ width: "794px" }}
         >
           <PlanPdfDocument plan={plan} logs={weightLogs ?? []} target={null} goal={goal ?? null} />
         </div>
@@ -750,7 +751,8 @@ export default function UserDetailPage() {
         <div
           ref={workoutPdfRef}
           aria-hidden="true"
-          className="pointer-events-none fixed inset-x-0 top-0 -z-10 opacity-0"
+          className="pointer-events-none fixed -left-[10000px] top-0 opacity-100"
+          style={{ width: "794px" }}
         >
           <WorkoutPlanPdfDocument plan={workout} />
         </div>

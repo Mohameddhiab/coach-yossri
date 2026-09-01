@@ -9,6 +9,8 @@ import { getGuideImageUrl, getGuideImageUrls } from "@/shared/lib/exercise-guide
 
 export async function downloadWorkoutPdf(element: HTMLElement, filename: string) {
   const doc = new jsPDF({ unit: "px", format: "a4", compress: true });
+  // html2canvas must capture the hidden PDF node even though it is off-screen.
+  // For guide-assets (/guide-assets/*) which are same-origin, we don't need CORS.
   await doc.html(element, {
     margin: 0,
     autoPaging: "slice",
@@ -16,7 +18,9 @@ export async function downloadWorkoutPdf(element: HTMLElement, filename: string)
       scale: 2,
       backgroundColor: "#ffffff",
       windowWidth: element.scrollWidth,
-      useCORS: true,
+      useCORS: false,
+      allowTaint: true,
+      logging: false,
     },
   });
   doc.save(filename);
@@ -67,7 +71,7 @@ export function WorkoutPlanPdfDocument({ plan }: { plan: WorkoutPlan }) {
                 </thead>
                 <tbody>
                   {dayExercises.map((ex) => {
-                    const displayUrl = ex.image_url ?? getGuideImageUrl(ex.nom, 1) ?? null;
+                    const displayUrl = getGuideImageUrl(ex.nom, 1) ?? ex.image_url ?? null;
                     const guideUrls = getGuideImageUrls(ex.nom);
                     const displayUrls = guideUrls.length === 3 ? guideUrls : displayUrl ? [displayUrl] : [];
                     return (
@@ -84,9 +88,9 @@ export function WorkoutPlanPdfDocument({ plan }: { plan: WorkoutPlan }) {
                                   key={u}
                                   src={u}
                                   alt=""
-                                  className="h-10 w-10 bg-white object-contain"
-                                  style={{ filter: "invert(1)" }}
-                                  crossOrigin="anonymous"
+                                  className="h-10 w-10 object-contain"
+                                  // guide assets are black on transparent → visible on white PDF without invert
+                                  style={{ backgroundColor: "#ffffff" }}
                                 />
                               ))}
                             </span>
