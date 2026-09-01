@@ -41,22 +41,43 @@ function fixLabColors(doc: Document) {
 }
 
 export async function downloadWorkoutPdf(element: HTMLElement, filename: string) {
-  const canvas = await (html2canvas as unknown as (el: HTMLElement, opts: Record<string, unknown>) => Promise<HTMLCanvasElement>)(element, {
-    scale: 2,
-    backgroundColor: "#ffffff",
-    useCORS: false,
-    allowTaint: true,
-    logging: false,
-    windowWidth: element.scrollWidth || 794,
-    onclone: (clonedDoc: Document) => fixLabColors(clonedDoc),
+  // Fallback to direct jsPDF generation if html2canvas fails (e.g. lab colors)
+  // We try html2canvas-pro first, then direct.
+  try {
+    const canvas = await (html2canvas as unknown as (el: HTMLElement, opts: Record<string, unknown>) => Promise<HTMLCanvasElement>)(element, {
+      scale: 2,
+      backgroundColor: "#ffffff",
+      windowWidth: element.scrollWidth || 794,
+      useCORS: false,
+      allowTaint: true,
+      logging: false,
+      onclone: (clonedDoc: Document) => fixLabColors(clonedDoc),
+    });
+    const imgData = canvas.toDataURL("image/png");
+    const doc = new jsPDF({ unit: "px", format: "a4", compress: true });
+    const pdfW = doc.internal.pageSize.getWidth();
+    const pdfH = (canvas.height * pdfW) / canvas.width;
+    doc.addImage(imgData, "PNG", 0, 0, pdfW, pdfH);
+    doc.save(filename);
+    return;
+  } catch (e) {
+    console.warn("[pdf] html2canvas failed, falling back to direct", e);
+  }
+  // Direct fallback: generate via jsPDF text table (no html2canvas)
+  const doc = new jsPDF({ unit: "pt", format: "a4" });
+  let y = 40;
+  doc.setFontSize(16);
+  doc.text("Coach Yosri - خطة التمارين", 300, y, { align: "center" });
+  y += 30;
+  // This fallback will be replaced by the element's HTML if html2canvas fails,
+  // but we keep it simple: just save the HTML as PDF via jsPDF.html as last resort
+  await doc.html(element, {
+    callback: (d) => d.save(filename),
+    x: 10,
+    y: 10,
+    width: 180,
+    windowWidth: 794,
   });
-  const imgData = canvas.toDataURL("image/png");
-  const doc = new jsPDF({ unit: "px", format: "a4", compress: true });
-  const pdfW = doc.internal.pageSize.getWidth();
-  const pdfH = (canvas.height * pdfW) / canvas.width;
-  doc.addImage(imgData, "PNG", 0, 0, pdfW, pdfH);
-  // Simple single-page for now (autoPaging via slice is handled by html2canvas single canvas)
-  doc.save(filename);
 }
 
 export function WorkoutPlanPdfDocument({ plan }: { plan: WorkoutPlan }) {
