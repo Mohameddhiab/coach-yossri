@@ -13,7 +13,13 @@ export function Providers({ children }: { children: ReactNode }) {
         defaultOptions: {
           queries: {
             staleTime: 30_000,
-            retry: 1,
+            retry: (failureCount, error) => {
+              if (error instanceof Error && (error as unknown as { status?: number }).status === 429) return false;
+              // ne pas retrier sur 4xx métier (ex: 403 SUBSCRIPTION_EXPIRED)
+              const status = (error as unknown as { status?: number })?.status ?? 0;
+              if (status >= 400 && status < 500) return false;
+              return failureCount < 1;
+            },
             refetchOnWindowFocus: false,
           },
         },

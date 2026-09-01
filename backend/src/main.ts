@@ -53,6 +53,7 @@ async function bootstrap() {
       'Accept',
     ],
   });
+  app.getHttpAdapter().getInstance().set('trust proxy', 1);
   const port = Number(process.env.PORT ?? 3000);
   await app.listen(port);
   console.log(`Coach Yosri API ready on http://localhost:${port}/api`);

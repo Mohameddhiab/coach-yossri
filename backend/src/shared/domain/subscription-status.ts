@@ -25,8 +25,12 @@ export function getSubscriptionStatus(
 ): SubscriptionStatus {
   if (!sub) return 'EXPIRE';
   const now = Date.now();
-  const fin = effectiveDateFin(sub).getTime();
-  const debut = sub.dateDebut.getTime();
+  const finDate = effectiveDateFin(sub);
+  finDate.setHours(23, 59, 59, 999);
+  const fin = finDate.getTime();
+  const debutDate = new Date(sub.dateDebut.getTime());
+  debutDate.setHours(0, 0, 0, 0);
+  const debut = debutDate.getTime();
   if (fin < now) return 'EXPIRE';
   if (debut > now) return 'EXPIRE';
   const daysLeft = Math.ceil((fin - now) / 86400000);
@@ -36,8 +40,7 @@ export function getSubscriptionStatus(
 
 export function daysLeft(sub: SubscriptionLike | null): number {
   if (!sub) return 0;
-  return Math.max(
-    0,
-    Math.ceil((effectiveDateFin(sub).getTime() - Date.now()) / 86400000),
-  );
+  const finDate = effectiveDateFin(sub);
+  finDate.setHours(23, 59, 59, 999);
+  return Math.max(0, Math.ceil((finDate.getTime() - Date.now()) / 86400000));
 }

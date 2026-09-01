@@ -27,7 +27,7 @@ import { StatsModule } from './modules/stats/stats.module';
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     ThrottlerModule.forRoot([
-      { name: 'default', ttl: 60000, limit: 60 },
+      { name: 'default', ttl: 60000, limit: 200 },
       { name: 'auth', ttl: 60000, limit: 5 },
     ]),
     PrismaModule,
