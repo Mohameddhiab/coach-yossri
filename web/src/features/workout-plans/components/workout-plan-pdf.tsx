@@ -197,12 +197,17 @@ export async function downloadWorkoutPdfDirect(plan: WorkoutPlan, filename: stri
         doc.addPage();
         y = 40;
       }
-      const guideSingle = getGuideImageUrl(ex.nom, 1);
-      const imgUrl = guideSingle ?? ex.image_url ?? fallbackForCategory(ex.groupe_musculaire) ?? "/guide-assets/bench-press/frame-1.png";
+      // Always use local guide-assets for PDF - never wger cross-origin
+      const guideSingle = getGuideImageUrl(ex.nom, 1) ?? fallbackForCategory(ex.groupe_musculaire) ?? "/guide-assets/bench-press/frame-1.png";
+      const imgUrl = guideSingle;
       let imgData: string | null = null;
       try {
         const url = new URL(imgUrl, window.location.origin).toString();
         imgData = await fetchImageAsDataUrl(url);
+        // Fallback to bench-press if specific guide missing
+        if (!imgData && imgUrl !== "/guide-assets/bench-press/frame-1.png") {
+          imgData = await fetchImageAsDataUrl(new URL("/guide-assets/bench-press/frame-1.png", window.location.origin).toString());
+        }
       } catch {}
       const rowH = 28;
       // Row background
@@ -211,15 +216,24 @@ export async function downloadWorkoutPdfDirect(plan: WorkoutPlan, filename: stri
       x = margin;
       doc.setFontSize(7);
       doc.setFont(useFont, "bold");
-      // Keep English names as-is, Arabic will use Amiri
       doc.text(ex.nom, x + 2, y + 8, { maxWidth: colW[0] - 4 });
       x += colW[0];
-      // Image cell
+      // Image cell - always draw border, then image if available
       doc.rect(x, y - 6, colW[1], rowH);
       if (imgData) {
         try {
-          doc.addImage(imgData, "PNG", x + 10, y - 2, 20, 20);
-        } catch {}
+          // Center 20x20 in 80x28 cell
+          doc.addImage(imgData, "PNG", x + (colW[1] - 20) / 2, y - 2, 20, 20);
+        } catch (e) {
+          console.warn("[pdf] addImage failed", imgUrl, e);
+        }
+      } else {
+        // Draw placeholder text if image missing
+        doc.setFontSize(6);
+        doc.setFont(useFont, "normal");
+        doc.setTextColor(150);
+        doc.text("—", x + colW[1] / 2, y + 8, { align: "center" });
+        doc.setTextColor(0);
       }
       x += colW[1];
       // Other cells
