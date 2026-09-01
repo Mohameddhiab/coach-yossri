@@ -1,11 +1,13 @@
 import {
-  CalendarCheck,
+  Dumbbell,
   MessagesSquare,
   Scale,
   Settings,
   Ticket,
+  Trophy,
   UserRound,
   Users,
+  UtensilsCrossed,
 } from "lucide-react";
 import type { SubscriptionTier } from "@/shared/lib/domain";
 
@@ -22,16 +24,22 @@ const BASE_NAV: UserNavItem[] = [
   { href: "/reglages", label: "الإعدادات", icon: Settings },
 ];
 
+const PLAN_NAV: UserNavItem[] = [
+  { href: "/plan", label: "الوجبات", icon: UtensilsCrossed },
+  { href: "/exercices", label: "التمارين", icon: Dumbbell },
+  { href: "/ligue", label: "الدوري", icon: Trophy },
+];
+
 export function navForTier(tier: SubscriptionTier | null): UserNavItem[] {
   if (tier === "PREMIUM_COACH") {
     return [
-      { href: "/plan", label: "خطّتي", icon: CalendarCheck },
+      ...PLAN_NAV,
       { href: "/messages", label: "الرسائل", icon: MessagesSquare },
       ...BASE_NAV.slice(0, 3),
     ];
   }
   if (tier === "ONLINE") {
-    return [{ href: "/plan", label: "خطّتي", icon: CalendarCheck }, ...BASE_NAV];
+    return [...PLAN_NAV, ...BASE_NAV];
   }
   return [...BASE_NAV];
 }
