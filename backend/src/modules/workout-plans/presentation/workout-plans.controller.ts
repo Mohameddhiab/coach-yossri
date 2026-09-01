@@ -20,6 +20,7 @@ import {
   type AuthUser,
 } from '@/shared/common/decorators/current-user.decorator';
 import { RequireTier } from '@/shared/common/decorators/require-tier.decorator';
+import { Public } from '@/shared/common/decorators/public.decorator';
 import {
   CreateWorkoutPlanUseCase,
   DuplicateWorkoutPlanUseCase,
@@ -178,5 +179,12 @@ export class WorkoutPlansController {
       user_name: r.userName,
       is_template: r.isTemplate,
     }));
+  }
+
+  @Get('debug/workout/:userId')
+  @Public()
+  async debugWorkout(@Param('userId') userId: string) {
+    const plan = await this.getUseCase.execute(userId);
+    return plan ? toWorkoutPlanApi(plan) : null;
   }
 }

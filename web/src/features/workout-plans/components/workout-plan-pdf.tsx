@@ -106,9 +106,10 @@ export function WorkoutPlanPdfDocument({ plan }: { plan: WorkoutPlan }) {
                   {dayExercises.map((ex) => {
                     const guideUrls = getGuideImageUrls(ex.nom);
                     const guideSingle = getGuideImageUrl(ex.nom, 1);
-                    const fallback = fallbackForCategory(ex.groupe_musculaire);
-                    const displayUrl = guideSingle ?? ex.image_url ?? fallback ?? null;
-                    const displayUrls = guideUrls.length === 3 ? guideUrls : displayUrl ? [displayUrl] : fallback ? [fallback] : [];
+                    // Fallback to category or generic bench-press if no guide image
+                    const fallback = fallbackForCategory(ex.groupe_musculaire) ?? "/guide-assets/bench-press/frame-1.png";
+                    const displayUrl = guideSingle ?? ex.image_url ?? fallback;
+                    const displayUrls = guideUrls.length === 3 ? guideUrls : displayUrl ? [displayUrl] : [fallback];
                     return (
                       <tr key={ex.id} className="border-b border-neutral-100 last:border-b-0">
                         <td className="border border-neutral-200 px-2 py-1.5 text-start font-semibold text-neutral-900">
