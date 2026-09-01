@@ -6,8 +6,9 @@ const _isProd = process.env.NODE_ENV === "production";
 const serverApiUrl = process.env.SERVER_API_URL || "http://localhost:3001/api";
 const backendOrigin = serverApiUrl.replace(/\/api\/?$/, "");
 
-const COACH_PATHS = ["/dashboard", "/users", "/settings", "/pointage", "/notifications", "/classification", "/messages"];
-const USER_PATHS = ["/plan", "/progression", "/abonnement", "/reglages"];
+const COACH_PATHS = ["/dashboard", "/users", "/settings", "/pointage", "/notifications", "/classification"];
+const USER_PATHS = ["/plan", "/exercices", "/ligue", "/progression", "/abonnement", "/reglages"];
+// /messages est partagé COACH + USER PREMIUM → pas de blocage proxy, la garde tier gère l'accès
 const PUBLIC_AUTH_PATHS = ["/forgot-password", "/reset-password"];
 
 const SECURITY_HEADERS: Record<string, string> = {
