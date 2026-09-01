@@ -92,22 +92,47 @@ export async function downloadWorkoutPdf(element: HTMLElement, filename: string)
   });
 }
 
+let amiriFontLoaded = false;
+async function ensureArabicFont(doc: jsPDF) {
+  if (amiriFontLoaded) return;
+  try {
+    // Amiri supports Arabic glyphs - cache as base64 in jsPDF VFS
+    const res = await fetch("https://fonts.gstatic.com/s/amiri/v26/J7aRnpd8CGxBHpUrtLMA.ttf");
+    if (!res.ok) throw new Error("font fetch failed");
+    const buf = await res.arrayBuffer();
+    const bytes = new Uint8Array(buf);
+    let binary = "";
+    for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+    const base64 = btoa(binary);
+    doc.addFileToVFS("Amiri-Regular.ttf", base64);
+    doc.addFont("Amiri-Regular.ttf", "Amiri", "normal");
+    doc.addFont("Amiri-Regular.ttf", "Amiri", "bold");
+    amiriFontLoaded = true;
+  } catch {
+    // fallback to helvetica if font load fails - Arabic will be boxes but not crash
+  }
+}
+
 export async function downloadWorkoutPdfDirect(plan: WorkoutPlan, filename: string) {
   const doc = new jsPDF({ unit: "pt", format: "a4" });
+  await ensureArabicFont(doc);
+  const useFont = amiriFontLoaded ? "Amiri" : "helvetica";
   const pageW = doc.internal.pageSize.getWidth();
   const margin = 30;
   let y = 40;
   doc.setFontSize(16);
-  doc.setFont("helvetica", "bold");
-  doc.text("Coach Yosri - خطة التمارين", pageW / 2, y, { align: "center" });
+  doc.setFont(useFont, "bold");
+  // Use English for header to avoid Arabic shaping issues in direct; keep Arabic for plan title via Amiri
+  doc.text("Coach Yosri - Khota Al Tamareen", pageW / 2, y, { align: "center" });
   y += 18;
   doc.setFontSize(10);
-  doc.setFont("helvetica", "normal");
-  doc.text(`${plan.titre} - ${OBJECTIVE_LABELS[plan.objectif]} - الإصدار ${plan.version}`, pageW / 2, y, { align: "center" });
+  doc.setFont(useFont, "normal");
+  // Title may contain Arabic - use Amiri if loaded
+  doc.text(`${plan.titre} - ${OBJECTIVE_LABELS[plan.objectif]} - Isdar ${plan.version}`, pageW / 2, y, { align: "center" });
   y += 12;
   doc.setFontSize(8);
   doc.setTextColor(120);
-  doc.text(`تاريخ الاستخراج: ${formatDateShort(new Date().toISOString())}`, pageW / 2, y, { align: "center" });
+  doc.text(`Tarikh: ${formatDateShort(new Date().toISOString())}`, pageW / 2, y, { align: "center" });
   doc.setTextColor(0);
   y += 20;
 
@@ -118,11 +143,11 @@ export async function downloadWorkoutPdfDirect(plan: WorkoutPlan, filename: stri
     ];
     if (dayExercises.length === 0) {
       doc.setFontSize(10);
-      doc.setFont("helvetica", "bold");
+      doc.setFont(useFont, "bold");
       doc.text(WEEK_DAY_LABELS[day], margin, y);
       y += 14;
       doc.setFontSize(8);
-      doc.setFont("helvetica", "normal");
+      doc.setFont(useFont, "normal");
       doc.setTextColor(100);
       doc.text("يوم راحة - لا توجد تمارين مبرمجة", margin, y);
       doc.setTextColor(0);
@@ -134,7 +159,7 @@ export async function downloadWorkoutPdfDirect(plan: WorkoutPlan, filename: stri
       continue;
     }
     doc.setFontSize(11);
-    doc.setFont("helvetica", "bold");
+    doc.setFont(useFont, "bold");
     doc.text(WEEK_DAY_LABELS[day], margin, y);
     y += 8;
     doc.setDrawColor(200);
@@ -146,7 +171,7 @@ export async function downloadWorkoutPdfDirect(plan: WorkoutPlan, filename: stri
     const headers = ["التمرين", "الصورة", "الحمل", "التكرارات", "الجولات", "الإيقاع", "الراحة"];
     let x = margin;
     doc.setFontSize(7);
-    doc.setFont("helvetica", "bold");
+    doc.setFont(useFont, "bold");
     doc.setFillColor(245, 245, 245);
     doc.rect(margin, y - 8, pageW - margin * 2, 14, "F");
     for (let i = 0; i < headers.length; i++) {
@@ -173,7 +198,8 @@ export async function downloadWorkoutPdfDirect(plan: WorkoutPlan, filename: stri
       // Exercise name
       x = margin;
       doc.setFontSize(7);
-      doc.setFont("helvetica", "bold");
+      doc.setFont(useFont, "bold");
+      // Keep English names as-is, Arabic will use Amiri
       doc.text(ex.nom, x + 2, y + 8, { maxWidth: colW[0] - 4 });
       x += colW[0];
       // Image cell
@@ -188,7 +214,7 @@ export async function downloadWorkoutPdfDirect(plan: WorkoutPlan, filename: stri
       const cells = [ex.charge ?? "-", ex.repetitions ?? "-", ex.series ?? "-", ex.tempo ?? "-", ex.repos ?? "-"];
       for (let i = 0; i < cells.length; i++) {
         doc.rect(x, y - 6, colW[2 + i], rowH);
-        doc.setFont("helvetica", "normal");
+        doc.setFont(useFont, "normal");
         doc.text(String(cells[i]).slice(0, 20), x + colW[2 + i] / 2, y + 8, { align: "center", maxWidth: colW[2 + i] - 4 });
         x += colW[2 + i];
       }
