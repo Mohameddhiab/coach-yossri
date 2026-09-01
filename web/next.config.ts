@@ -4,14 +4,11 @@ const _isProd = process.env.NODE_ENV === "production";
 const serverApiUrl = process.env.SERVER_API_URL || "http://localhost:3001/api";
 const backendOrigin = serverApiUrl.replace(/\/api\/?$/, "");
 
-console.log("[next-config] loaded img-src includes http wger and supabase.in");
- // force rebuild 2026-09-01 v2
 const securityHeaders = [
   { key: "X-Frame-Options", value: "DENY" },
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   { key: "X-XSS-Protection", value: "1; mode=block" },
-  { key: "X-Test-Deploy", value: "2026-09-01-v2" },
   {
     key: "Strict-Transport-Security",
     value: "max-age=63072000; includeSubDomains; preload",

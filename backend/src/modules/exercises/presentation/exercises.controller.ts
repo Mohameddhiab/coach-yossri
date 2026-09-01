@@ -49,6 +49,8 @@ export class ExercisesController {
   }
 
   @Post('ensure-curated')
+  @Roles('COACH')
+  @UseGuards(RolesGuard)
   async ensureCurated() {
     return this.ensureCuratedUC.execute();
   }
