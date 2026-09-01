@@ -321,8 +321,8 @@ export function WorkoutPlanPdfDocument({ plan }: { plan: WorkoutPlan }) {
                             <img
                               src={displayUrl}
                               alt=""
-                              className="h-10 w-10 object-contain"
-                              style={{ backgroundColor: "#ffffff" }}
+                              className="h-10 w-10 object-contain rounded"
+                              style={{ backgroundColor: "#18181b" }}
                             />
                           </span>
                         </td>
