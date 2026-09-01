@@ -6,6 +6,7 @@ import { OBJECTIVE_LABELS, WEEK_DAYS, WEEK_DAY_LABELS } from "@/shared/lib/domai
 import type { WorkoutPlan } from "@/features/workout-plans/api/workoutPlans.api";
 import { formatDateShort } from "@/lib/utils";
 import { getGuideImageUrl, getGuideImageUrls } from "@/shared/lib/exercise-guide-map";
+import { fallbackForCategory } from "@/shared/lib/exercise-fallbacks";
 
 export async function downloadWorkoutPdf(element: HTMLElement, filename: string) {
   const doc = new jsPDF({ unit: "px", format: "a4", compress: true });
@@ -71,9 +72,11 @@ export function WorkoutPlanPdfDocument({ plan }: { plan: WorkoutPlan }) {
                 </thead>
                 <tbody>
                   {dayExercises.map((ex) => {
-                    const displayUrl = getGuideImageUrl(ex.nom, 1) ?? ex.image_url ?? null;
                     const guideUrls = getGuideImageUrls(ex.nom);
-                    const displayUrls = guideUrls.length === 3 ? guideUrls : displayUrl ? [displayUrl] : [];
+                    const guideSingle = getGuideImageUrl(ex.nom, 1);
+                    const fallback = fallbackForCategory(ex.groupe_musculaire);
+                    const displayUrl = guideSingle ?? ex.image_url ?? fallback ?? null;
+                    const displayUrls = guideUrls.length === 3 ? guideUrls : displayUrl ? [displayUrl] : fallback ? [fallback] : [];
                     return (
                       <tr key={ex.id} className="border-b border-neutral-100 last:border-b-0">
                         <td className="border border-neutral-200 px-2 py-1.5 text-start font-semibold text-neutral-900">

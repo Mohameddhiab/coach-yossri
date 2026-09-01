@@ -37,13 +37,16 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(
       fetch(request)
         .then((res) => {
-          const copy = res.clone();
-          caches.open(CACHE).then((cache) => cache.put("/", copy));
+          if (res.ok) {
+            const copy = res.clone();
+            caches.open(CACHE).then((cache) => cache.put(request, copy));
+          }
           return res;
         })
         .catch(() =>
           caches
-            .match("/")
+            .match(request)
+            .then((cached) => cached ?? caches.match("/"))
             .then((cached) => cached ?? Response.error()),
         ),
     );
@@ -54,13 +57,15 @@ self.addEventListener("fetch", (event) => {
     caches.match(request).then(
       (cached) =>
         cached ??
-        fetch(request).then((res) => {
-          if (res.ok && url.pathname.startsWith("/_next/")) {
-            const copy = res.clone();
-            caches.open(CACHE).then((cache) => cache.put(request, copy));
-          }
-          return res;
-        }),
+        fetch(request)
+          .then((res) => {
+            if (res.ok && url.pathname.startsWith("/_next/")) {
+              const copy = res.clone();
+              caches.open(CACHE).then((cache) => cache.put(request, copy));
+            }
+            return res;
+          })
+          .catch(() => caches.match(request)),
     ),
   );
 });

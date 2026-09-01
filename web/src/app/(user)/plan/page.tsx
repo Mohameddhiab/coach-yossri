@@ -72,23 +72,33 @@ export default function MyPlanPage() {
   const workout = workoutQuery.data;
 
   const handlePdfDownload = async (kind: "meal" | "workout") => {
-    const el =
-      kind === "meal"
-        ? (mealPdfRef.current?.firstElementChild as HTMLElement | null)
-        : (workoutPdfRef.current?.firstElementChild as HTMLElement | null);
-    if (!el || (kind === "meal" ? !plan : !workout)) return;
+    const container =
+      kind === "meal" ? mealPdfRef.current : workoutPdfRef.current;
+    const el = container?.firstElementChild as HTMLElement | null;
+    // Fallback to visible preview if hidden container not found (for direct preview)
+    const fallbackEl =
+      kind === "workout"
+        ? document.querySelector<HTMLElement>("[data-pdf-preview='workout']")
+        : document.querySelector<HTMLElement>("[data-pdf-preview='meal']");
+    const target = el ?? fallbackEl;
+    if (!target || (kind === "meal" ? !plan : !workout)) {
+      toast.error("العنصر غير جاهز — حاول مرة أخرى");
+      return;
+    }
     setPdfBusy(kind);
     try {
-      await downloadPlanPdf(
-        el,
+      const fn = kind === "meal" ? downloadPlanPdf : (await import("@/features/workout-plans/components/workout-plan-pdf")).downloadWorkoutPdf;
+      await fn(
+        target,
         `${kind === "meal" ? "plan" : "workout"}-${
           kind === "meal"
             ? plan!.titre.replace(/\s+/g, "-")
             : workout!.titre.replace(/\s+/g, "-")
         }-${new Date().toISOString().slice(0, 10)}.pdf`,
       );
-    } catch {
-      toast.error("تعذر تحويل ملف PDF — حاول مرة أخرى");
+    } catch (e) {
+      console.error("[pdf] failed", e);
+      toast.error(e instanceof Error ? e.message : "تعذر تحويل ملف PDF — حاول مرة أخرى");
     } finally {
       setPdfBusy(null);
     }
@@ -400,11 +410,42 @@ export default function MyPlanPage() {
 
       {tierAllows(tier, "follow-up") && <FollowUpList />}
 
+      {(plan || workout) && (
+        <div className="rounded-2xl border bg-card p-4">
+          <h3 className="mb-3 text-sm font-black">معاينة PDF</h3>
+          <div className="flex flex-wrap gap-2">
+            {plan && (
+              <Button size="sm" variant="outline" onClick={() => handlePdfDownload("meal")} disabled={pdfBusy === "meal"}>
+                <FileDown className="size-4" /> تحميل PDF الغذاء
+              </Button>
+            )}
+            {workout && (
+              <Button size="sm" variant="outline" onClick={() => handlePdfDownload("workout")} disabled={pdfBusy === "workout"}>
+                <FileDown className="size-4" /> تحميل PDF التمارين
+              </Button>
+            )}
+          </div>
+          <div className="mt-4 overflow-auto rounded-xl border bg-white">
+            {workout && (
+              <div data-pdf-preview="workout">
+                <WorkoutPlanPdfDocument plan={workout} />
+              </div>
+            )}
+            {plan && !workout && (
+              <div data-pdf-preview="meal">
+                <PlanPdfDocument plan={plan} logs={logs ?? []} target={target ?? null} goal={goal ?? null} />
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {plan && (
         <div
           ref={mealPdfRef}
           aria-hidden="true"
-          className="pointer-events-none fixed inset-x-0 top-0 -z-10 opacity-0 print:hidden"
+          className="pointer-events-none fixed -left-[10000px] top-0 opacity-100 print:hidden"
+          style={{ width: "794px" }}
         >
           <PlanPdfDocument plan={plan} logs={logs ?? []} target={target ?? null} goal={goal ?? null} />
         </div>
@@ -414,7 +455,8 @@ export default function MyPlanPage() {
         <div
           ref={workoutPdfRef}
           aria-hidden="true"
-          className="pointer-events-none fixed inset-x-0 top-0 -z-10 opacity-0 print:hidden"
+          className="pointer-events-none fixed -left-[10000px] top-0 opacity-100 print:hidden"
+          style={{ width: "794px" }}
         >
           <WorkoutPlanPdfDocument plan={workout} />
         </div>
