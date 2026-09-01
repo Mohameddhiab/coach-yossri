@@ -14,8 +14,10 @@ import {
 } from '../application/use-cases/verify-email.use-case';
 import { PasswordResetTokenRepository } from '../infrastructure/password-reset-token.repository';
 import { EmailVerificationTokenRepository } from '../infrastructure/email-verification-token.repository';
+import { RefreshSessionRepository } from '../infrastructure/refresh-session.repository';
 import { BcryptPasswordHasher } from '../infrastructure/bcrypt-password-hasher';
 import { JwtTokenService } from '../infrastructure/jwt-token.service';
+import { AuthRateLimitService } from '../infrastructure/auth-rate-limit.service';
 import { PASSWORD_HASHER } from '@/shared/domain/password';
 import { TOKEN_SERVICE } from '@/shared/domain/token-service.port';
 
@@ -47,6 +49,8 @@ import { TOKEN_SERVICE } from '@/shared/domain/token-service.port';
     ConfirmEmailVerificationUseCase,
     PasswordResetTokenRepository,
     EmailVerificationTokenRepository,
+    RefreshSessionRepository,
+    AuthRateLimitService,
   ],
   exports: [PASSWORD_HASHER, TOKEN_SERVICE, RequestEmailVerificationUseCase],
 })

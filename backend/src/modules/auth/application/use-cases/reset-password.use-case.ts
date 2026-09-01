@@ -6,6 +6,7 @@ import {
   type UserRepository,
 } from '@/shared/domain/ports/user-repository.port';
 import { PasswordResetTokenRepository } from '../../infrastructure/password-reset-token.repository';
+import { RefreshSessionRepository } from '../../infrastructure/refresh-session.repository';
 import { hashResetToken } from './request-password-reset.use-case';
 
 @Injectable()
@@ -14,6 +15,7 @@ export class ResetPasswordUseCase {
     @Inject(USER_REPOSITORY) private readonly users: UserRepository,
     @Inject(PASSWORD_HASHER) private readonly hasher: PasswordHasher,
     private readonly tokens: PasswordResetTokenRepository,
+    private readonly refreshSessions: RefreshSessionRepository,
   ) {}
 
   async execute(token: string, newPassword: string): Promise<void> {
@@ -41,5 +43,10 @@ export class ResetPasswordUseCase {
       await this.hasher.hash(newPassword),
     );
     await this.tokens.markUsed(record.id);
+    try {
+      await this.refreshSessions.revokeAllForUser(user.id);
+    } catch (e) {
+      console.warn('[ResetPassword] revoke sessions failed:', e);
+    }
   }
 }

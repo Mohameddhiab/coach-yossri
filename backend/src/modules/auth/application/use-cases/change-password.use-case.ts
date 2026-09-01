@@ -5,12 +5,14 @@ import {
   USER_REPOSITORY,
   type UserRepository,
 } from '@/shared/domain/ports/user-repository.port';
+import { RefreshSessionRepository } from '../../infrastructure/refresh-session.repository';
 
 @Injectable()
 export class ChangePasswordUseCase {
   constructor(
     @Inject(USER_REPOSITORY) private readonly users: UserRepository,
     @Inject(PASSWORD_HASHER) private readonly hasher: PasswordHasher,
+    private readonly refreshSessions: RefreshSessionRepository,
   ) {}
 
   async execute(userId: string, current: string, next: string): Promise<void> {
@@ -34,5 +36,10 @@ export class ChangePasswordUseCase {
       fail(400, 'INVALID_CURRENT', 'كلمة السر الحالية غير صحيحة');
     }
     await this.users.updatePassword(userId, await this.hasher.hash(next));
+    try {
+      await this.refreshSessions.revokeAllForUser(userId);
+    } catch (e) {
+      console.warn('[ChangePassword] revoke sessions failed:', e);
+    }
   }
 }

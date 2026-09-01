@@ -98,6 +98,7 @@ model User {
   followUpsGiven FollowUp[]        @relation("FollowUpCoach")
   conversationsAsCoach  Conversation[] @relation("ConvCoach")
   conversationsAsMember Conversation[] @relation("ConvMember")
+  refreshSessions RefreshSession[]
 
   @@index([coachId])
   @@map("users")
@@ -387,6 +388,20 @@ model FollowUp {
 
   @@index([userId, createdAt])
   @@map("follow_ups")
+}
+
+model RefreshSession {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("refresh_sessions")
 }
 
 enum ExerciseSource {

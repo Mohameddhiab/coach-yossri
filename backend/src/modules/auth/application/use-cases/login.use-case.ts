@@ -11,6 +11,10 @@ import {
 } from '@/shared/domain/ports/user-repository.port';
 import type { User } from '@/shared/domain/entities';
 import { RequestEmailVerificationUseCase } from './verify-email.use-case';
+import {
+  RefreshSessionRepository,
+  hashRefreshToken,
+} from '../../infrastructure/refresh-session.repository';
 
 export interface LoginResult {
   user: User;
@@ -25,6 +29,7 @@ export class LoginUseCase {
     @Inject(PASSWORD_HASHER) private readonly hasher: PasswordHasher,
     @Inject(TOKEN_SERVICE) private readonly tokens: TokenService,
     private readonly requestEmailVerification: RequestEmailVerificationUseCase,
+    private readonly refreshSessions: RefreshSessionRepository,
   ) {}
 
   async execute(email: string, password: string): Promise<LoginResult> {
@@ -66,6 +71,15 @@ export class LoginUseCase {
       this.tokens.signAccess(auth),
       this.tokens.signRefresh(auth),
     ]);
+    try {
+      await this.refreshSessions.create({
+        userId: user.id,
+        tokenHash: hashRefreshToken(refreshToken),
+        expiresAt: new Date(Date.now() + 7 * 24 * 3600 * 1000),
+      });
+    } catch (e) {
+      console.warn('[Login] refresh session create failed:', e);
+    }
     return { user, accessToken, refreshToken };
   }
 }

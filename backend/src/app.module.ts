@@ -26,7 +26,10 @@ import { StatsModule } from './modules/stats/stats.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    ThrottlerModule.forRoot([{ ttl: 60000, limit: 60 }]),
+    ThrottlerModule.forRoot([
+      { name: 'default', ttl: 60000, limit: 60 },
+      { name: 'auth', ttl: 60000, limit: 5 },
+    ]),
     PrismaModule,
     SupabaseModule,
     EmailModule,

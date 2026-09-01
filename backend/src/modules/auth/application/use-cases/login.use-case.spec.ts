@@ -42,8 +42,11 @@ function setup(user: User & { passwordHash: string }) {
   const requestEmailVerification = {
     execute: jest.fn().mockResolvedValue(undefined),
   } as unknown as jest.Mocked<RequestEmailVerificationUseCase>;
-  const uc = new LoginUseCase(users, hasher, tokens, requestEmailVerification);
-  return { users, hasher, tokens, requestEmailVerification, uc };
+  const refreshSessions = {
+    create: jest.fn().mockResolvedValue(undefined),
+  } as unknown as jest.Mocked<import('../../infrastructure/refresh-session.repository').RefreshSessionRepository>;
+  const uc = new LoginUseCase(users, hasher, tokens, requestEmailVerification, refreshSessions);
+  return { users, hasher, tokens, requestEmailVerification, refreshSessions, uc };
 }
 
 describe('LoginUseCase', () => {

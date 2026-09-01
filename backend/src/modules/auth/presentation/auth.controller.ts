@@ -8,6 +8,7 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import type { Request, Response } from 'express';
 import {
   IsBoolean,
@@ -37,6 +38,11 @@ import {
 } from '../application/use-cases/verify-email.use-case';
 import { toUserApi } from '@/shared/mapping/user.mapper';
 import type { NotificationPrefs } from '@/shared/domain/entities';
+import {
+  RefreshSessionRepository,
+  hashRefreshToken,
+} from '../infrastructure/refresh-session.repository';
+import { AuthRateLimitService } from '../infrastructure/auth-rate-limit.service';
 
 export class LoginDto {
   @IsEmail({}, { message: 'بريد إلكتروني غير صحيح' })
@@ -99,6 +105,8 @@ export class AuthController {
     private readonly resetPasswordUseCase: ResetPasswordUseCase,
     private readonly requestEmailVerificationUseCase: RequestEmailVerificationUseCase,
     private readonly confirmEmailVerificationUseCase: ConfirmEmailVerificationUseCase,
+    private readonly refreshSessions: RefreshSessionRepository,
+    private readonly rateLimiter: AuthRateLimitService,
   ) {}
 
   private setTokens(res: Response, accessToken: string, refreshToken: string) {
@@ -125,11 +133,13 @@ export class AuthController {
     });
   }
 
+  @Throttle({ auth: { ttl: 60000, limit: 5 } })
   @Post('login')
   async login(
     @Body() dto: LoginDto,
     @Res({ passthrough: true }) res: Response,
   ) {
+    this.rateLimiter.check(dto.email, 5, 60_000);
     const { user, accessToken, refreshToken } = await this.loginUseCase.execute(
       dto.email,
       dto.password,
@@ -161,7 +171,20 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Post('logout')
-  logout(@Res({ passthrough: true }) res: Response) {
+  async logout(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const token = (req.cookies as Record<string, string> | undefined)?.[
+      REFRESH_COOKIE
+    ];
+    if (token) {
+      try {
+        await this.refreshSessions.revokeByHash(hashRefreshToken(token));
+      } catch (e) {
+        console.warn('[Logout] revoke failed:', e);
+      }
+    }
     const secure =
       process.env.COOKIE_SECURE != null
         ? process.env.COOKIE_SECURE === 'true'
@@ -180,8 +203,10 @@ export class AuthController {
     return toUserApi(user);
   }
 
+  @Throttle({ auth: { ttl: 60000, limit: 5 } })
   @Post('forgot-password')
   async forgotPassword(@Body() dto: ForgotPasswordDto) {
+    this.rateLimiter.check(dto.email, 5, 60_000);
     await this.requestPasswordResetUseCase.execute(dto.email);
     return {
       ok: true,
