@@ -19,7 +19,7 @@ export interface UserNavItem {
 
 const BASE_NAV: UserNavItem[] = [
   { href: "/progression", label: "تقدّمي", icon: Scale },
-  { href: "/profil", label: "الملف الشخصي", icon: UserRound },
+  { href: "/profil", label: "الملف", icon: UserRound },
   { href: "/abonnement", label: "الاشتراك", icon: Ticket },
   { href: "/reglages", label: "الإعدادات", icon: Settings },
 ];
