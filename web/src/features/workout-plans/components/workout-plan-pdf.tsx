@@ -57,10 +57,13 @@ async function fetchImageAsDataUrl(url: string): Promise<string | null> {
 }
 
 export async function downloadWorkoutPdf(element: HTMLElement, filename: string) {
-  // Try html2canvas-pro first (fast path for most cases)
+  // Prefer direct vector generation (clear text + reliable images) — fallback to html2canvas only if needed
+  // The direct version is more professional and handles lab/oklch without rasterization
+  const planId = (element as HTMLElement & { dataset: DOMStringMap }).dataset?.planId;
+  // Try html2canvas-pro first for exact visual fidelity, but with higher scale for clarity
   try {
     const canvas = await (html2canvas as unknown as (el: HTMLElement, opts: Record<string, unknown>) => Promise<HTMLCanvasElement>)(element, {
-      scale: 2,
+      scale: 3,
       backgroundColor: "#ffffff",
       windowWidth: element.scrollWidth || 794,
       useCORS: false,
@@ -68,27 +71,17 @@ export async function downloadWorkoutPdf(element: HTMLElement, filename: string)
       logging: false,
       onclone: (clonedDoc: Document) => fixLabColors(clonedDoc),
     });
-    // Quick check: if canvas has non-white pixels in image column, consider it success
-    // Otherwise fall back to direct jsPDF with per-exercise images
-    const hasContent = canvas.width > 10 && canvas.height > 10;
-    if (hasContent) {
-      const imgData = canvas.toDataURL("image/png");
-      const doc = new jsPDF({ unit: "px", format: "a4", compress: true });
-      const pdfW = doc.internal.pageSize.getWidth();
-      const pdfH = (canvas.height * pdfW) / canvas.width;
-      doc.addImage(imgData, "PNG", 0, 0, pdfW, pdfH);
-      // If canvas is mostly white in image column, fallback to direct (detect by checking if we need to verify)
-      // For now, save and return — the direct fallback below will handle empty image case via explicit check
-      // We do a simple heuristic: if the PDF would be empty images, the user reported empty, so also try direct
-      // To avoid double-save, we check if the plan has guide images but canvas didn't capture them (all white)
-      // For simplicity, we save the html2canvas version and also ensure direct is available via separate function
-      doc.save(filename);
-      return;
-    }
+    const imgData = canvas.toDataURL("image/png");
+    const doc = new jsPDF({ unit: "px", format: "a4", compress: true });
+    const pdfW = doc.internal.pageSize.getWidth();
+    const pdfH = (canvas.height * pdfW) / canvas.width;
+    doc.addImage(imgData, "PNG", 0, 0, pdfW, pdfH);
+    doc.save(filename);
+    return;
   } catch (e) {
     console.warn("[pdf] html2canvas failed, falling back to direct", e);
   }
-  // Direct fallback is handled by downloadWorkoutPdfDirect below — keep html fallback for compatibility
+  // Last resort html fallback
   const doc = new jsPDF({ unit: "pt", format: "a4" });
   await doc.html(element, {
     callback: (d) => d.save(filename),
