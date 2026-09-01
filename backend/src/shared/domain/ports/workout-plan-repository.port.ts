@@ -94,6 +94,7 @@ export interface ChatRepository {
     conversationId: string,
     senderId: string,
     contenu: string,
+    attachment?: { url: string; type: string; name: string } | null,
   ): Promise<ChatMessage>;
   markRead(conversationId: string, viewerId: string): Promise<void>;
   unreadCount(conversationId: string, ownerId: string): Promise<number>;

@@ -1,4 +1,5 @@
 import { Global, Module } from '@nestjs/common';
+import { SupabaseModule } from '@/shared/supabase/supabase.module';
 import {
   PrismaChatRepositoryProvider,
   PrismaFollowUpRepositoryProvider,
@@ -16,6 +17,7 @@ import { ChatController } from './presentation/chat.controller';
 
 @Global()
 @Module({
+  imports: [SupabaseModule],
   controllers: [ChatController],
   providers: [
     PrismaChatRepositoryProvider,

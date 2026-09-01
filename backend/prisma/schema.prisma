@@ -368,6 +368,9 @@ model ChatMessage {
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   senderId       String
   contenu        String
+  attachmentUrl  String?
+  attachmentType String?
+  attachmentName String?
   lu             Boolean      @default(false)
   createdAt      DateTime     @default(now())
 

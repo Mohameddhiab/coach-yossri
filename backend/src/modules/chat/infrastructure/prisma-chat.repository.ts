@@ -36,6 +36,9 @@ export class PrismaChatRepository implements ChatRepository {
     conversationId: string;
     senderId: string;
     contenu: string;
+    attachmentUrl: string | null;
+    attachmentType: string | null;
+    attachmentName: string | null;
     lu: boolean;
     createdAt: Date;
   }): ChatMessage {
@@ -44,6 +47,9 @@ export class PrismaChatRepository implements ChatRepository {
       conversationId: row.conversationId,
       senderId: row.senderId,
       contenu: row.contenu,
+      attachmentUrl: row.attachmentUrl,
+      attachmentType: row.attachmentType,
+      attachmentName: row.attachmentName,
       lu: row.lu,
       createdAt: row.createdAt,
     };
@@ -81,13 +87,22 @@ export class PrismaChatRepository implements ChatRepository {
     const unreadById = new Map(
       unreads.map((u) => [u.conversationId, u._count.id]),
     );
-    return rows.map((r) => ({
-      ...this.mapConversation(r),
-      userName: r.member.nom,
-      userPrenom: r.member.prenom,
-      unreadCount: unreadById.get(r.id) ?? 0,
-      lastMessage: r.messages[0]?.contenu ?? null,
-    }));
+    return rows.map((r) => {
+      const last = r.messages[0] as
+        | { contenu: string; attachmentUrl: string | null; attachmentType: string | null }
+        | undefined;
+      let preview: string | null = last?.contenu ?? null;
+      if ((!preview || !preview.trim()) && last?.attachmentUrl) {
+        preview = last.attachmentType?.startsWith('video') ? '🎥 Vidéo' : '📷 Photo';
+      }
+      return {
+        ...this.mapConversation(r),
+        userName: r.member.nom,
+        userPrenom: r.member.prenom,
+        unreadCount: unreadById.get(r.id) ?? 0,
+        lastMessage: preview,
+      };
+    });
   }
 
   async findByUsers(
@@ -135,10 +150,18 @@ export class PrismaChatRepository implements ChatRepository {
     conversationId: string,
     senderId: string,
     contenu: string,
+    attachment?: { url: string; type: string; name: string } | null,
   ): Promise<ChatMessage> {
     const row = await this.prisma.$transaction(async (tx) => {
       const msg = await tx.chatMessage.create({
-        data: { conversationId, senderId, contenu },
+        data: {
+          conversationId,
+          senderId,
+          contenu,
+          attachmentUrl: attachment?.url ?? null,
+          attachmentType: attachment?.type ?? null,
+          attachmentName: attachment?.name ?? null,
+        },
       });
       await tx.conversation.update({
         where: { id: conversationId },

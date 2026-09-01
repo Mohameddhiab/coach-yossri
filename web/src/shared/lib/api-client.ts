@@ -21,8 +21,9 @@ function getAccessToken(): string | null {
   return m ? decodeURIComponent(m[1]) : null;
 }
 
-function buildHeaders(): Record<string, string> {
-  const headers: Record<string, string> = { "Content-Type": "application/json" };
+function buildHeaders(isFormData = false): Record<string, string> {
+  const headers: Record<string, string> = {};
+  if (!isFormData) headers["Content-Type"] = "application/json";
   const token = getAccessToken();
   if (token) headers.Authorization = `Bearer ${token}`;
   return headers;
@@ -66,12 +67,13 @@ export async function apiClient<T>(
   path: string,
   body?: unknown,
 ): Promise<T> {
+  const isFormData = typeof FormData !== "undefined" && body instanceof FormData;
   const doFetch = async () => {
     const res = await fetch(`${API_BASE_URL}${path}`, {
       method,
-      headers: buildHeaders(),
+      headers: buildHeaders(isFormData),
       credentials: "include",
-      body: body === undefined ? undefined : JSON.stringify(body),
+      body: body === undefined ? undefined : isFormData ? (body as FormData) : JSON.stringify(body),
     });
     return res;
   };

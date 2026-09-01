@@ -183,6 +183,9 @@ export interface ChatMessage {
   conversationId: string;
   senderId: string;
   contenu: string;
+  attachmentUrl: string | null;
+  attachmentType: string | null;
+  attachmentName: string | null;
   lu: boolean;
   createdAt: Date;
 }

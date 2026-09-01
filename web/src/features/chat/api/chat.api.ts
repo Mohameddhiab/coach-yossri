@@ -21,6 +21,9 @@ export interface ChatMessageApi {
   sender_id: string;
   sender_role?: "COACH" | "USER";
   contenu: string;
+  attachment_url?: string | null;
+  attachment_type?: string | null;
+  attachment_name?: string | null;
   lu: boolean;
   created_at: string;
 }
@@ -38,17 +41,35 @@ export function getMessages(conversationId: string, after?: string) {
   return apiClient<ChatMessageApi[]>("GET", `/conversations/${conversationId}/messages${q}`);
 }
 
-export function sendMessage(conversationId: string, contenu: string) {
+export function sendMessage(conversationId: string, contenu: string, file?: File | null) {
+  if (file) {
+    const fd = new FormData();
+    fd.append("file", file);
+    if (contenu) fd.append("contenu", contenu);
+    return apiClient<ChatMessageApi>("POST", `/conversations/${conversationId}/messages`, fd);
+  }
   return apiClient<ChatMessageApi>("POST", `/conversations/${conversationId}/messages`, {
     contenu,
   });
 }
 
-export function sendFirstToCoach(contenu: string) {
+export function sendFirstToCoach(contenu: string, file?: File | null) {
+  if (file) {
+    const fd = new FormData();
+    fd.append("file", file);
+    if (contenu) fd.append("contenu", contenu);
+    return apiClient<ChatMessageApi>("POST", "/me/conversation/messages", fd);
+  }
   return apiClient<ChatMessageApi>("POST", "/me/conversation/messages", { contenu });
 }
 
-export function sendToMember(userId: string, contenu: string) {
+export function sendToMember(userId: string, contenu: string, file?: File | null) {
+  if (file) {
+    const fd = new FormData();
+    fd.append("file", file);
+    if (contenu) fd.append("contenu", contenu);
+    return apiClient<ChatMessageApi>("POST", `/users/${userId}/messages`, fd);
+  }
   return apiClient<ChatMessageApi>("POST", `/users/${userId}/messages`, { contenu });
 }
 

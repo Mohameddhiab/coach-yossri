@@ -41,8 +41,14 @@ export function useSendMessage(conversationId: string | null) {
   const qc = useQueryClient();
   const { user } = useAuth();
   return useMutation({
-    mutationFn: (contenu: string) => sendMessage(conversationId as string, contenu),
-    onMutate: async (contenu: string) => {
+    mutationFn: (vars: string | { contenu: string; file?: File | null }) => {
+      const c = typeof vars === "string" ? vars : vars.contenu;
+      const f = typeof vars === "string" ? undefined : vars.file;
+      return sendMessage(conversationId as string, c, f ?? undefined);
+    },
+    onMutate: async (vars: string | { contenu: string; file?: File | null }) => {
+      const contenu = typeof vars === "string" ? vars : vars.contenu;
+      const file = typeof vars === "string" ? null : vars.file ?? null;
       await qc.cancelQueries({ queryKey: ["messages", conversationId] });
       const key = ["messages", conversationId] as const;
       const previous = qc.getQueryData<ChatMessageApi[]>(key);
@@ -52,6 +58,9 @@ export function useSendMessage(conversationId: string | null) {
         sender_id: user?.id ?? "",
         sender_role: user?.role as "COACH" | "USER" | undefined,
         contenu,
+        attachment_url: file ? URL.createObjectURL(file) : null,
+        attachment_type: file?.type ?? null,
+        attachment_name: file?.name ?? null,
         lu: false,
         created_at: new Date().toISOString(),
       };

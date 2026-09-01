@@ -69,9 +69,15 @@ export class GetMessagesUseCase {
 export class SendMessageUseCase {
   constructor(@Inject(CHAT_REPOSITORY) private readonly chat: ChatRepository) {}
 
-  async execute(auth: AuthUser, conversationId: string, contenu: string) {
+  async execute(
+    auth: AuthUser,
+    conversationId: string,
+    contenu: string,
+    attachment?: { url: string; type: string; name: string } | null,
+  ) {
     const text = String(contenu ?? '').trim();
-    if (!text) {
+    const hasAttachment = !!attachment?.url;
+    if (!text && !hasAttachment) {
       fail(400, 'VALIDATION', 'الرسالة فارغة');
     }
     const conv = await this.chat.findById(conversationId);
@@ -87,6 +93,7 @@ export class SendMessageUseCase {
       conversationId,
       auth.userId,
       text.slice(0, 4000),
+      hasAttachment ? attachment : null,
     );
   }
 }
@@ -98,7 +105,17 @@ export class SendToMemberUseCase {
     @Inject(USER_REPOSITORY) private readonly users: UserRepository,
   ) {}
 
-  async execute(coachId: string, userId: string, contenu: string) {
+  async execute(
+    coachId: string,
+    userId: string,
+    contenu: string,
+    attachment?: { url: string; type: string; name: string } | null,
+  ) {
+    const text = String(contenu ?? '').trim();
+    const hasAttachment = !!attachment?.url;
+    if (!text && !hasAttachment) {
+      fail(400, 'VALIDATION', 'الرسالة فارغة');
+    }
     const user = await this.users.findById(userId);
     if (
       !user ||
@@ -113,9 +130,8 @@ export class SendToMemberUseCase {
     return this.chat.addMessage(
       conversation.id,
       coachId,
-      String(contenu ?? '')
-        .trim()
-        .slice(0, 4000),
+      text.slice(0, 4000),
+      hasAttachment ? attachment : null,
     );
   }
 }
@@ -127,9 +143,14 @@ export class SendMessageToCoachUseCase {
     @Inject(USER_REPOSITORY) private readonly users: UserRepository,
   ) {}
 
-  async execute(userId: string, contenu: string) {
+  async execute(
+    userId: string,
+    contenu: string,
+    attachment?: { url: string; type: string; name: string } | null,
+  ) {
     const text = String(contenu ?? '').trim();
-    if (!text) {
+    const hasAttachment = !!attachment?.url;
+    if (!text && !hasAttachment) {
       fail(400, 'VALIDATION', 'الرسالة فارغة');
     }
     const user = await this.users.findById(userId);
@@ -139,7 +160,7 @@ export class SendMessageToCoachUseCase {
     const conv =
       (await this.chat.findByUsers(user.coachId, userId)) ??
       (await this.chat.findOrCreate(user.coachId, userId));
-    return this.chat.addMessage(conv.id, userId, text.slice(0, 4000));
+    return this.chat.addMessage(conv.id, userId, text.slice(0, 4000), hasAttachment ? attachment : null);
   }
 }
 
