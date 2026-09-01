@@ -57,7 +57,6 @@ async function fetchImageAsDataUrl(url: string): Promise<string | null> {
 }
 
 export async function downloadWorkoutPdf(element: HTMLElement, filename: string) {
-  // Task 5: wait for webfont and all images before capture
   await document.fonts.ready;
   const imgs = Array.from(element.querySelectorAll("img"));
   await Promise.all(
@@ -77,14 +76,12 @@ export async function downloadWorkoutPdf(element: HTMLElement, filename: string)
         }),
     ),
   );
-  // Task 3: ensure no cross-origin wger remains — convert to data URL before capture to avoid tainted canvas
   for (const img of imgs) {
     if (img.src.includes("wger.de")) {
       const dataUrl = await fetchImageAsDataUrl(img.src);
       if (dataUrl) img.src = dataUrl;
     }
   }
-
   try {
     const canvas = await (html2canvas as unknown as (el: HTMLElement, opts: Record<string, unknown>) => Promise<HTMLCanvasElement>)(element, {
       scale: 2,
@@ -95,7 +92,6 @@ export async function downloadWorkoutPdf(element: HTMLElement, filename: string)
       logging: false,
       onclone: (clonedDoc: Document) => fixLabColors(clonedDoc),
     });
-    // Task 6: canvas.toDataURL will throw if canvas is tainted — let it throw to catch below
     const imgData = canvas.toDataURL("image/png");
     const doc = new jsPDF({ unit: "px", format: "a4", compress: true });
     const pdfW = doc.internal.pageSize.getWidth();
@@ -104,7 +100,7 @@ export async function downloadWorkoutPdf(element: HTMLElement, filename: string)
     doc.save(filename);
   } catch (e) {
     console.error("[pdf] workout html2canvas failed", e);
-    throw new Error("Échec de la génération du PDF du plan d'entraînement. Vérifiez votre connexion et réessayez. Si le problème persiste, contactez le support.");
+    throw new Error("Échec de la génération du PDF du plan d'entraînement. Vérifiez votre connexion et réessayez.");
   }
 }
 
