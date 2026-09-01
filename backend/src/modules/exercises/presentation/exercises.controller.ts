@@ -8,6 +8,7 @@ import {
   type AuthUser,
 } from '@/shared/common/decorators/current-user.decorator';
 import {
+  EnsureCuratedExercisesUseCase,
   ImportExerciseFromWgerUseCase,
   ListLocalExercisesUseCase,
   SearchWgerExercisesUseCase,
@@ -24,6 +25,7 @@ export class ExercisesController {
     private readonly searchWgerUC: SearchWgerExercisesUseCase,
     private readonly importWgerUC: ImportExerciseFromWgerUseCase,
     private readonly listLocalUC: ListLocalExercisesUseCase,
+    private readonly ensureCuratedUC: EnsureCuratedExercisesUseCase,
   ) {}
 
   @Get('wger/search')
@@ -44,5 +46,10 @@ export class ExercisesController {
   @Get()
   async list(@Query('q') q?: string) {
     return this.listLocalUC.execute(q);
+  }
+
+  @Post('ensure-curated')
+  async ensureCurated() {
+    return this.ensureCuratedUC.execute();
   }
 }

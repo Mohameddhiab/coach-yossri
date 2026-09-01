@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { WgerApiAdapter } from './infrastructure/external/wger-api.adapter';
 import { ExerciseImageService } from './application/exercise-image.service';
 import {
+  EnsureCuratedExercisesUseCase,
   ImportExerciseFromWgerUseCase,
   ListLocalExercisesUseCase,
   SearchWgerExercisesUseCase,
@@ -16,6 +17,7 @@ import { ExercisesController } from './presentation/exercises.controller';
     SearchWgerExercisesUseCase,
     ImportExerciseFromWgerUseCase,
     ListLocalExercisesUseCase,
+    EnsureCuratedExercisesUseCase,
   ],
 })
 export class ExercisesModule {}

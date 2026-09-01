@@ -6,6 +6,7 @@ import {
   type WgerSearchItem,
 } from '../../infrastructure/external/wger-api.adapter';
 import { ExerciseImageService } from '../exercise-image.service';
+import { CURATED_EXERCISES } from '../../../../../prisma/data/curated-exercises';
 
 @Injectable()
 export class SearchWgerExercisesUseCase {
@@ -94,5 +95,35 @@ export class ListLocalExercisesUseCase {
       orderBy: [{ updatedAt: 'desc' }],
       take,
     });
+  }
+}
+
+@Injectable()
+export class EnsureCuratedExercisesUseCase {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async execute(): Promise<{ count: number; seeded: boolean }> {
+    const count = await this.prisma.exercise.count();
+    if (count >= 43) {
+      // déjà 43+ → on considère OK, pas de reseed pour ne pas écraser
+      return { count, seeded: false };
+    }
+    // sinon reseed complet des 43 curated (comme en local Docker)
+    await this.prisma.exercise.deleteMany({});
+    for (const ex of CURATED_EXERCISES) {
+      await this.prisma.exercise.create({
+        data: {
+          name: ex.name,
+          category: ex.category,
+          source: 'MANUAL',
+          wgerUuid: null,
+          imageUrl: null,
+          imageThumbUrl: null,
+          createdBy: 'ensure-curated',
+        },
+      });
+    }
+    const finalCount = await this.prisma.exercise.count();
+    return { count: finalCount, seeded: true };
   }
 }
