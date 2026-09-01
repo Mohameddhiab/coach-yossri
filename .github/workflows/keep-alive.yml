@@ -18,8 +18,7 @@ jobs:
         run: |
           URL="${{ secrets.RENDER_HEALTH_URL }}"
           if [ -z "$URL" ]; then
-            echo "::warning::RENDER_HEALTH_URL not set, using fallback"
-            URL="https://your-backend.onrender.com/api/health"
+            URL="https://coach-yossri.onrender.com/api/health"
           fi
           
           echo "Pinging $URL ..."

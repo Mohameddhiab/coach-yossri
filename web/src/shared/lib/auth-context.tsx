@@ -29,6 +29,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let cancelled = false;
+    // Éviter un aller-retour Render froid pour les visiteurs anonymes (LCP)
+    const hasToken = typeof document !== "undefined" && document.cookie.includes("coachyosri_access=");
+    if (!hasToken) {
+      setIsLoading(false);
+      return () => {
+        cancelled = true;
+      };
+    }
     apiClient<User>("GET", "/auth/me")
       .then((u) => {
         if (!cancelled) setUser(u);

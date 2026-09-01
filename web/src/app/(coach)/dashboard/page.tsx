@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/shared/components/page-header";
-import { PageLoader } from "@/shared/components/page-loader";
+import { Skeleton } from "@/components/ui/skeleton";
 import { StatCard } from "@/shared/components/stat-card";
 import { EmptyState } from "@/shared/components/empty-state";
 import { ErrorState } from "@/shared/components/error-state";
@@ -48,8 +48,9 @@ export default function DashboardPage() {
   const { data: growth, isLoading: loadingGrowth, isError: errorGrowth, refetch: refetchGrowth, isFetching: fetchingGrowth } = useGrowth(12);
   const { data: users } = useUsers("", "TOUS");
 
-  if (loadingSummary || loadingGrowth) return <PageLoader />;
-  if (errorSummary || errorGrowth || !summary || !growth) {
+  const isInitialLoading = (loadingSummary || loadingGrowth) && !summary && !growth;
+  const hasError = (errorSummary || errorGrowth) && !summary && !growth;
+  if (hasError) {
     const retrying = fetchingSummary || fetchingGrowth;
     return (
       <div className="space-y-6">
@@ -61,6 +62,46 @@ export default function DashboardPage() {
             refetchGrowth();
           }}
           retrying={retrying}
+        />
+      </div>
+    );
+  }
+
+  // Skeleton immédiat → LCP sur structure, pas d'écran blanc bloquant Render froid
+  if (isInitialLoading) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-36 rounded-3xl" />
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-28 rounded-2xl" />
+          ))}
+        </div>
+        <Skeleton className="h-20 rounded-2xl" />
+        <div className="grid gap-6 lg:grid-cols-3">
+          <Skeleton className="h-72 rounded-2xl lg:col-span-2" />
+          <Skeleton className="h-72 rounded-2xl" />
+        </div>
+        <div className="grid gap-6 lg:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Skeleton key={i} className="h-48 rounded-2xl" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (!summary || !growth) {
+    return (
+      <div className="space-y-6">
+        <ErrorState
+          title="تعذّر تحميل لوحة التحكم"
+          description="تحقق من اتصالك ثم أعد المحاولة."
+          onRetry={() => {
+            refetchSummary();
+            refetchGrowth();
+          }}
+          retrying={fetchingSummary || fetchingGrowth}
         />
       </div>
     );
