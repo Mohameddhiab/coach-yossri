@@ -9,7 +9,9 @@ const dest = join(__dirname, "..", "public", "guide-assets");
 if (!existsSync(src)) {
   console.warn("[copy-guide-assets] source not found:", src);
   console.warn("[copy-guide-assets] hint: ensure @bryllim/workout-guide is installed (npm install)");
-  process.exit(0);
+  // Fail loudly on Vercel/production, allow local dev to continue
+  const isProd = process.env.VERCEL === "1" || process.env.NODE_ENV === "production";
+  process.exit(isProd ? 1 : 0);
 }
 mkdirSync(dest, { recursive: true });
 cpSync(src, dest, { recursive: true, force: true });

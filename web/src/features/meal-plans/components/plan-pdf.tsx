@@ -47,21 +47,45 @@ function fixLabColors(doc: Document) {
 }
 
 export async function downloadPlanPdf(element: HTMLElement, filename: string) {
-  const canvas = await (html2canvas as unknown as (el: HTMLElement, opts: Record<string, unknown>) => Promise<HTMLCanvasElement>)(element, {
-    scale: 2,
-    backgroundColor: "#ffffff",
-    windowWidth: element.scrollWidth || 794,
-    useCORS: false,
-    allowTaint: true,
-    logging: false,
-    onclone: (clonedDoc: Document) => fixLabColors(clonedDoc),
-  });
-  const imgData = canvas.toDataURL("image/png");
-  const doc = new jsPDF({ unit: "px", format: "a4", compress: true });
-  const pdfW = doc.internal.pageSize.getWidth();
-  const pdfH = (canvas.height * pdfW) / canvas.width;
-  doc.addImage(imgData, "PNG", 0, 0, pdfW, pdfH);
-  doc.save(filename);
+  await document.fonts.ready;
+  const imgs = Array.from(element.querySelectorAll("img"));
+  await Promise.all(
+    imgs.map(
+      (img) =>
+        new Promise<void>((resolve, reject) => {
+          if (img.complete && img.naturalWidth > 0) return resolve();
+          const t = setTimeout(() => reject(new Error(`Image timeout: ${img.src}`)), 8000);
+          img.onload = () => {
+            clearTimeout(t);
+            resolve();
+          };
+          img.onerror = () => {
+            clearTimeout(t);
+            reject(new Error(`Image failed: ${img.src}`));
+          };
+        }),
+    ),
+  );
+  try {
+    const canvas = await (html2canvas as unknown as (el: HTMLElement, opts: Record<string, unknown>) => Promise<HTMLCanvasElement>)(element, {
+      scale: 2,
+      backgroundColor: "#ffffff",
+      windowWidth: element.scrollWidth || 794,
+      useCORS: true,
+      allowTaint: false,
+      logging: false,
+      onclone: (clonedDoc: Document) => fixLabColors(clonedDoc),
+    });
+    const imgData = canvas.toDataURL("image/png");
+    const doc = new jsPDF({ unit: "px", format: "a4", compress: true });
+    const pdfW = doc.internal.pageSize.getWidth();
+    const pdfH = (canvas.height * pdfW) / canvas.width;
+    doc.addImage(imgData, "PNG", 0, 0, pdfW, pdfH);
+    doc.save(filename);
+  } catch (e) {
+    console.error("[pdf] meal html2canvas failed", e);
+    throw new Error("Échec de la génération du PDF du plan alimentaire. Vérifiez votre connexion et réessayez.");
+  }
 }
 
 export function PlanPdfDocument({

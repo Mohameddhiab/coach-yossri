@@ -57,39 +57,55 @@ async function fetchImageAsDataUrl(url: string): Promise<string | null> {
 }
 
 export async function downloadWorkoutPdf(element: HTMLElement, filename: string) {
-  // Prefer direct vector generation (clear text + reliable images) — fallback to html2canvas only if needed
-  // The direct version is more professional and handles lab/oklch without rasterization
-  const planId = (element as HTMLElement & { dataset: DOMStringMap }).dataset?.planId;
-  // Try html2canvas-pro first for exact visual fidelity, but with higher scale for clarity
+  // Task 5: wait for webfont and all images before capture
+  await document.fonts.ready;
+  const imgs = Array.from(element.querySelectorAll("img"));
+  await Promise.all(
+    imgs.map(
+      (img) =>
+        new Promise<void>((resolve, reject) => {
+          if (img.complete && img.naturalWidth > 0) return resolve();
+          const t = setTimeout(() => reject(new Error(`Image timeout: ${img.src}`)), 8000);
+          img.onload = () => {
+            clearTimeout(t);
+            resolve();
+          };
+          img.onerror = () => {
+            clearTimeout(t);
+            reject(new Error(`Image failed: ${img.src}`));
+          };
+        }),
+    ),
+  );
+  // Task 3: ensure no cross-origin wger remains — convert to data URL before capture to avoid tainted canvas
+  for (const img of imgs) {
+    if (img.src.includes("wger.de")) {
+      const dataUrl = await fetchImageAsDataUrl(img.src);
+      if (dataUrl) img.src = dataUrl;
+    }
+  }
+
   try {
     const canvas = await (html2canvas as unknown as (el: HTMLElement, opts: Record<string, unknown>) => Promise<HTMLCanvasElement>)(element, {
-      scale: 3,
+      scale: 2,
       backgroundColor: "#ffffff",
       windowWidth: element.scrollWidth || 794,
-      useCORS: false,
-      allowTaint: true,
+      useCORS: true,
+      allowTaint: false,
       logging: false,
       onclone: (clonedDoc: Document) => fixLabColors(clonedDoc),
     });
+    // Task 6: canvas.toDataURL will throw if canvas is tainted — let it throw to catch below
     const imgData = canvas.toDataURL("image/png");
     const doc = new jsPDF({ unit: "px", format: "a4", compress: true });
     const pdfW = doc.internal.pageSize.getWidth();
     const pdfH = (canvas.height * pdfW) / canvas.width;
     doc.addImage(imgData, "PNG", 0, 0, pdfW, pdfH);
     doc.save(filename);
-    return;
   } catch (e) {
-    console.warn("[pdf] html2canvas failed, falling back to direct", e);
+    console.error("[pdf] workout html2canvas failed", e);
+    throw new Error("Échec de la génération du PDF du plan d'entraînement. Vérifiez votre connexion et réessayez. Si le problème persiste, contactez le support.");
   }
-  // Last resort html fallback
-  const doc = new jsPDF({ unit: "pt", format: "a4" });
-  await doc.html(element, {
-    callback: (d) => d.save(filename),
-    x: 10,
-    y: 10,
-    width: 180,
-    windowWidth: 794,
-  });
 }
 
 let amiriFontLoaded = false;
