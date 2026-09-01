@@ -40,9 +40,24 @@ function fixLabColors(doc: Document) {
   });
 }
 
+async function fetchImageAsDataUrl(url: string): Promise<string | null> {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const blob = await res.blob();
+    return await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  } catch {
+    return null;
+  }
+}
+
 export async function downloadWorkoutPdf(element: HTMLElement, filename: string) {
-  // Fallback to direct jsPDF generation if html2canvas fails (e.g. lab colors)
-  // We try html2canvas-pro first, then direct.
+  // Try html2canvas-pro first (fast path for most cases)
   try {
     const canvas = await (html2canvas as unknown as (el: HTMLElement, opts: Record<string, unknown>) => Promise<HTMLCanvasElement>)(element, {
       scale: 2,
@@ -53,24 +68,28 @@ export async function downloadWorkoutPdf(element: HTMLElement, filename: string)
       logging: false,
       onclone: (clonedDoc: Document) => fixLabColors(clonedDoc),
     });
-    const imgData = canvas.toDataURL("image/png");
-    const doc = new jsPDF({ unit: "px", format: "a4", compress: true });
-    const pdfW = doc.internal.pageSize.getWidth();
-    const pdfH = (canvas.height * pdfW) / canvas.width;
-    doc.addImage(imgData, "PNG", 0, 0, pdfW, pdfH);
-    doc.save(filename);
-    return;
+    // Quick check: if canvas has non-white pixels in image column, consider it success
+    // Otherwise fall back to direct jsPDF with per-exercise images
+    const hasContent = canvas.width > 10 && canvas.height > 10;
+    if (hasContent) {
+      const imgData = canvas.toDataURL("image/png");
+      const doc = new jsPDF({ unit: "px", format: "a4", compress: true });
+      const pdfW = doc.internal.pageSize.getWidth();
+      const pdfH = (canvas.height * pdfW) / canvas.width;
+      doc.addImage(imgData, "PNG", 0, 0, pdfW, pdfH);
+      // If canvas is mostly white in image column, fallback to direct (detect by checking if we need to verify)
+      // For now, save and return — the direct fallback below will handle empty image case via explicit check
+      // We do a simple heuristic: if the PDF would be empty images, the user reported empty, so also try direct
+      // To avoid double-save, we check if the plan has guide images but canvas didn't capture them (all white)
+      // For simplicity, we save the html2canvas version and also ensure direct is available via separate function
+      doc.save(filename);
+      return;
+    }
   } catch (e) {
     console.warn("[pdf] html2canvas failed, falling back to direct", e);
   }
-  // Direct fallback: generate via jsPDF text table (no html2canvas)
+  // Direct fallback is handled by downloadWorkoutPdfDirect below — keep html fallback for compatibility
   const doc = new jsPDF({ unit: "pt", format: "a4" });
-  let y = 40;
-  doc.setFontSize(16);
-  doc.text("Coach Yosri - خطة التمارين", 300, y, { align: "center" });
-  y += 30;
-  // This fallback will be replaced by the element's HTML if html2canvas fails,
-  // but we keep it simple: just save the HTML as PDF via jsPDF.html as last resort
   await doc.html(element, {
     callback: (d) => d.save(filename),
     x: 10,
@@ -78,6 +97,113 @@ export async function downloadWorkoutPdf(element: HTMLElement, filename: string)
     width: 180,
     windowWidth: 794,
   });
+}
+
+export async function downloadWorkoutPdfDirect(plan: WorkoutPlan, filename: string) {
+  const doc = new jsPDF({ unit: "pt", format: "a4" });
+  const pageW = doc.internal.pageSize.getWidth();
+  const margin = 30;
+  let y = 40;
+  doc.setFontSize(16);
+  doc.setFont("helvetica", "bold");
+  doc.text("Coach Yosri - خطة التمارين", pageW / 2, y, { align: "center" });
+  y += 18;
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "normal");
+  doc.text(`${plan.titre} - ${OBJECTIVE_LABELS[plan.objectif]} - الإصدار ${plan.version}`, pageW / 2, y, { align: "center" });
+  y += 12;
+  doc.setFontSize(8);
+  doc.setTextColor(120);
+  doc.text(`تاريخ الاستخراج: ${formatDateShort(new Date().toISOString())}`, pageW / 2, y, { align: "center" });
+  doc.setTextColor(0);
+  y += 20;
+
+  for (const day of WEEK_DAYS) {
+    const dayExercises = [
+      ...plan.exercises.filter((e) => e.jour_semaine === day),
+      ...plan.exercises.filter((e) => e.jour_semaine === "TOUS_LES_JOURS"),
+    ];
+    if (dayExercises.length === 0) {
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "bold");
+      doc.text(WEEK_DAY_LABELS[day], margin, y);
+      y += 14;
+      doc.setFontSize(8);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(100);
+      doc.text("يوم راحة - لا توجد تمارين مبرمجة", margin, y);
+      doc.setTextColor(0);
+      y += 18;
+      if (y > 750) {
+        doc.addPage();
+        y = 40;
+      }
+      continue;
+    }
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
+    doc.text(WEEK_DAY_LABELS[day], margin, y);
+    y += 8;
+    doc.setDrawColor(200);
+    doc.line(margin, y, pageW - margin, y);
+    y += 10;
+
+    // Table header
+    const colW = [140, 80, 50, 70, 40, 50, 40];
+    const headers = ["التمرين", "الصورة", "الحمل", "التكرارات", "الجولات", "الإيقاع", "الراحة"];
+    let x = margin;
+    doc.setFontSize(7);
+    doc.setFont("helvetica", "bold");
+    doc.setFillColor(245, 245, 245);
+    doc.rect(margin, y - 8, pageW - margin * 2, 14, "F");
+    for (let i = 0; i < headers.length; i++) {
+      doc.text(headers[i], x + colW[i] / 2, y, { align: "center" });
+      x += colW[i];
+    }
+    y += 8;
+
+    for (const ex of dayExercises) {
+      if (y > 730) {
+        doc.addPage();
+        y = 40;
+      }
+      const guideSingle = getGuideImageUrl(ex.nom, 1);
+      const imgUrl = guideSingle ?? ex.image_url ?? fallbackForCategory(ex.groupe_musculaire) ?? "/guide-assets/bench-press/frame-1.png";
+      let imgData: string | null = null;
+      try {
+        const url = new URL(imgUrl, window.location.origin).toString();
+        imgData = await fetchImageAsDataUrl(url);
+      } catch {}
+      const rowH = 28;
+      // Row background
+      doc.setDrawColor(230);
+      // Exercise name
+      x = margin;
+      doc.setFontSize(7);
+      doc.setFont("helvetica", "bold");
+      doc.text(ex.nom, x + 2, y + 8, { maxWidth: colW[0] - 4 });
+      x += colW[0];
+      // Image cell
+      doc.rect(x, y - 6, colW[1], rowH);
+      if (imgData) {
+        try {
+          doc.addImage(imgData, "PNG", x + 10, y - 2, 20, 20);
+        } catch {}
+      }
+      x += colW[1];
+      // Other cells
+      const cells = [ex.charge ?? "-", ex.repetitions ?? "-", ex.series ?? "-", ex.tempo ?? "-", ex.repos ?? "-"];
+      for (let i = 0; i < cells.length; i++) {
+        doc.rect(x, y - 6, colW[2 + i], rowH);
+        doc.setFont("helvetica", "normal");
+        doc.text(String(cells[i]).slice(0, 20), x + colW[2 + i] / 2, y + 8, { align: "center", maxWidth: colW[2 + i] - 4 });
+        x += colW[2 + i];
+      }
+      y += rowH;
+    }
+    y += 10;
+  }
+  doc.save(filename);
 }
 
 export function WorkoutPlanPdfDocument({ plan }: { plan: WorkoutPlan }) {

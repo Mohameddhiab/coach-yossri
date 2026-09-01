@@ -222,27 +222,36 @@ export default function UserDetailPage() {
   };
 
   const handlePdfDownload = async (kind: "meal" | "workout") => {
-    const el =
-      kind === "meal"
-        ? (mealPdfRef.current?.firstElementChild as HTMLElement | null)
-        : (workoutPdfRef.current?.firstElementChild as HTMLElement | null);
-    if (!el || (kind === "meal" ? !plan : !workout)) return;
-    setPdfBusy(kind);
-    try {
-      if (kind === "meal") {
+    if (kind === "meal") {
+      const el = mealPdfRef.current?.firstElementChild as HTMLElement | null;
+      if (!el || !plan) return;
+      setPdfBusy(kind);
+      try {
         await downloadPlanPdf(
           el,
           `plan-${plan!.titre.replace(/\s+/g, "-")}-${new Date().toISOString().slice(0, 10)}.pdf`,
         );
-      } else {
-        await downloadWorkoutPdf(
-          el,
-          `workout-${workout!.titre.replace(/\s+/g, "-")}-${new Date().toISOString().slice(0, 10)}.pdf`,
-        );
+        toast.success("تم تحميل PDF");
+      } catch (e) {
+        console.error("[pdf] meal failed", e);
+        toast.error("تعذر تحويل ملف PDF — حاول مرة أخرى");
+      } finally {
+        setPdfBusy(null);
       }
+      return;
+    }
+    if (!workout) return;
+    setPdfBusy(kind);
+    try {
+      const { downloadWorkoutPdfDirect } = await import("@/features/workout-plans/components/workout-plan-pdf");
+      await downloadWorkoutPdfDirect(
+        workout,
+        `workout-${workout.titre.replace(/\s+/g, "-")}-${new Date().toISOString().slice(0, 10)}.pdf`,
+      );
       toast.success("تم تحميل PDF");
-    } catch {
-      toast.error("تعذر تحويل ملف PDF — حاول مرة أخرى");
+    } catch (e) {
+      console.error("[pdf] workout direct failed", e);
+      toast.error(e instanceof Error ? e.message : "تعذر تحويل ملف PDF — حاول مرة أخرى");
     } finally {
       setPdfBusy(null);
     }

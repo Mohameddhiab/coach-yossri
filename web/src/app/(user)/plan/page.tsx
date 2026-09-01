@@ -72,29 +72,39 @@ export default function MyPlanPage() {
   const workout = workoutQuery.data;
 
   const handlePdfDownload = async (kind: "meal" | "workout") => {
-    const container =
-      kind === "meal" ? mealPdfRef.current : workoutPdfRef.current;
-    const el = container?.firstElementChild as HTMLElement | null;
-    // Fallback to visible preview if hidden container not found (for direct preview)
-    const fallbackEl =
-      kind === "workout"
-        ? document.querySelector<HTMLElement>("[data-pdf-preview='workout']")
-        : document.querySelector<HTMLElement>("[data-pdf-preview='meal']");
-    const target = el ?? fallbackEl;
-    if (!target || (kind === "meal" ? !plan : !workout)) {
-      toast.error("العنصر غير جاهز — حاول مرة أخرى");
+    if (kind === "meal") {
+      const container = mealPdfRef.current;
+      const el = container?.firstElementChild as HTMLElement | null;
+      const fallbackEl = document.querySelector<HTMLElement>("[data-pdf-preview='meal']");
+      const target = el ?? fallbackEl;
+      if (!target || !plan) {
+        toast.error("العنصر غير جاهز — حاول مرة أخرى");
+        return;
+      }
+      setPdfBusy(kind);
+      try {
+        await downloadPlanPdf(
+          target,
+          `plan-${plan.titre.replace(/\s+/g, "-")}-${new Date().toISOString().slice(0, 10)}.pdf`,
+        );
+      } catch (e) {
+        console.error("[pdf] failed", e);
+        toast.error(e instanceof Error ? e.message : "تعذر تحويل ملف PDF — حاول مرة أخرى");
+      } finally {
+        setPdfBusy(null);
+      }
+      return;
+    }
+    if (!workout) {
+      toast.error("لا يوجد خطة تمارين");
       return;
     }
     setPdfBusy(kind);
     try {
-      const fn = kind === "meal" ? downloadPlanPdf : (await import("@/features/workout-plans/components/workout-plan-pdf")).downloadWorkoutPdf;
-      await fn(
-        target,
-        `${kind === "meal" ? "plan" : "workout"}-${
-          kind === "meal"
-            ? plan!.titre.replace(/\s+/g, "-")
-            : workout!.titre.replace(/\s+/g, "-")
-        }-${new Date().toISOString().slice(0, 10)}.pdf`,
+      const { downloadWorkoutPdfDirect } = await import("@/features/workout-plans/components/workout-plan-pdf");
+      await downloadWorkoutPdfDirect(
+        workout,
+        `workout-${workout.titre.replace(/\s+/g, "-")}-${new Date().toISOString().slice(0, 10)}.pdf`,
       );
     } catch (e) {
       console.error("[pdf] failed", e);
