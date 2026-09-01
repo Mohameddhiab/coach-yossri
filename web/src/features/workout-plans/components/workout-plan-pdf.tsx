@@ -40,9 +40,25 @@ function fixLabColors(doc: Document) {
   });
 }
 
+async function toDataUri(url: string): Promise<string> {
+  try {
+    const res = await fetch(url, { mode: "cors" });
+    if (!res.ok) throw new Error(`fetch ${res.status}`);
+    const blob = await res.blob();
+    return await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  } catch {
+    return "/guide-assets/bench-press/frame-1.png";
+  }
+}
+
 async function fetchImageAsDataUrl(url: string): Promise<string | null> {
   try {
-    const res = await fetch(url);
+    const res = await fetch(url, { mode: "cors" });
     if (!res.ok) return null;
     const blob = await res.blob();
     return await new Promise<string>((resolve, reject) => {
@@ -58,50 +74,44 @@ async function fetchImageAsDataUrl(url: string): Promise<string | null> {
 
 export async function downloadWorkoutPdf(element: HTMLElement, filename: string) {
   await document.fonts.ready;
+
+  // 1. Ne jamais laisser une image cross-origin brute dans le canvas — convertir en data: URI avant capture
   const imgs = Array.from(element.querySelectorAll("img"));
+  await Promise.all(
+    imgs.map(async (img) => {
+      if (img.src.startsWith(window.location.origin) || img.src.startsWith("data:")) return;
+      img.crossOrigin = "anonymous";
+      img.src = await toDataUri(img.src);
+    }),
+  );
+  // 2. Attendre que toutes les images (locales + data: URI converties) soient réellement chargées
   await Promise.all(
     imgs.map(
       (img) =>
-        new Promise<void>((resolve, reject) => {
-          if (img.complete && img.naturalWidth > 0) return resolve();
-          const t = setTimeout(() => reject(new Error(`Image timeout: ${img.src}`)), 8000);
-          img.onload = () => {
-            clearTimeout(t);
-            resolve();
-          };
-          img.onerror = () => {
-            clearTimeout(t);
-            reject(new Error(`Image failed: ${img.src}`));
-          };
-        }),
+        img.complete
+          ? Promise.resolve()
+          : new Promise<void>((r) => {
+              img.onload = () => r();
+              img.onerror = () => r();
+            }),
     ),
   );
-  for (const img of imgs) {
-    if (img.src.includes("wger.de")) {
-      const dataUrl = await fetchImageAsDataUrl(img.src);
-      if (dataUrl) img.src = dataUrl;
-    }
-  }
-  try {
-    const canvas = await (html2canvas as unknown as (el: HTMLElement, opts: Record<string, unknown>) => Promise<HTMLCanvasElement>)(element, {
-      scale: 2,
-      backgroundColor: "#ffffff",
-      windowWidth: element.scrollWidth || 794,
-      useCORS: true,
-      allowTaint: false,
-      logging: false,
-      onclone: (clonedDoc: Document) => fixLabColors(clonedDoc),
-    });
-    const imgData = canvas.toDataURL("image/png");
-    const doc = new jsPDF({ unit: "px", format: "a4", compress: true });
-    const pdfW = doc.internal.pageSize.getWidth();
-    const pdfH = (canvas.height * pdfW) / canvas.width;
-    doc.addImage(imgData, "PNG", 0, 0, pdfW, pdfH);
-    doc.save(filename);
-  } catch (e) {
-    console.error("[pdf] workout html2canvas failed", e);
-    throw new Error("Échec de la génération du PDF du plan d'entraînement. Vérifiez votre connexion et réessayez.");
-  }
+
+  const canvas = await (html2canvas as unknown as (el: HTMLElement, opts: Record<string, unknown>) => Promise<HTMLCanvasElement>)(element, {
+    scale: 2,
+    backgroundColor: "#ffffff",
+    windowWidth: element.scrollWidth || 794,
+    useCORS: true,
+    allowTaint: false,
+    logging: false,
+    onclone: (clonedDoc: Document) => fixLabColors(clonedDoc),
+  });
+  const imgData = canvas.toDataURL("image/png");
+  const doc = new jsPDF({ unit: "px", format: "a4", compress: true });
+  const pdfW = doc.internal.pageSize.getWidth();
+  const pdfH = (canvas.height * pdfW) / canvas.width;
+  doc.addImage(imgData, "PNG", 0, 0, pdfW, pdfH);
+  doc.save(filename);
 }
 
 let amiriFontLoaded = false;
