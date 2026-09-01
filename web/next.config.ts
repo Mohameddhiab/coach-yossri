@@ -4,6 +4,7 @@ const _isProd = process.env.NODE_ENV === "production";
 const serverApiUrl = process.env.SERVER_API_URL || "http://localhost:3001/api";
 const backendOrigin = serverApiUrl.replace(/\/api\/?$/, "");
 
+// force rebuild 2026-09-01
 const securityHeaders = [
   { key: "X-Frame-Options", value: "DENY" },
   { key: "X-Content-Type-Options", value: "nosniff" },
