@@ -1,6 +1,7 @@
 "use client";
 
 import { jsPDF } from "jspdf";
+import html2canvas from "html2canvas-pro";
 import type { MealPlan, MonthlyGoal, WeekDay, WeightLog } from "@/shared/lib/domain";
 import {
   MEAL_TYPE_LABELS,
@@ -14,18 +15,52 @@ import { targetProgress } from "@/shared/lib/insights";
 import { currentStreak } from "@/features/goals/lib/streak";
 import { formatDateShort } from "@/lib/utils";
 
-export async function downloadPlanPdf(element: HTMLElement, filename: string) {
-  const doc = new jsPDF({ unit: "px", format: "a4", compress: true });
-  await doc.html(element, {
-    margin: 0,
-    autoPaging: "slice",
-    html2canvas: {
-      scale: 2,
-      backgroundColor: "#ffffff",
-      windowWidth: element.scrollWidth,
-      useCORS: true,
-    },
+function fixLabColors(doc: Document) {
+  doc.querySelectorAll<HTMLElement>("*").forEach((el) => {
+    const cs = doc.defaultView?.getComputedStyle(el);
+    if (!cs) return;
+    const props: (keyof CSSStyleDeclaration)[] = [
+      "color",
+      "backgroundColor",
+      "borderColor",
+      "borderTopColor",
+      "borderBottomColor",
+      "borderLeftColor",
+      "borderRightColor",
+    ];
+    for (const p of props) {
+      const v = cs.getPropertyValue(p as string);
+      if (v && (v.includes("lab(") || v.includes("oklch(") || v.includes("oklab("))) {
+        if (String(p).includes("background")) el.style.setProperty(p as string, "#ffffff", "important");
+        else if (String(p).includes("border")) el.style.setProperty(p as string, "#e5e7eb", "important");
+        else el.style.setProperty(p as string, "#171717", "important");
+      }
+    }
+    const inline = el.getAttribute("style");
+    if (inline && (inline.includes("lab(") || inline.includes("oklch(") || inline.includes("oklab("))) {
+      el.setAttribute(
+        "style",
+        inline.replace(/lab\([^)]+\)/g, "#171717").replace(/oklch\([^)]+\)/g, "#171717").replace(/oklab\([^)]+\)/g, "#171717"),
+      );
+    }
   });
+}
+
+export async function downloadPlanPdf(element: HTMLElement, filename: string) {
+  const canvas = await (html2canvas as unknown as (el: HTMLElement, opts: Record<string, unknown>) => Promise<HTMLCanvasElement>)(element, {
+    scale: 2,
+    backgroundColor: "#ffffff",
+    windowWidth: element.scrollWidth || 794,
+    useCORS: false,
+    allowTaint: true,
+    logging: false,
+    onclone: (clonedDoc: Document) => fixLabColors(clonedDoc),
+  });
+  const imgData = canvas.toDataURL("image/png");
+  const doc = new jsPDF({ unit: "px", format: "a4", compress: true });
+  const pdfW = doc.internal.pageSize.getWidth();
+  const pdfH = (canvas.height * pdfW) / canvas.width;
+  doc.addImage(imgData, "PNG", 0, 0, pdfW, pdfH);
   doc.save(filename);
 }
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { jsPDF } from "jspdf";
+import html2canvas from "html2canvas-pro";
 import type { WeekDay } from "@/shared/lib/domain";
 import { OBJECTIVE_LABELS, WEEK_DAYS, WEEK_DAY_LABELS } from "@/shared/lib/domain";
 import type { WorkoutPlan } from "@/features/workout-plans/api/workoutPlans.api";
@@ -8,22 +9,53 @@ import { formatDateShort } from "@/lib/utils";
 import { getGuideImageUrl, getGuideImageUrls } from "@/shared/lib/exercise-guide-map";
 import { fallbackForCategory } from "@/shared/lib/exercise-fallbacks";
 
-export async function downloadWorkoutPdf(element: HTMLElement, filename: string) {
-  const doc = new jsPDF({ unit: "px", format: "a4", compress: true });
-  // html2canvas must capture the hidden PDF node even though it is off-screen.
-  // For guide-assets (/guide-assets/*) which are same-origin, we don't need CORS.
-  await doc.html(element, {
-    margin: 0,
-    autoPaging: "slice",
-    html2canvas: {
-      scale: 2,
-      backgroundColor: "#ffffff",
-      windowWidth: element.scrollWidth,
-      useCORS: false,
-      allowTaint: true,
-      logging: false,
-    },
+function fixLabColors(doc: Document) {
+  doc.querySelectorAll<HTMLElement>("*").forEach((el) => {
+    const cs = doc.defaultView?.getComputedStyle(el);
+    if (!cs) return;
+    const props: (keyof CSSStyleDeclaration)[] = [
+      "color",
+      "backgroundColor",
+      "borderColor",
+      "borderTopColor",
+      "borderBottomColor",
+      "borderLeftColor",
+      "borderRightColor",
+    ];
+    for (const p of props) {
+      const v = cs.getPropertyValue(p as string);
+      if (v && (v.includes("lab(") || v.includes("oklch(") || v.includes("oklab("))) {
+        if (String(p).includes("background")) el.style.setProperty(p as string, "#ffffff", "important");
+        else if (String(p).includes("border")) el.style.setProperty(p as string, "#e5e7eb", "important");
+        else el.style.setProperty(p as string, "#171717", "important");
+      }
+    }
+    const inline = el.getAttribute("style");
+    if (inline && (inline.includes("lab(") || inline.includes("oklch(") || inline.includes("oklab("))) {
+      el.setAttribute(
+        "style",
+        inline.replace(/lab\([^)]+\)/g, "#171717").replace(/oklch\([^)]+\)/g, "#171717").replace(/oklab\([^)]+\)/g, "#171717"),
+      );
+    }
   });
+}
+
+export async function downloadWorkoutPdf(element: HTMLElement, filename: string) {
+  const canvas = await (html2canvas as unknown as (el: HTMLElement, opts: Record<string, unknown>) => Promise<HTMLCanvasElement>)(element, {
+    scale: 2,
+    backgroundColor: "#ffffff",
+    useCORS: false,
+    allowTaint: true,
+    logging: false,
+    windowWidth: element.scrollWidth || 794,
+    onclone: (clonedDoc: Document) => fixLabColors(clonedDoc),
+  });
+  const imgData = canvas.toDataURL("image/png");
+  const doc = new jsPDF({ unit: "px", format: "a4", compress: true });
+  const pdfW = doc.internal.pageSize.getWidth();
+  const pdfH = (canvas.height * pdfW) / canvas.width;
+  doc.addImage(imgData, "PNG", 0, 0, pdfW, pdfH);
+  // Simple single-page for now (autoPaging via slice is handled by html2canvas single canvas)
   doc.save(filename);
 }
 
