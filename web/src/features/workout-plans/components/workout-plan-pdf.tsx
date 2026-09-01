@@ -6,7 +6,7 @@ import type { WeekDay } from "@/shared/lib/domain";
 import { OBJECTIVE_LABELS, WEEK_DAYS, WEEK_DAY_LABELS } from "@/shared/lib/domain";
 import type { WorkoutPlan } from "@/features/workout-plans/api/workoutPlans.api";
 import { formatDateShort } from "@/lib/utils";
-import { getGuideImageUrl, getGuideImageUrls } from "@/shared/lib/exercise-guide-map";
+import { getGuideImageUrl } from "@/shared/lib/exercise-guide-map";
 import { fallbackForCategory } from "@/shared/lib/exercise-fallbacks";
 
 function fixLabColors(doc: Document) {
@@ -306,35 +306,25 @@ export function WorkoutPlanPdfDocument({ plan }: { plan: WorkoutPlan }) {
                 </thead>
                 <tbody>
                   {dayExercises.map((ex) => {
-                    const guideUrls = getGuideImageUrls(ex.nom);
                     const guideSingle = getGuideImageUrl(ex.nom, 1);
-                    // Fallback to category or generic bench-press if no guide image
+                    // PDF: une seule photo statique par exercice (frame-1), pas de gif 3 frames
                     const fallback = fallbackForCategory(ex.groupe_musculaire) ?? "/guide-assets/bench-press/frame-1.png";
                     const displayUrl = guideSingle ?? ex.image_url ?? fallback;
-                    const displayUrls = guideUrls.length === 3 ? guideUrls : displayUrl ? [displayUrl] : [fallback];
                     return (
                       <tr key={ex.id} className="border-b border-neutral-100 last:border-b-0">
                         <td className="border border-neutral-200 px-2 py-1.5 text-start font-semibold text-neutral-900">
                           {ex.nom}
                         </td>
                         <td className="border border-neutral-200 px-2 py-1.5">
-                          {displayUrls.length ? (
-                            <span className="flex items-center justify-center gap-1">
-                              {displayUrls.map((u) => (
-                                // eslint-disable-next-line @next/next/no-img-element
-                                <img
-                                  key={u}
-                                  src={u}
-                                  alt=""
-                                  className="h-10 w-10 object-contain"
-                                  // guide assets are black on transparent → visible on white PDF without invert
-                                  style={{ backgroundColor: "#ffffff" }}
-                                />
-                              ))}
-                            </span>
-                          ) : (
-                            "—"
-                          )}
+                          <span className="flex items-center justify-center">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={displayUrl}
+                              alt=""
+                              className="h-10 w-10 object-contain"
+                              style={{ backgroundColor: "#ffffff" }}
+                            />
+                          </span>
                         </td>
                       <td className="border border-neutral-200 px-2 py-1.5 font-semibold">{ex.charge ?? "—"}</td>
                       <td className="border border-neutral-200 px-2 py-1.5 whitespace-pre-line text-start leading-4">
