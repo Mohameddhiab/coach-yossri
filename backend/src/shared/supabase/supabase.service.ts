@@ -92,12 +92,12 @@ export class SupabaseService {
     const tryUpload = async (bucket: string, k: string) => {
       const { error } = await this.client!.storage.from(bucket).upload(k, outBuffer, {
         contentType: outType,
-        upsert: false,
+        upsert: true,
         cacheControl: '31536000',
       });
       if (error) {
         // bucket not found -> throw to try fallback
-        if (error.message.includes('Bucket not found') || error.message.includes('not found')) {
+        if (error.message.includes('Bucket not found') || error.message.includes('not found') || error.message.includes('Bucket')) {
           throw error;
         }
         this.logger.error(`Supabase chat upload failed ${bucket}/${k}: ${error.message}`);

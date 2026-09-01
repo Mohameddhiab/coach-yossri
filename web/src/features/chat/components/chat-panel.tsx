@@ -103,8 +103,10 @@ export function ChatPanel({
     setPreview(null);
     try {
       await send.mutateAsync({ contenu, file: f });
-    } catch {
-      toast.error("تعذّر إرسال الرسالة — يُرجى المحاولة مرة أخرى");
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "تعذّر إرسال الرسالة — يُرجى المحاولة مرة أخرى";
+      // Afficher le vrai code backend (ex: Type non autorisé, Fichier trop volumineux, SUBSCRIPTION_EXPIRED)
+      toast.error(msg);
       setText(contenu);
       if (f) setFile(f);
     }

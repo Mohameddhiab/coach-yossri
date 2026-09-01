@@ -37,15 +37,28 @@ import {
 
 const ALLOWED_TYPES = new Set([
   'image/jpeg',
+  'image/jpg',
   'image/png',
   'image/webp',
   'image/heic',
   'image/heif',
+  'image/heif-sequence',
+  'image/heic-sequence',
   'video/mp4',
   'video/webm',
   'video/quicktime',
   'video/x-msvideo',
+  'video/3gpp',
+  'video/x-matroska',
 ]);
+function isAllowedMime(mt: string | undefined): boolean {
+  if (!mt) return false;
+  if (ALLOWED_TYPES.has(mt.toLowerCase())) return true;
+  // fallback permissif: tout image/* ou video/* est accepté (couvre mimetype non listé / octet-stream mal détecté)
+  const low = mt.toLowerCase();
+  if (low.startsWith('image/') || low.startsWith('video/')) return true;
+  return false;
+}
 const MAX_FILE_BYTES = 30 * 1024 * 1024;
 
 export class SendMessageDto {
@@ -82,19 +95,37 @@ export class ChatController {
     prefix: string,
   ): Promise<{ url: string; type: string; name: string } | null> {
     if (!file) return null;
-    if (!ALLOWED_TYPES.has(file.mimetype)) {
-      throw new BadRequestException('Type de fichier non autorisé');
+    // Certains navigateurs (iOS) envoient mimetype vide → inférer depuis l'extension
+    let mt = file.mimetype?.toLowerCase();
+    if (!mt || mt === 'application/octet-stream') {
+      const ext = file.originalname.split('.').pop()?.toLowerCase() ?? '';
+      if (['jpg', 'jpeg'].includes(ext)) mt = 'image/jpeg';
+      else if (ext === 'png') mt = 'image/png';
+      else if (ext === 'webp') mt = 'image/webp';
+      else if (ext === 'heic') mt = 'image/heic';
+      else if (ext === 'heif') mt = 'image/heif';
+      else if (ext === 'mp4') mt = 'video/mp4';
+      else if (ext === 'mov') mt = 'video/quicktime';
+      else if (ext === 'webm') mt = 'video/webm';
+      else mt = file.mimetype;
+    }
+    if (!isAllowedMime(mt)) {
+      throw new BadRequestException(`Type de fichier non autorisé (${file.mimetype || 'inconnu'})`);
     }
     if (file.size > MAX_FILE_BYTES) {
       throw new BadRequestException('Fichier trop volumineux (max 30 Mo)');
     }
-    const ext = extFromType(file.mimetype);
+    const ext = extFromType(mt);
     const key = `chat/${prefix}/${Date.now()}-${randomUUID()}.${ext}`;
-    const url = await this.supabase.uploadChatAttachment(key, file.buffer, file.mimetype);
+    // S'assurer que buffer est bien un Buffer (multer memoryStorage)
+    const buf = Buffer.isBuffer(file.buffer) ? file.buffer : Buffer.from(file.buffer as unknown as Uint8Array);
+    const url = await this.supabase.uploadChatAttachment(key, buf, mt);
     if (!url) {
-      throw new BadRequestException('Échec upload pièce jointe');
+      // Log côté serveur pour diagnostic Render
+      console.error('[chat] uploadChatAttachment returned null', { key, mt, size: file.size, supabaseEnabled: this.supabase.isEnabled(), bucket: this.supabase.getChatBucket() });
+      throw new BadRequestException('Échec upload pièce jointe — stockage indisponible, réessayez');
     }
-    return { url, type: file.mimetype, name: file.originalname };
+    return { url, type: mt, name: file.originalname };
   }
 
   private toMessageApi(m: {
@@ -153,8 +184,8 @@ export class ChatController {
     FileInterceptor('file', {
       limits: { fileSize: MAX_FILE_BYTES },
       fileFilter: (_req, file, cb) => {
-        if (ALLOWED_TYPES.has(file.mimetype)) cb(null, true);
-        else cb(new BadRequestException('Type non autorisé'), false);
+        if (isAllowedMime(file.mimetype) || !file.mimetype) cb(null, true);
+        else cb(new BadRequestException(`Type non autorisé (${file.mimetype})`), false);
       },
     }),
   )
@@ -175,8 +206,8 @@ export class ChatController {
     FileInterceptor('file', {
       limits: { fileSize: MAX_FILE_BYTES },
       fileFilter: (_req, file, cb) => {
-        if (ALLOWED_TYPES.has(file.mimetype)) cb(null, true);
-        else cb(new BadRequestException('Type non autorisé'), false);
+        if (isAllowedMime(file.mimetype) || !file.mimetype) cb(null, true);
+        else cb(new BadRequestException(`Type non autorisé (${file.mimetype})`), false);
       },
     }),
   )
@@ -221,8 +252,8 @@ export class ChatController {
     FileInterceptor('file', {
       limits: { fileSize: MAX_FILE_BYTES },
       fileFilter: (_req, file, cb) => {
-        if (ALLOWED_TYPES.has(file.mimetype)) cb(null, true);
-        else cb(new BadRequestException('Type non autorisé'), false);
+        if (isAllowedMime(file.mimetype) || !file.mimetype) cb(null, true);
+        else cb(new BadRequestException(`Type non autorisé (${file.mimetype})`), false);
       },
     }),
   )
