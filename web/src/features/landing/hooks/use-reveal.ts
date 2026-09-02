@@ -29,7 +29,9 @@ export function useReveal<T extends HTMLElement = HTMLDivElement>(
     }
 
     // Mobile: threshold plus bas + rootMargin en % pour s'adapter aux petits viewports
-    const isMobile = window.innerWidth < 768;
+    const isMobile = window.innerWidth < 768 || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    const vh = () => window.visualViewport?.height ?? window.innerHeight;
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -40,29 +42,54 @@ export function useReveal<T extends HTMLElement = HTMLDivElement>(
         });
       },
       {
-        threshold: isMobile ? 0.08 : 0.15,
-        rootMargin: isMobile ? "0px 0px -5% 0px" : "0px 0px -40px 0px",
+        threshold: isMobile ? 0.05 : 0.15,
+        rootMargin: isMobile ? "0px 0px -4% 0px" : "0px 0px -40px 0px",
         ...options,
       },
     );
 
     targets.forEach((el) => observer.observe(el));
 
-    // Fallback iOS Safari: si l'observer ne déclenche pas (ex: scroll figé), forcer visible après 800ms
-    const fallback = window.setTimeout(() => {
+    // Affichage immédiat du contenu au-dessus de la ligne de flottaison (mobile: premier viewport)
+    const revealAboveFold = () => {
       targets.forEach((el) => {
-        if (!el.classList.contains("reveal-visible")) {
-          const rect = el.getBoundingClientRect();
-          if (rect.top < window.innerHeight * 0.92) {
-            el.classList.add("reveal-visible");
-            observer.unobserve(el);
-          }
+        if (el.classList.contains("reveal-visible")) return;
+        const rect = el.getBoundingClientRect();
+        // Si l'élément est déjà visible à l'ouverture, l'afficher sans attendre le scroll
+        if (rect.top < vh() * 0.92 && rect.bottom > 0) {
+          el.classList.add("reveal-visible");
+          observer.unobserve(el);
         }
       });
-    }, 800);
+    };
+    // rAF pour laisser le layout se stabiliser (iOS Safari, Chrome mobile)
+    requestAnimationFrame(() => requestAnimationFrame(revealAboveFold));
+
+    // Fallback iOS Safari: si l'observer ne déclenche pas (ex: scroll figé), forcer visible après 700ms
+    const fallbackNear = window.setTimeout(revealAboveFold, 700);
+
+    // Filet de sécurité ultime mobile: tout révéler après 1400ms si encore caché (garantit que rien ne reste invisible)
+    const fallbackAll = window.setTimeout(() => {
+      targets.forEach((el) => {
+        if (!el.classList.contains("reveal-visible")) {
+          el.classList.add("reveal-visible");
+          observer.unobserve(el);
+        }
+      });
+    }, 1400);
+
+    // Réessayer au resize/orientationchange (barre d'adresse mobile qui apparaît/disparaît)
+    const onResize = () => revealAboveFold();
+    window.addEventListener("resize", onResize);
+    window.visualViewport?.addEventListener("resize", onResize);
+    window.addEventListener("orientationchange", onResize);
 
     return () => {
-      window.clearTimeout(fallback);
+      window.clearTimeout(fallbackNear);
+      window.clearTimeout(fallbackAll);
+      window.removeEventListener("resize", onResize);
+      window.visualViewport?.removeEventListener("resize", onResize);
+      window.removeEventListener("orientationchange", onResize);
       observer.disconnect();
     };
   }, [options]);
