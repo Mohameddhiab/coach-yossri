@@ -281,6 +281,9 @@
     opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1),
     transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
   transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .reveal {
@@ -319,6 +322,28 @@
 
 [data-reveal].reveal-visible .timeline-draw {
   transform: scaleY(1);
+}
+
+/* Marquee: accélération matérielle + pas de pause sur mobile */
+.marquee-track {
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+@media (max-width: 768px) {
+  [data-reveal] {
+    transition-duration: 0.65s;
+  }
+  .reveal {
+    transform: translateY(20px);
+  }
+  .reveal[data-reveal="start"] {
+    transform: translateX(-24px);
+  }
+  .reveal[data-reveal="zoom"] {
+    transform: scale(0.94) translateY(12px);
+  }
 }
 
 /* ---- Nav underline ---- */

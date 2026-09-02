@@ -134,8 +134,11 @@ function StatItem({ stat, index }: { stat: CoachStat; index: number }) {
     const target = Number(numStr);
     const zero = `${prefix}0${suffix}`;
     let raf = 0;
+    let hasRun = false;
 
     const runCount = () => {
+      if (hasRun) return;
+      hasRun = true;
       cancelAnimationFrame(raf);
       const start = performance.now();
       const duration = 1300;
@@ -148,28 +151,35 @@ function StatItem({ stat, index }: { stat: CoachStat; index: number }) {
       raf = requestAnimationFrame(step);
     };
 
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setDisplay(stat.value);
+      return;
+    }
+
+    const isMobile = window.innerWidth < 768;
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          cancelAnimationFrame(raf);
-          if (!entry.isIntersecting) {
-            if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-              setDisplay(zero);
-            }
-            return;
+          if (entry.isIntersecting && !hasRun) {
+            runCount();
+            observer.unobserve(entry.target);
           }
-          if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-            setDisplay(stat.value);
-            return;
-          }
-          setDisplay(zero);
-          runCount();
         });
       },
-      { threshold: 0.5 },
+      { threshold: isMobile ? 0.12 : 0.5 },
     );
 
     observer.observe(node);
+
+    // Fallback mobile: si déjà visible au chargement, déclencher immédiatement
+    const rect = node.getBoundingClientRect();
+    if (rect.top < window.innerHeight * 0.9 && rect.bottom > 0) {
+      // léger délai pour laisser le DOM se stabiliser (iOS)
+      window.setTimeout(() => {
+        if (!hasRun) runCount();
+      }, 250);
+    }
+
     return () => {
       observer.disconnect();
       cancelAnimationFrame(raf);
@@ -998,7 +1008,7 @@ export function LandingPage() {
               <div className="space-y-4">
                 <p className="text-lg leading-relaxed text-muted-foreground">{COACH_INFO.about}</p>
                 <blockquote className="border-s-4 border-primary ps-4 text-lg font-bold leading-relaxed">
-                  « الجسم يتغير عندما يكون البرنامج مصمماً خصيصاً لك — وليس لجيرانك. »
+                  « خطتك يجب أن تشبهك — لا أن تشبه غيرك. »
                 </blockquote>
               </div>
               <div className="space-y-2.5 rounded-2xl border border-border/60 bg-card p-5">
