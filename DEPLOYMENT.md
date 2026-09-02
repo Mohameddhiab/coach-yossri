@@ -1,193 +1,220 @@
-# Coach Yosri Production Deployment Guide
-## Vercel + Render + Supabase + Upstash (Free 24/7)
+# Coach Yosri — Guide de Déploiement et Fonctionnement 24/24
+
+Ce document décrit **toutes les étapes** pour déployer la plateforme Coach Yosri
+(web + mobile + backend) et la faire **fonctionner 24h/24** en production.
+
+> **État actuel de la chaîne (2026-09):** backend en auto-déploiement Render,
+> web en **déploiement manuel** Vercel (le `VERCEL_TOKEN` du workflow GitHub est périmé — voir §6).
 
 ---
 
-## Step 1: Supabase (PostgreSQL Database)
+## 1. Architecture de production
 
-1. Go to [supabase.com](https://supabase.com) → Sign up with GitHub
-2. Click **New Project**:
-   - Organization: Create new or select existing
-   - Project name: `coachyosri-prod`
-   - Database password: Generate strong password (save it!)
-   - Region: Closest to your users (e.g., `EU West` for Tunisia)
-3. Wait for project creation (2-3 minutes)
-4. Go to **Settings → Database**:
-   - Connection string → **URI**: `postgresql://postgres.[ref]:[password]@aws-0-[region].pooler.supabase.com:6543/postgres`
-   - Copy this to `DATABASE_URL` in `backend/.env.production`
-5. Go to **Settings → API**:
-   - **Project URL**: `https://xxxxx.supabase.co` → `SUPABASE_URL`
-   - **Anon key**: `eyJ...` → `SUPABASE_ANON_KEY`
-   - **Service role key**: `eyJ...` → `SUPABASE_SERVICE_ROLE_KEY`
+```
+                    Utilisateurs (navigateur / mobile)
+                                   │
+                ┌──────────────────┴───────────────────┐
+                │                                      │
+        ┌───────▼────────┐                     ┌───────▼────────┐
+        │   Vercel Web    │  API HTTPS         │  Render Backend │
+        │  (Next.js)      │ ─────────────────▶ │  (NestJS)      │
+        │  https://…vercel.app│                 │  /api/health   │
+        └─────────────────┘                     └───────┬────────┘
+                                                        │
+                                     ┌──────────────────┼──────────────────┐
+                                     ▼                  ▼                  ▼
+                              ┌────────────┐     ┌────────────┐     ┌────────────┐
+                              │ Supabase   │     │ Upstash    │     │ SMTP e-mail │
+                              │ PostgreSQL │     │ Redis      │     │ (templates)│
+                              └────────────┘     └────────────┘     └────────────┘
 
----
+  Garde en vie 24/24 :
+  ├── GitHub Actions "Keep Render Alive" (toutes les 14 min) → empêche Render de dormir
+  └── (Optionnel) UptimeRobot → alertes si le backend tombe
+```
 
-## Step 2: Upstash (Redis)
-
-1. Go to [upstash.com](https://upstash.com) → Sign up with GitHub
-2. Click **Create Database**:
-   - Name: `coachyosri-redis`
-   - Region: Same as Supabase
-   - Type: **Regional** (free tier)
-3. Go to **Details**:
-   - **Redis URL**: `rediss://...` → `REDIS_URL` in backend `.env.production`
-4. Free tier: 10,000 commands/day, 100 MB storage (enough for Coach Yosri)
-
----
-
-## Step 3: Render (Backend)
-
-1. Go to [render.com](https://render.com) → Sign up with GitHub
-2. Click **New → Web Service**:
-   - Connect GitHub repo: `Mohameddhiab/coach-yossri`
-   - Name: `coachyosri-backend`
-   - Runtime: `Docker`
-   - Region: Same as Supabase
-   - Instance: **Free** (512 MB RAM, sleeps after 15 min)
-3. Go to **Environment**:
-   - Add all variables from `backend/.env.production`:
-     - `DATABASE_URL`
-     - `REDIS_URL`
-     - `JWT_SECRET` → Generate: `openssl rand -hex 32`
-     - `CORS_ORIGINS` → `https://your-app.vercel.app`
-     - `WEB_APP_URL` → `https://your-app.vercel.app`
-     - `COOKIE_SECURE` → `true`
-4. Go to **Settings**:
-   - Build command: `docker build -t coachyosri-backend .`
-   - Dockerfile path: `backend/Dockerfile`
-   - Health check path: `/api/health`
-5. Click **Deploy** (first deploy takes 3-5 minutes)
+| Service  | Rôle                                        | URL / hébergeur |
+|----------|---------------------------------------------|-----------------|
+| Vercel   | Frontend web (Next.js)                      | `web/` → projet Vercel `web` |
+| Render   | Backend API (NestJS)                        | `https://coach-yossri.onrender.com/api` |
+| Supabase | Base de données PostgreSQL                  | `DATABASE_URL` |
+| Upstash  | Cache Redis                                 | `REDIS_URL` |
+| GitHub Actions | CI, déploiements, keep-alive, sécurité | `.github/workflows/` |
 
 ---
 
-## Step 4: Vercel (Web Frontend)
+## 2. Prérequis / Outils locaux
 
-1. Go to [vercel.com](https://vercel.com) → Sign up with GitHub
-2. Click **Import Project**:
-   - Select GitHub repo: `Mohameddhiab/coach-yossri`
-   - Root directory: `web`
-   - Framework: `Next.js`
-3. Go to **Environment Variables**:
-   - `NEXT_PUBLIC_API_URL` → `https://your-backend.onrender.com/api`
-   - `SERVER_API_URL` → `https://your-backend.onrender.com/api`
-4. Click **Deploy** (first deploy takes 2-3 minutes)
-5. After deploy:
-   - Go to **Settings → Domains**:
-   - Add custom domain (optional): `coachyosri.tn`
-   - Note: `https://your-app.vercel.app`
+- Git + un terminal (`pwsh` sur Windows)
+- Node.js **22** (même version que la CI)
+- CLI Vercel : `npm i -g vercel` (authentifié : `vercel login`)
+- CLI GitHub : `gh` (authentifié)
+- Docker (optionnel, pour backend en local)
 
 ---
 
-## Step 5: UptimeRobot (Keep Render Awake)
+## 3. Déploiement du Backend (Render — auto)
 
-1. Go to [uptimerobot.com](https://uptimerobot.com) → Sign up
-2. Click **Add New Monitor**:
-   - Monitor type: `HTTP(s)`
-   - Friendly name: `coachyosri-backend`
-   - URL: `https://your-backend.onrender.com/api/health`
-   - Monitoring interval: `5 minutes`
-3. Click **Create Monitor**
-4. Free tier: 50 monitors, enough for Coach Yosri
+Le backend se déploie **automatiquement** sur tout push vers `master` qui touche
+`backend/**` (workflow `.github/workflows/deploy-backend.yml`).
+
+### 3.1 Variables d'environnement requises
+
+Dans `backend/.env.production` (et sur Render → Environment) :
+
+| Variable | Exemple |
+|----------|---------|
+| `DATABASE_URL` | `postgresql://…@aws-0-…pooler.supabase.com:6543/postgres` |
+| `REDIS_URL` | `rediss://…` (Upstash) |
+| `JWT_SECRET` | `openssl rand -hex 32` |
+| `CORS_ORIGINS` | URL(s) du front web |
+| `WEB_APP_URL` | URL du front web |
+| `COOKIE_SECURE` | `true` |
+
+### 3.2 Secrets GitHub pour Render (Settings → Secrets → Actions)
+
+| Secret | Où le trouver |
+|--------|---------------|
+| `RENDER_DEPLOY_HOOK` | Render → Service → Settings → **Deploy Hooks** (copier l'URL) |
+| `RENDER_HEALTH_URL` | `https://coach-yossri.onrender.com/api/health` |
+
+### 3.3 Étapes d'un déploiement backend
+
+1. `git push origin master` avec des changements dans `backend/`.
+2. Le workflow `deploy-backend.yml` déclenche le webhook Render (build + start).
+3. Le job `verify` attend 60 s puis sonde `RENDER_HEALTH_URL` (5 tentatives / 30 s).
+4. Le backend est en ligne : `curl https://coach-yossri.onrender.com/api/health` → `200`.
+
+> ⚠️ **Premier démarrage uniquement :** appliquer les migrations Prisma :
+> `npx prisma migrate deploy` (via Render Shell), puis optionnellement seed.
 
 ---
 
-## Step 6: Initialize Database
+## 4. Déploiement du Web (Vercel — actuellement MANUEL)
 
-After Render backend is deployed:
+> ⚠️ La CI vérifie lint + type + build sur chaque push (`ci.yml`, job `Web`).
+> Si la CI Web passe, le build est sain et peut être déployé.
+
+### 4.1 Variables d'environnement web
+
+Dans `web/.env.production` (copié au déploiement) :
+
+| Variable | Exemple |
+|----------|---------|
+| `NEXT_PUBLIC_API_URL` | `https://coach-yossri.onrender.com/api` |
+| `SERVER_API_URL` | `https://coach-yossri.onrender.com/api` |
+
+### 4.2 Déploiement manuel (procédure actuelle)
+
+Les projets Vercel sont liés dans `C:\Users\moham\AppData\Local\Temp\opencode\deploy-root\web\.vercel`.
+
+```powershell
+# 1) Copier le web frais dans le dossier de déploiement (exclure le lourd)
+robocopy "C:\Users\moham\OneDrive\Bureau\sport\web" `
+  "C:\Users\moham\AppData\Local\Temp\opencode\deploy-root\web" `
+  /E /XD node_modules .next .vercel /NFL /NDL /NJH /NJS
+#   (robocopy exit code 1 = succès)
+
+# 2) Déployer en production
+#   depuis C:\Users\moham\AppData\Local\Temp\opencode\deploy-root\web
+vercel --prod --yes --force
+
+# 3) L'URL de production apparaît en fin de sortie (alias « Production »)
+```
+
+Vérifier : la page charge en `200` (HTML en arabe, `dir="rtl"`).
+
+### 4.3 Déploiement automatique (désactivé — token périmé)
+
+Le workflow `.github/workflows/deploy-web.yml` (Vercel CLI via `VERCEL_TOKEN`)
+échoue actuellement à l'étape `vercel pull` :
+
+```
+Error: The token provided via `--token` argument is not valid.
+```
+
+**Pour réactiver l'auto-déploiement web** :
+1. Vercel → **Settings** → **Tokens** → **Create** (régénérer un token).
+2. Mettre à jour le secret GitHub :
+   ```bash
+   gh secret set VERCEL_TOKEN   # coller le nouveau token
+   ```
+3. Tester : `gh workflow run deploy-web.yml` ou prochain push sur `web/**`.
+
+> **Non bloquant** : tant que l'app fonctionne, le déploiement manuel suffit.
+
+---
+
+## 5. Fonctionnement 24/24
+
+Render (tier gratuit) dort après **15 min** d'inactivité. Pour éviter les
+"cold start" et garder le backend éveillé :
+
+### 5.1 Keep-Alive GitHub Actions (actif)
+
+`.github/workflows/keep-alive.yml` pings `RENDER_HEALTH_URL` **toutes les 14 min**
+(`*/14 * * * *`), soit juste avant le seuil des 15 min. Aucune action requise.
+
+### 5.2 (Recommandé) UptimeRobot
+
+1. [uptimerobot.com](https://uptimerobot.com) (gratuit, 50 monitors).
+2. Ajouter un monitor **HTTP(s)** : URL = `https://coach-yossri.onrender.com/api/health`, interval 5 min.
+3. Configurer une alerte (email) → notification si le site tombe.
+
+---
+
+## 6. Pipeline CI/CD complète (workflows GitHub)
+
+| Workflow | Fichier | Déclencheur | Rôle |
+|----------|---------|-------------|------|
+| **CI** | `ci.yml` | push/PR sur `main`/`master` | Lint + type + build (backend & web) |
+| **Deploy Backend** | `deploy-backend.yml` | push `backend/**` | Déploie sur Render |
+| **Deploy Web** | `deploy-web.yml` | push `web/**` | Déploie sur Vercel ⚠️ token périmé |
+| **Keep Alive** | `keep-alive.yml` | toutes les 14 min | Empêche Render de dormir |
+| **Security** | `security.yml` | push/PR + lundi 6h UTC | CodeQL, gitleaks, dependency review |
+
+### Surveillance de la CI
 
 ```bash
-# Run Prisma migration
-curl -X POST https://your-backend.onrender.com/api/health
-
-# Seed curated exercises (43 exercises)
-curl -X POST https://your-backend.onrender.com/api/exercises/seed-curated
-```
-
-Or use Render Shell:
-1. Go to Render Dashboard → coachyosri-backend → **Shell**
-2. Run:
-```bash
-npx prisma migrate deploy
-npx ts-node prisma/seed-curated.ts
+gh run list                 # listes des runs
+gh run watch <run-id>       # suivre un run
+gh run view <run-id> --log  # logs d'un run
+gh run list --workflow=ci.yml --limit 5
 ```
 
 ---
 
-## Step 7: Update GitHub Actions (Keep-Alive)
+## 7. Vérifications avant de considérer un déploiement comme OK
 
-1. Go to GitHub repo → **Settings → Secrets → Actions**:
-   - Add: `RENDER_HEALTH_URL` = `https://your-backend.onrender.com/api/health`
-2. The workflow `.github/workflows/keep-alive.yml` will ping every 14 minutes
-
----
-
-## Architecture
-
-```
-┌─────────────────────────────────────────────────┐
-│                  Users                          │
-└─────────────────┬───────────────────────────────┘
-                  │
-                  ▼
-┌─────────────────────────────────────────────────┐
-│           Vercel (Next.js Web)                  │
-│           https://your-app.vercel.app           │
-└─────────────────┬───────────────────────────────┘
-                  │ API calls
-                  ▼
-┌─────────────────────────────────────────────────┐
-│           Render (NestJS Backend)                │
-│           https://your-backend.onrender.com     │
-└───────┬─────────────────────────┬───────────────┘
-        │                         │
-        ▼                         ▼
-┌───────────────┐       ┌─────────────────┐
-│   Supabase    │       │     Upstash     │
-│  PostgreSQL   │       │     Redis       │
-└───────────────┘       └─────────────────┘
-```
+1. **CI verte** : `master CI` doit avoir **Backend ✓** et **Web ✓**.
+2. **Backend en ligne** : `curl https://coach-yossri.onrender.com/api/health` → `200`.
+3. **Web en ligne** : la page de prod répond `200` (arabe, `dir="rtl"`).
+4. **Keep-alive** : runs du workflow `Keep Render Alive` terminent sans échec.
 
 ---
 
-## Costs (Monthly)
+## 8. Guide de résolution rapide
 
-| Service     | Free Tier           | Limits                    |
-|-------------|---------------------|---------------------------|
-| Vercel      | 100 GB bandwidth    | 100 builds/month          |
-| Render      | 750 hours           | Sleeps after 15 min       |
-| Supabase    | 500 MB database     | 50,000 MAU                |
-| Upstash     | 10,000 commands/day | 100 MB storage            |
-| UptimeRobot | 50 monitors         | 5-minute intervals        |
-
-**Total: $0/month** (within free tier limits)
-
----
-
-## Troubleshooting
-
-### Backend not responding
-1. Check Render logs: Dashboard → coachyosri-backend → Logs
-2. Verify environment variables are set correctly
-3. Check if Supabase database is accessible
-
-### CORS errors
-1. Verify `CORS_ORIGINS` in backend matches Vercel URL
-2. Check `NEXT_PUBLIC_API_URL` in Vercel matches Render URL
-
-### Cookie issues
-1. Ensure `COOKIE_SECURE=true` in production
-2. Check browser DevTools → Application → Cookies
-
-### Database connection
-1. Verify Supabase connection string format
-2. Check if IP is whitelisted in Supabase dashboard
+| Problème | Solution |
+|----------|----------|
+| CI échoue sur lint | `npm run lint` dans `backend/` ou `web/` ; corriger les erreurs `react-hooks/set-state-in-effect`, etc. |
+| CI échoue `npm ci` (EUSAGE) | Régénérer le lock : dans le dossier concerné, `npm install --package-lock-only`, puis commit du `package-lock.json`. |
+| Déploiement web échoue (`token not valid`) | Voir §4.3 (régénérer `VERCEL_TOKEN` + `gh secret set VERCEL_TOKEN`), ou déployer manuellement (§4.2). |
+| Backend ne répond pas | Console Render → Logs ; vérifier `.env`/variables ; re-trigger le webhook. |
+| Erreurs CORS | Vérifier `CORS_ORIGINS` backend = URL exacte du web. |
+| Problèmes de cookie JWT | Vérifier `COOKIE_SECURE=true`, domaines cohérents, proxy Next.js. |
 
 ---
 
-## Next Steps (Optional)
+## 9. Coût estimé (au 2026-09)
 
-1. **Custom Domain**: Buy `coachyosri.tn` → Configure DNS to point to Vercel
-2. **Supabase Storage**: Create `exercise-images` bucket for user-uploaded images
-3. **SMTP**: Configure real email for password resets
-4. **Monitoring**: Add Sentry for error tracking
-5. **Analytics**: Add Google Analytics or Plausible
+| Service | Plan | Emploi actuel |
+|---------|------|---------------|
+| Vercel | Gratuit | >100 Go/mois inclus, builds mensuels |
+| Render | Gratuit | dort après 15 min (d'où le keep-alive) |
+| Supabase | Gratuit | 500 Mo base, 50 000 MAU |
+| Upstash | Gratuit | 10 000 commandes/jour |
+| GitHub Actions | Gratuit | 2 000 min/mois |
+| UptimeRobot | Gratuit | 50 monitors |
+
+**Total : 0 $/mois** dans les limites du gratuit (avec cold-start possible côté Render).
