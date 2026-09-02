@@ -53,7 +53,7 @@ export function FidelityCard({ history }: { history: Subscription[] | null | und
             </div>
             <div className="h-2 overflow-hidden rounded-full bg-muted">
               <div
-                className="h-full rounded-full bg-gradient-to-l from-amber-500 to-amber-600 transition-all"
+                className="h-full rounded-full bg-gradient-to-l from-amber-500 to-amber-600 transition-[width]"
                 style={{
                   width: `${Math.min(100, (fidelity.months / (fidelity.months + fidelity.monthsToNext)) * 100)}%`,
                 }}

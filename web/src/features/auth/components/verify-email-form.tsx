@@ -21,12 +21,13 @@ export function VerifyEmailForm({ token }: { token: string }) {
     if (!token || started.current) return;
     started.current = true;
     let cancelled = false;
+    let timerId: ReturnType<typeof setTimeout> | undefined;
     apiClient("POST", "/auth/verify-email", { token })
       .then(() => {
         if (cancelled) return;
         setStatus("done");
-        setTimeout(() => {
-          router.push("/login");
+        timerId = setTimeout(() => {
+          if (!cancelled) router.push("/login");
         }, 2500);
       })
       .catch((err) => {
@@ -38,6 +39,7 @@ export function VerifyEmailForm({ token }: { token: string }) {
       });
     return () => {
       cancelled = true;
+      if (timerId !== undefined) clearTimeout(timerId);
     };
   }, [token, router]);
 

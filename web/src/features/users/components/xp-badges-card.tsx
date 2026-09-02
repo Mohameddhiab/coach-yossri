@@ -113,7 +113,7 @@ export function XpBadgesCard() {
             </div>
             <div className="h-2.5 overflow-hidden rounded-full bg-muted">
               <div
-                className="h-full rounded-full bg-gradient-to-l from-primary to-amber-400 transition-all duration-700"
+                className="h-full rounded-full bg-gradient-to-l from-primary to-amber-400 transition-[width] duration-700"
                 style={{ width: `${xp.progress}%` }}
               />
             </div>

@@ -8,7 +8,14 @@ import { PageLoader } from "@/shared/components/page-loader";
 import { EmptyState } from "@/shared/components/empty-state";
 import { ErrorState } from "@/shared/components/error-state";
 import { ExpiredScreen } from "@/features/subscriptions/components/expired-screen";
-import { WeightChart } from "@/features/progress/components/weight-chart";
+import dynamic from "next/dynamic";
+const WeightChart = dynamic(
+  () =>
+    import("@/features/progress/components/weight-chart").then(
+      (m) => m.WeightChart,
+    ),
+  { ssr: false, loading: () => <PageLoader rows={1} /> },
+);
 import { WeightProjectionCard } from "@/features/progress/components/weight-projection-card";
 import { WeightTargetCard } from "@/features/progress/components/weight-target-card";
 import { AddWeightButton } from "@/features/progress/components/add-weight-button";

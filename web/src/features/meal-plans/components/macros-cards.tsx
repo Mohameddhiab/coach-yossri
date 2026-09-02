@@ -25,7 +25,7 @@ export function MacrosCards({
       {ITEMS.map((item) => (
         <div
           key={item.key}
-          className={`animate-scale-in group relative overflow-hidden rounded-xl border ${item.bg} p-3.5 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5`}
+          className={`animate-scale-in group relative overflow-hidden rounded-xl border ${item.bg} p-3.5 transition-[transform,box-shadow] duration-200 hover:shadow-md hover:-translate-y-0.5`}
         >
           <div className="flex items-start justify-between">
             <div>

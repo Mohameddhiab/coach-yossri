@@ -177,7 +177,7 @@ export default function MyPlanPage() {
                     <button
                       key={d}
                       onClick={() => setDay(d)}
-                      className={`relative flex shrink-0 flex-col items-center justify-center gap-1 rounded-xl border px-3.5 py-2.5 text-xs font-bold transition-all ${
+                      className={`relative flex shrink-0 flex-col items-center justify-center gap-1 rounded-xl border px-3.5 py-2.5 text-xs font-bold transition-[color,background-color,transform,box-shadow] ${
                         isActive
                           ? "border-primary bg-primary text-primary-foreground shadow-md shadow-primary/20 scale-[1.02]"
                           : "border-border bg-card hover:border-primary/30 hover:bg-muted/50"

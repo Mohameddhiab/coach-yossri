@@ -7,14 +7,16 @@ import { Button } from "@/components/ui/button";
 const THEME_KEY = "coachyosri_theme";
 
 export function ThemeToggle() {
-  const [theme, setTheme] = useState<"dark" | "light">(() => {
-    if (typeof window === "undefined") return "dark";
-    return localStorage.getItem(THEME_KEY) === "light" ? "light" : "dark";
-  });
+  const [mounted, setMounted] = useState(false);
+  const [theme, setTheme] = useState<"dark" | "light">("dark");
 
   useEffect(() => {
-    document.documentElement.classList.toggle("dark", theme === "dark");
-  }, [theme]);
+    setMounted(true);
+    const stored = localStorage.getItem(THEME_KEY);
+    const initial = stored === "light" ? "light" : "dark";
+    setTheme(initial);
+    document.documentElement.classList.toggle("dark", initial === "dark");
+  }, []);
 
   const toggle = () => {
     const next = theme === "dark" ? "light" : "dark";

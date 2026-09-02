@@ -121,7 +121,7 @@ export function WeightTargetCard({
                   strokeLinecap="round"
                   strokeDasharray={c}
                   strokeDashoffset={c - (c * progress) / 100}
-                  className="stroke-primary transition-all duration-700"
+                  className="stroke-primary transition-[stroke-dashoffset] duration-700"
                 />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">

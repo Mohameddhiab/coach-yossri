@@ -1,7 +1,5 @@
 "use client";
 
-import { jsPDF } from "jspdf";
-import html2canvas from "html2canvas-pro";
 import type { MealPlan, MonthlyGoal, WeekDay, WeightLog } from "@/shared/lib/domain";
 import {
   MEAL_TYPE_LABELS,
@@ -67,6 +65,8 @@ export async function downloadPlanPdf(element: HTMLElement, filename: string) {
     ),
   );
   try {
+    const { default: jsPDF } = await import("jspdf");
+    const { default: html2canvas } = await import("html2canvas-pro");
     const canvas = await (html2canvas as unknown as (el: HTMLElement, opts: Record<string, unknown>) => Promise<HTMLCanvasElement>)(element, {
       scale: 2,
       backgroundColor: "#ffffff",

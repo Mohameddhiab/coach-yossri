@@ -244,6 +244,7 @@ export function UsersTable() {
                     <TableRow
                       key={user.id}
                       tabIndex={0}
+                      role="button"
                       className="group cursor-pointer transition-colors hover:bg-primary/[0.04] focus-visible:bg-primary/[0.06] focus-visible:outline-none"
                       onClick={() => router.push(`/users/${user.id}`)}
                       onKeyDown={(e) => {
@@ -371,7 +372,7 @@ export function UsersTable() {
 
                       {/* Action Chevron */}
                       <TableCell className="text-center">
-                        <div className="flex size-8 items-center justify-center rounded-xl text-muted-foreground transition-all group-hover:bg-primary/10 group-hover:text-primary">
+                        <div className="flex size-8 items-center justify-center rounded-xl text-muted-foreground transition-colors group-hover:bg-primary/10 group-hover:text-primary">
                           <ChevronLeft className="size-4" />
                         </div>
                       </TableCell>
@@ -395,7 +396,7 @@ export function UsersTable() {
                   key={user.id}
                   href={`/users/${user.id}`}
                   className={cn(
-                    "flex items-center gap-3.5 rounded-2xl border border-s-4 bg-card p-4 shadow-sm transition-all hover:bg-primary/[0.04] active:scale-[0.99]",
+                    "flex items-center gap-3.5 rounded-2xl border border-s-4 bg-card p-4 shadow-sm transition-[color,background-color,transform] hover:bg-primary/[0.04] active:scale-[0.99]",
                     statusValue === "ACTIF" && "border-s-emerald-500",
                     statusValue === "EXPIRE_BIENTOT" && "border-s-amber-500",
                     statusValue === "EXPIRE" && "border-s-destructive",

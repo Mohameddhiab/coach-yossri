@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -20,6 +21,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+} from "@/components/ui/dialog";
 import {
   Accordion,
   AccordionContent,
@@ -119,10 +124,7 @@ function CoachPhoto({ className }: { className?: string }) {
 
 function StatItem({ stat, index }: { stat: CoachStat; index: number }) {
   const ref = useRef<HTMLDivElement>(null);
-  const [display, setDisplay] = useState(() => {
-    const match = stat.value.match(/^([^\d]*)(\d+)(.*)$/);
-    return match ? `${match[1]}0${match[3]}` : stat.value;
-  });
+  const [display, setDisplay] = useState(stat.value);
 
   useEffect(() => {
     const node = ref.current;
@@ -134,6 +136,7 @@ function StatItem({ stat, index }: { stat: CoachStat; index: number }) {
     const target = Number(numStr);
     const zero = `${prefix}0${suffix}`;
     let raf = 0;
+    let timerId: number | undefined;
     let hasRun = false;
 
     const runCount = () => {
@@ -175,7 +178,7 @@ function StatItem({ stat, index }: { stat: CoachStat; index: number }) {
     const rect = node.getBoundingClientRect();
     if (rect.top < window.innerHeight * 0.9 && rect.bottom > 0) {
       // léger délai pour laisser le DOM se stabiliser (iOS)
-      window.setTimeout(() => {
+      timerId = window.setTimeout(() => {
         if (!hasRun) runCount();
       }, 250);
     }
@@ -183,6 +186,7 @@ function StatItem({ stat, index }: { stat: CoachStat; index: number }) {
     return () => {
       observer.disconnect();
       cancelAnimationFrame(raf);
+      if (timerId !== undefined) clearTimeout(timerId);
     };
   }, [stat.value]);
 
@@ -253,7 +257,7 @@ function StepsSection() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {STEPS.map((step, index) => (
           <Reveal key={step.num} delay={index * 100} variant="start">
-            <Card className="group h-full transition-all duration-300 hover:-translate-y-1.5 hover:border-primary/40 hover:shadow-[0_16px_48px_-16px] hover:shadow-primary/30">
+            <Card className="group h-full transition-[transform,border-color,box-shadow] duration-300 hover:-translate-y-1.5 hover:border-primary/40 hover:shadow-[0_16px_48px_-16px] hover:shadow-primary/30">
               <CardContent className="space-y-2 p-5">
                 <span className="amber-gradient-text text-3xl font-black tabular-nums">{step.num}</span>
                 <div className="font-bold">{step.title}</div>
@@ -401,7 +405,7 @@ function FeaturesSection() {
       <div className="space-y-6">
         {PILLARS.map((p, index) => (
           <Reveal key={p.num} delay={index * 80}>
-            <Card className="overflow-hidden transition-all duration-300 hover:border-primary/40">
+            <Card className="overflow-hidden transition-[border-color] duration-300 hover:border-primary/40">
               <CardContent className="grid gap-5 p-6 lg:grid-cols-[1fr_1.2fr] lg:items-center">
                 <div className="space-y-2">
                   <span className="text-xs font-black uppercase tracking-[0.3em] text-primary/70">
@@ -464,8 +468,17 @@ function CertificatesGallery() {
         {CERTIFICATES.map((c, index) => (
           <Reveal key={c.file} delay={index * 100} variant="zoom">
             <Card
-              className="group cursor-pointer overflow-hidden transition-all duration-500 hover:-translate-y-1.5 hover:scale-[1.02] hover:border-primary/40 hover:shadow-[0_16px_48px_-16px] hover:shadow-primary/30"
+              role="button"
+              tabIndex={0}
+              aria-label={`عرض شهادة ${c.title}`}
+              className="group cursor-pointer overflow-hidden transition-[transform,border-color,box-shadow] duration-500 hover:-translate-y-1.5 hover:scale-[1.02] hover:border-primary/40 hover:shadow-[0_16px_48px_-16px] hover:shadow-primary/30 focus-visible:border-primary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
               onClick={() => setSelected(`/certifacte/${encodeURIComponent(c.file)}`)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  setSelected(`/certifacte/${encodeURIComponent(c.file)}`);
+                }
+              }}
             >
               <div className="relative aspect-[4/3] overflow-hidden bg-muted">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -488,28 +501,20 @@ function CertificatesGallery() {
           </Reveal>
         ))}
       </div>
-      {selected && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
-          onClick={() => setSelected(null)}
-          role="dialog"
-          aria-modal="true"
+      <Dialog open={!!selected} onOpenChange={(open) => !open && setSelected(null)}>
+        <DialogContent
+          className="max-w-[90vw] border-0 bg-transparent p-0 ring-0 sm:max-w-3xl"
+          showCloseButton={false}
+          aria-label="شهادة مكبرة"
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={selected}
+            src={selected ?? ""}
             alt="شهادة مكبرة"
             className="max-h-[90vh] max-w-[90vw] animate-[zoom-in_0.3s_ease] rounded-xl border border-white/10 object-contain shadow-2xl"
           />
-          <button
-            aria-label="إغلاق"
-            onClick={() => setSelected(null)}
-            className="absolute right-4 top-4 rounded-full bg-white/10 p-2 text-white backdrop-blur transition hover:bg-white/20"
-          >
-            <X className="size-5" />
-          </button>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }
@@ -532,7 +537,7 @@ function ResultsSection() {
       <div className="grid gap-4 sm:grid-cols-3">
         {placeholders.map((i) => (
           <Reveal key={i} delay={i * 120} variant="zoom">
-            <Card className="group h-full overflow-hidden transition-all duration-300 hover:-translate-y-1.5 hover:border-primary/40">
+            <Card className="group h-full overflow-hidden transition-[transform,border-color] duration-300 hover:-translate-y-1.5 hover:border-primary/40">
               <CardContent className="space-y-3 p-4">
                 <div className="grid grid-cols-2 gap-2">
                   {["قبل", "بعد"].map((label) => (
@@ -596,7 +601,7 @@ function PricingSection({ whatsappUrl }: { whatsappUrl: string }) {
           return (
             <Reveal key={plan.id} delay={index * 100} variant="start">
               <Card
-                className={`relative h-full transition-all duration-300 hover:-translate-y-1.5 ${
+                className={`relative h-full transition-[transform,border-color,box-shadow] duration-300 hover:-translate-y-1.5 ${
                   plan.highlight
                     ? "border-primary/60 shadow-[0_20px_60px_-20px] shadow-primary/40"
                     : "hover:border-primary/40"
@@ -626,7 +631,7 @@ function PricingSection({ whatsappUrl }: { whatsappUrl: string }) {
                       </div>
                       <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
                         <div
-                          className={`h-full rounded-full transition-all ${
+                          className={`h-full rounded-full transition-[width,background-color] ${
                             full ? "bg-destructive" : "bg-primary"
                           }`}
                           style={{
@@ -810,7 +815,7 @@ function FinalCta({ whatsappUrl }: { whatsappUrl: string }) {
               href={instagram}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex size-10 items-center justify-center rounded-full border border-border/60 bg-background/60 text-muted-foreground transition-all duration-300 hover:border-primary/50 hover:text-primary hover:scale-110"
+              className="flex size-10 items-center justify-center rounded-full border border-border/60 bg-background/60 text-muted-foreground transition-[color,border-color,transform] duration-300 hover:border-primary/50 hover:text-primary hover:scale-110"
               aria-label="Instagram"
             >
               <svg className="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -823,7 +828,7 @@ function FinalCta({ whatsappUrl }: { whatsappUrl: string }) {
               href={facebook}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex size-10 items-center justify-center rounded-full border border-border/60 bg-background/60 text-muted-foreground transition-all duration-300 hover:border-primary/50 hover:text-primary hover:scale-110"
+              className="flex size-10 items-center justify-center rounded-full border border-border/60 bg-background/60 text-muted-foreground transition-[color,border-color,transform] duration-300 hover:border-primary/50 hover:text-primary hover:scale-110"
               aria-label="Facebook"
             >
               <svg className="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -862,24 +867,24 @@ export function LandingPage() {
           <Logo />
           <nav aria-label="تنقل سريع" className="hidden items-center gap-4 lg:flex">
             {navLinks.map((link) => (
-              <a
+              <Link
                 key={link.href}
                 href={link.href}
                 className="nav-link text-sm font-semibold text-muted-foreground transition-colors hover:text-primary"
               >
                 {link.label}
-              </a>
+              </Link>
             ))}
           </nav>
           <div className="flex items-center gap-2">
             <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
-              <a href="/login">
+              <Link href="/login">
                 <LogIn className="size-4" />
                 تسجيل الدخول
-              </a>
+              </Link>
             </Button>
             <Button asChild size="sm" className="hidden sm:inline-flex">
-              <a href="#plans">ابدأ الآن</a>
+              <Link href="#plans">ابدأ الآن</Link>
             </Button>
             <Button
               variant="ghost"
@@ -897,25 +902,25 @@ export function LandingPage() {
           <div className="border-t bg-background px-4 py-4 lg:hidden">
             <nav className="flex flex-col gap-1">
               {navLinks.map((link) => (
-                <a
+                <Link
                   key={link.href}
                   href={link.href}
                   onClick={() => setMobileOpen(false)}
                   className="rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors hover:bg-muted"
                 >
                   {link.label}
-                </a>
+                </Link>
               ))}
-              <Button asChild className="mt-3 w-full">
-                <a href="#plans" onClick={() => setMobileOpen(false)}>
+              <Button asChild className="mt-3 w-full" onClick={() => setMobileOpen(false)}>
+                <Link href="#plans">
                   ابدأ الآن
-                </a>
+                </Link>
               </Button>
-              <Button asChild variant="outline" className="mt-2 w-full">
-                <a href="/login" onClick={() => setMobileOpen(false)}>
+              <Button asChild variant="outline" className="mt-2 w-full" onClick={() => setMobileOpen(false)}>
+                <Link href="/login">
                   <LogIn className="size-4" />
                   تسجيل الدخول
-                </a>
+                </Link>
               </Button>
             </nav>
           </div>
@@ -1051,7 +1056,7 @@ export function LandingPage() {
                     aria-hidden
                     className="absolute -start-[23px] top-6 size-4 rounded-full border-2 border-background bg-primary shadow-[0_0_0_4px] shadow-primary/15"
                   />
-                  <Card className="transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-[0_12px_36px_-14px] hover:shadow-primary/25">
+                  <Card className="transition-[transform,border-color,box-shadow] duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-[0_12px_36px_-14px] hover:shadow-primary/25">
                     <CardContent className="flex flex-wrap items-center justify-between gap-2 p-4">
                       <div className="flex items-center gap-3">
                         <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">

@@ -62,7 +62,7 @@ export function WorkoutPlanDayView({
         return (
           <div
             key={e.id}
-            className="group relative overflow-hidden rounded-2xl border border-border/60 bg-card p-4 transition-all duration-300 hover:border-amber-500/30 hover:shadow-[0_4px_24px_-8px_rgba(245,158,11,0.15)] hover:-translate-y-0.5"
+            className="group relative overflow-hidden rounded-2xl border border-border/60 bg-card p-4 transition-[transform,box-shadow,border-color] duration-300 hover:border-amber-500/30 hover:shadow-[0_4px_24px_-8px_rgba(245,158,11,0.15)] hover:-translate-y-0.5"
             style={{ animationDelay: `${idx * 60}ms` }}
           >
             {/* subtle accent line */}

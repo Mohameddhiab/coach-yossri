@@ -26,7 +26,7 @@ export function TierDistributionCard({ users }: { users: UserWithSubscription[] 
             </div>
             <div className="h-2 overflow-hidden rounded-full bg-muted">
               <div
-                className="h-full rounded-full bg-primary transition-all"
+                className="h-full rounded-full bg-primary transition-[width]"
                 style={{ width: `${Math.round((r.count / max) * 100)}%` }}
               />
             </div>

@@ -16,10 +16,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { StatCard } from "@/shared/components/stat-card";
 import { EmptyState } from "@/shared/components/empty-state";
 import { ErrorState } from "@/shared/components/error-state";
-import {
-  MemberGrowthChart,
-  SubscriptionStatusChart,
-} from "@/features/dashboard/components/dashboard-charts";
+import dynamic from "next/dynamic";
 import { AlertsMiniList } from "@/features/dashboard/components/alerts-mini-list";
 import { TierDistributionCard } from "@/features/dashboard/components/tier-distribution-card";
 import { UnreadMessagesCard } from "@/features/dashboard/components/unread-messages-card";
@@ -27,6 +24,24 @@ import { TodayAttendanceCard } from "@/features/check-ins/components/today-atten
 import { useSummary, useGrowth } from "@/features/stats/hooks/useStats";
 import { useUsers } from "@/features/users/hooks/useUsers";
 import { useAuth } from "@/shared/lib/auth-context";
+
+const ChartSkeleton = () => (
+  <Skeleton className="h-56 rounded-2xl" />
+);
+const MemberGrowthChart = dynamic(
+  () =>
+    import("@/features/dashboard/components/dashboard-charts").then(
+      (m) => m.MemberGrowthChart,
+    ),
+  { ssr: false, loading: ChartSkeleton },
+);
+const SubscriptionStatusChart = dynamic(
+  () =>
+    import("@/features/dashboard/components/dashboard-charts").then(
+      (m) => m.SubscriptionStatusChart,
+    ),
+  { ssr: false, loading: ChartSkeleton },
+);
 
 function ClickableStat({
   href,

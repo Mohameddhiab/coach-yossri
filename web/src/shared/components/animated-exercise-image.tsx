@@ -22,9 +22,11 @@ export function AnimatedExerciseImage({
   const [idx, setIdx] = useState(0);
   const [paused, setPaused] = useState(false);
   const timer = useRef<number | null>(null);
+  const [prefersReduced, setPrefersReduced] = useState(false);
 
-  const prefersReduced =
-    typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  useEffect(() => {
+    setPrefersReduced(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  }, []);
 
   useEffect(() => {
     if (urls.length <= 1 || prefersReduced || paused) return;

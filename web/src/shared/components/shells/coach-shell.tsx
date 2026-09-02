@@ -88,7 +88,7 @@ function SidebarContent() {
       <div className="p-3">
         <Button
           asChild
-          className="w-full justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 font-bold text-white shadow-lg shadow-amber-500/20 transition-all duration-200 hover:from-amber-600 hover:to-amber-700 hover:shadow-xl hover:shadow-amber-500/30"
+          className="w-full justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 font-bold text-white shadow-lg shadow-amber-500/20 transition-shadow duration-200 hover:from-amber-600 hover:to-amber-700 hover:shadow-xl hover:shadow-amber-500/30"
         >
           <Link href="/users/new">
             <UserPlus className="size-4" />
@@ -106,7 +106,7 @@ function SidebarContent() {
               key={item.href}
               href={item.href}
               className={cn(
-                "group flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-all duration-150",
+                "group flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-colors duration-150",
                 active
                   ? "bg-primary/15 text-primary ring-1 ring-primary/30 shadow-sm"
                   : "text-muted-foreground hover:bg-sidebar-accent hover:text-foreground",

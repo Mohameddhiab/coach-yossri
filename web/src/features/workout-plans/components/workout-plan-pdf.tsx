@@ -1,7 +1,6 @@
 "use client";
 
-import { jsPDF } from "jspdf";
-import html2canvas from "html2canvas-pro";
+import type { jsPDF as JsPDFType } from "jspdf";
 import type { WeekDay } from "@/shared/lib/domain";
 import { OBJECTIVE_LABELS, WEEK_DAYS, WEEK_DAY_LABELS } from "@/shared/lib/domain";
 import type { WorkoutPlan } from "@/features/workout-plans/api/workoutPlans.api";
@@ -74,16 +73,19 @@ async function fetchImageAsDataUrl(url: string): Promise<string | null> {
 
 export async function downloadWorkoutPdf(element: HTMLElement, filename: string) {
   await document.fonts.ready;
+  const [{ default: jsPDF }, { default: html2canvas }] =
+    await Promise.all([
+      import("jspdf"),
+      import("html2canvas-pro"),
+    ]);
 
   // 1. Ne jamais laisser une image cross-origin brute dans le canvas — convertir en data: URI avant capture
   const imgs = Array.from(element.querySelectorAll("img"));
-  await Promise.all(
-    imgs.map(async (img) => {
-      if (img.src.startsWith(window.location.origin) || img.src.startsWith("data:")) return;
-      img.crossOrigin = "anonymous";
-      img.src = await toDataUri(img.src);
-    }),
-  );
+  for (const img of imgs) {
+    if (img.src.startsWith(window.location.origin) || img.src.startsWith("data:")) continue;
+    img.crossOrigin = "anonymous";
+    img.src = await toDataUri(img.src);
+  }
   // 2. Attendre que toutes les images (locales + data: URI converties) soient réellement chargées
   await Promise.all(
     imgs.map(
@@ -115,7 +117,7 @@ export async function downloadWorkoutPdf(element: HTMLElement, filename: string)
 }
 
 let amiriFontLoaded = false;
-async function ensureArabicFont(doc: jsPDF) {
+async function ensureArabicFont(doc: JsPDFType) {
   if (amiriFontLoaded) return;
   try {
     // Amiri supports Arabic glyphs - cache as base64 in jsPDF VFS
@@ -136,6 +138,7 @@ async function ensureArabicFont(doc: jsPDF) {
 }
 
 export async function downloadWorkoutPdfDirect(plan: WorkoutPlan, filename: string) {
+  const { default: jsPDF } = await import("jspdf");
   const doc = new jsPDF({ unit: "pt", format: "a4" });
   await ensureArabicFont(doc);
   const useFont = amiriFontLoaded ? "Amiri" : "helvetica";

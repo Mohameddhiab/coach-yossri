@@ -4,6 +4,12 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { CalendarCheck, Scale } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useAuth } from "@/shared/lib/auth-context";
 import { motivationOfToday } from "@/shared/lib/motivation";
 import { useGoal } from "@/features/goals/hooks/useGoals";
@@ -13,6 +19,11 @@ export function MorningGreeting() {
   const { user } = useAuth();
   const userId = user?.id;
   const [dismissed, setDismissed] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!userId) return;
@@ -24,7 +35,7 @@ export function MorningGreeting() {
   }, [userId]);
 
   const markedToday =
-    typeof window !== "undefined" && userId
+    mounted && userId
       ? localStorage.getItem(`coachyosri_greeting_${userId}`) === new Date().toISOString().slice(0, 10)
       : false;
 
@@ -35,17 +46,14 @@ export function MorningGreeting() {
   const streak = currentStreak(goal?.checkins ?? []);
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-label="تحية الصباح"
-      className="greeting-fade fixed inset-0 z-50 flex items-end justify-center bg-background/70 p-4 backdrop-blur-sm sm:items-center"
-      onClick={() => setDismissed(true)}
-    >
-      <div
-        className="greeting-pop w-full max-w-sm rounded-2xl border bg-card p-6 text-center shadow-2xl"
-        onClick={(e) => e.stopPropagation()}
+    <Dialog open onOpenChange={(open) => !open && setDismissed(true)}>
+      <DialogContent
+        className="greeting-pop w-full max-w-sm rounded-2xl border bg-card p-6 text-center shadow-2xl sm:max-w-sm"
+        showCloseButton={false}
+        aria-label="تحية الصباح"
       >
+        <DialogTitle className="hidden" />
+        <DialogDescription className="hidden" />
         <div className="text-xs font-medium text-primary">Coach Yosri</div>
         <h2 className="mt-1 text-2xl font-extrabold">صباح الخير يا {user.prenom} 👋</h2>
         <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{motivationOfToday()}</p>
@@ -75,7 +83,7 @@ export function MorningGreeting() {
         >
           تجاهل التنبيه اليوم
         </button>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

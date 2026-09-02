@@ -65,7 +65,14 @@ import { CoachGoalCard } from "@/features/goals/components/coach-goal-card";
 import { NotesPanel } from "@/features/users/components/notes-panel";
 import { MemberTimeline } from "@/features/users/components/member-timeline";
 import { ReferralCard } from "@/features/users/components/referral-card";
-import { WeightChart } from "@/features/progress/components/weight-chart";
+import dynamic from "next/dynamic";
+const WeightChart = dynamic(
+  () =>
+    import("@/features/progress/components/weight-chart").then(
+      (m) => m.WeightChart,
+    ),
+  { ssr: false, loading: () => <div className="h-[260px] animate-pulse rounded-xl bg-muted" /> },
+);
 import { WeightProjectionCard } from "@/features/progress/components/weight-projection-card";
 import { WeightTargetCard } from "@/features/progress/components/weight-target-card";
 import { PhotoGallery } from "@/features/progress/components/photo-gallery";

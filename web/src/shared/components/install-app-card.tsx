@@ -14,6 +14,11 @@ const noopSubscribe = () => () => {};
 
 export function InstallAppCard() {
   const [promptEvent, setPromptEvent] = useState<BeforeInstallPromptEvent | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const installed = useSyncExternalStore(
     noopSubscribe,
@@ -38,7 +43,7 @@ export function InstallAppCard() {
   }, []);
 
   const isIos =
-    typeof navigator !== "undefined" &&
+    mounted &&
     /iphone|ipad|ipod/i.test(navigator.userAgent);
 
   return (
