@@ -26,6 +26,12 @@ const COLORS = {
   textFaint: '#4B4F57',
 };
 
+/** Liens "site" utilisés dans le pied de page commun des emails. */
+const SITE_URL = 'https://coach-yossri.vercel.app';
+const APP_LINK = `${SITE_URL}/login`;
+const PLANS_LINK = `${SITE_URL}/#plans`;
+const WHATSAPP_LINK = 'https://wa.me/21621636922';
+
 /** Échappe une chaîne pour une insertion HTML sûre. */
 export function esc(str: string): string {
   return String(str ?? '')
@@ -140,7 +146,7 @@ export function renderEmailLayout({
 
       <!-- Badge de marque -->
       <tr>
-        <td align="center" style="padding:36px 20px 20px;">
+        <td align="center" style="padding:38px 20px 22px;">
           <span style="display:inline-flex;align-items:center;gap:10px;padding:7px 18px 7px 10px;
             border:1px solid rgba(251,191,36,.35);border-radius:999px;background:rgba(251,191,36,.08);
             font-family:${FONT_STACK};font-size:13px;font-weight:700;color:${COLORS.accent};letter-spacing:.2px;">
@@ -171,6 +177,9 @@ export function renderEmailLayout({
                   font-weight:800;color:${COLORS.textPrimary};">${esc(title)}</h1>
               </td>
             </tr>
+            <tr><td class="pad" style="padding:24px 32px 0;">
+              <div style="height:1px;line-height:1px;font-size:0;background:${COLORS.surfaceBorder};">&nbsp;</div>
+            </td></tr>
 
             <tr>
               <td class="pad" style="padding:18px 32px 0;font-family:${FONT_STACK};font-size:15px;
@@ -198,10 +207,50 @@ export function renderEmailLayout({
 
       <!-- Footer global -->
       <tr>
-        <td align="center" style="padding:22px 20px 40px;font-family:${FONT_STACK};font-size:12px;color:${COLORS.textFaint};">
-          © ${year} كوتش يسري — جميع الحقوق محفوظة
+        <td class="pad" style="padding:24px 20px 0;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+            style="background:${COLORS.bgCard};border:1px solid ${COLORS.border};border-radius:16px;overflow:hidden;">
+            <!-- Bande signature discrète -->
+            <tr><td height="2" style="height:2px;line-height:2px;font-size:0;background:rgba(251,191,36,.35);">&nbsp;</td></tr>
+            <tr>
+              <td class="pad" style="padding:22px 24px 18px;text-align:center;">
+                <span style="font-family:${FONT_STACK};font-size:15px;font-weight:800;color:${COLORS.textPrimary};">🏋️‍♂️ كوتش يسري</span>
+                <div style="height:4px;line-height:4px;font-size:0;">&nbsp;</div>
+                <span style="font-family:${FONT_STACK};font-size:12px;color:${COLORS.textSecondary};">مع مدربك بكل صحة وقوة</span>
+              </td>
+            </tr>
+            <tr><td class="pad" style="padding:0 24px;">
+              <div style="height:1px;line-height:1px;font-size:0;background:${COLORS.surfaceBorder};">&nbsp;</div>
+            </td></tr>
+            <tr>
+              <td class="pad" style="padding:16px 24px 6px;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td align="center" style="padding:6px 0;font-family:${FONT_STACK};">
+                      <a href="${esc(APP_LINK)}" target="_blank" style="color:#9BA0A8;text-decoration:none;font-size:12px;">تسجيل الدخول</a>
+                      <span style="color:#3A3E46;padding:0 10px;">·</span>
+                      <a href="${esc(PLANS_LINK)}" target="_blank" style="color:#9BA0A8;text-decoration:none;font-size:12px;">الباقات</a>
+                      <span style="color:#3A3E46;padding:0 10px;">·</span>
+                      <a href="${esc(WHATSAPP_LINK)}" target="_blank" style="color:#9BA0A8;text-decoration:none;font-size:12px;">تواصل معنا</a>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr><td class="pad" style="padding:16px 24px 22px;">
+              <div style="height:1px;line-height:1px;font-size:0;background:${COLORS.surfaceBorder};">&nbsp;</div>
+            </td></tr>
+            <tr>
+              <td class="pad" style="padding:16px 24px 22px;text-align:center;font-family:${FONT_STACK};
+                font-size:12px;line-height:1.9;color:${COLORS.textFaint};">
+                © ${year} كوتش يسري — جميع الحقوق محفوظة<br>
+                تونس · الاثنين — السبت: 9:00 — 22:00
+              </td>
+            </tr>
+          </table>
         </td>
       </tr>
+      <tr><td height="20" style="height:20px;line-height:20px;font-size:0;">&nbsp;</td></tr>
     </table>
     <!--[if mso]>
     </td></tr></table>
