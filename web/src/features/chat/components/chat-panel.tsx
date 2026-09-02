@@ -62,12 +62,15 @@ export function ChatPanel({
 
   useEffect(() => {
     if (!file) {
-      setPreview(null);
-      return;
+      const id = setTimeout(() => setPreview(null), 0);
+      return () => clearTimeout(id);
     }
     const url = URL.createObjectURL(file);
-    setPreview(url);
-    return () => URL.revokeObjectURL(url);
+    const id = setTimeout(() => setPreview(url), 0);
+    return () => {
+      clearTimeout(id);
+      URL.revokeObjectURL(url);
+    };
   }, [file]);
 
   const handlePick = () => fileRef.current?.click();

@@ -25,7 +25,10 @@ export function AnimatedExerciseImage({
   const [prefersReduced, setPrefersReduced] = useState(false);
 
   useEffect(() => {
-    setPrefersReduced(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+    const id = setTimeout(() => {
+      setPrefersReduced(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+    }, 0);
+    return () => clearTimeout(id);
   }, []);
 
   useEffect(() => {

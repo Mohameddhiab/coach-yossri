@@ -32,7 +32,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Éviter un aller-retour Render froid pour les visiteurs anonymes (LCP)
     const hasToken = typeof document !== "undefined" && document.cookie.includes("coachyosri_access=");
     if (!hasToken) {
-      setIsLoading(false);
+      queueMicrotask(() => {
+        if (!cancelled) setIsLoading(false);
+      });
       return () => {
         cancelled = true;
       };

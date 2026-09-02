@@ -155,7 +155,7 @@ function StatItem({ stat, index }: { stat: CoachStat; index: number }) {
     };
 
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setDisplay(stat.value);
+      // display est déjà initialisé à stat.value : pas de setState nécessaire
       return;
     }
 
