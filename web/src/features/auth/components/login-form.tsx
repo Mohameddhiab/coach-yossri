@@ -82,14 +82,14 @@ export function LoginForm() {
                         type={showPassword ? "text" : "password"}
                         dir="ltr"
                         placeholder="••••••••"
-                        className="pe-10"
+                        className="pl-10"
                         {...field}
                       />
                       <button
                         type="button"
                         aria-label={showPassword ? "إخفاء كلمة المرور" : "إظهار كلمة المرور"}
                         onClick={() => setShowPassword((v) => !v)}
-                        className="absolute end-2 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
+                        className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
                       >
                         {showPassword ? (
                           <EyeOff className="size-4" />
