@@ -55,13 +55,14 @@ export function XpBadgesCard() {
   useEffect(() => {
     if (!badges || !me) return;
     const key = `coachyosri_badges_${me.user.id}`;
-    let known: string[] = [];
+    let known = new Set<string>();
     try {
-      known = JSON.parse(localStorage.getItem(key) ?? "[]") as string[];
+      const raw = JSON.parse(localStorage.getItem(key) ?? "[]") as string[];
+      known = new Set(raw);
     } catch {
-      known = [];
+      known = new Set();
     }
-    const fresh = badges.filter((b) => b.unlocked && !known.includes(b.badge.id));
+    const fresh = badges.filter((b) => b.unlocked && !known.has(b.badge.id));
     if (fresh.length > 0) {
       fresh.forEach((b) => {
         toast(`🎉 وسام جديد: ${b.badge.label}`, {

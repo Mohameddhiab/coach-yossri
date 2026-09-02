@@ -13,6 +13,8 @@ import { targetProgress } from "@/shared/lib/insights";
 import { currentStreak } from "@/features/goals/lib/streak";
 import { formatDateShort } from "@/lib/utils";
 
+const moisFmt = new Intl.DateTimeFormat("ar-TN", { month: "long", year: "numeric" });
+
 function fixLabColors(doc: Document) {
   doc.querySelectorAll<HTMLElement>("*").forEach((el) => {
     const cs = doc.defaultView?.getComputedStyle(el);
@@ -109,9 +111,7 @@ export function PlanPdfDocument({
   const progress = targetProgress(logs, target);
   const streak = currentStreak(goal?.checkins ?? []);
   const moisLabel = goal
-    ? new Intl.DateTimeFormat("ar-TN", { month: "long", year: "numeric" }).format(
-        new Date(`${goal.mois}-01T12:00:00`),
-      )
+    ? moisFmt.format(new Date(`${goal.mois}-01T12:00:00`))
     : null;
 
   return (

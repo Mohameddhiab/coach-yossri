@@ -27,6 +27,13 @@ import { useUsers } from "@/features/users/hooks/useUsers";
 import { useCoachShell } from "@/features/coach/hooks/useCoachShell";
 import { cn } from "@/lib/utils";
 
+const todayFmt = new Intl.DateTimeFormat("ar-TN", {
+  weekday: "long",
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+});
+
 export const COACH_NAV: {
   href: string;
   label: string;
@@ -179,12 +186,7 @@ export function CoachShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
-  const todayFormatted = new Intl.DateTimeFormat("ar-TN", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  }).format(new Date());
+  const todayFormatted = todayFmt.format(new Date());
 
   return (
     <div className="no-print flex min-h-screen bg-background">

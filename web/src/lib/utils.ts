@@ -5,30 +5,40 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+const arTNLong = new Intl.DateTimeFormat("ar-TN", {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+})
+
+const arTNShort = new Intl.DateTimeFormat("ar-TN", {
+  day: "numeric",
+  month: "short",
+})
+
+const arTNTime = new Intl.DateTimeFormat("ar-TN", {
+  hour: "2-digit",
+  minute: "2-digit",
+})
+
+const arTNWD = new Intl.DateTimeFormat("ar-TN", { weekday: "long" })
+
+const tndFmt = new Intl.NumberFormat("fr-TN", { maximumFractionDigits: 3 })
+
 export function formatDate(date: string | Date) {
-  return new Intl.DateTimeFormat("ar-TN", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  }).format(new Date(date))
+  return arTNLong.format(new Date(date))
 }
 
 export function formatDateShort(date: string | Date) {
-  return new Intl.DateTimeFormat("ar-TN", {
-    day: "numeric",
-    month: "short",
-  }).format(new Date(date))
+  return arTNShort.format(new Date(date))
 }
 
 export function formatTime(date: string | Date) {
-  return new Intl.DateTimeFormat("ar-TN", {
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(new Date(date))
+  return arTNTime.format(new Date(date))
 }
 
 export function formatTND(amount: number) {
-  return `${new Intl.NumberFormat("fr-TN", { maximumFractionDigits: 3 }).format(amount)} د.ت`
+  return `${tndFmt.format(amount)} د.ت`
 }
 
 export function formatRelativeDate(date: string | Date) {
@@ -40,7 +50,7 @@ export function formatRelativeDate(date: string | Date) {
   if (diffDays === 0) return formatTime(d)
   if (diffDays === 1) return "أمس"
   if (diffDays < 7) {
-    return new Intl.DateTimeFormat("ar-TN", { weekday: "long" }).format(d)
+    return arTNWD.format(d)
   }
   return formatDateShort(d)
 }

@@ -66,6 +66,12 @@ function useDebounced<T>(value: T, ms: number): T {
   return debounced;
 }
 
+function copyPhone(e: React.MouseEvent, tel: string) {
+  e.stopPropagation();
+  navigator.clipboard.writeText(tel);
+  toast.success("تم نسخ رقم الهاتف");
+}
+
 export function UsersTable() {
   const router = useRouter();
   const [search, setSearch] = useState("");
@@ -100,12 +106,6 @@ export function UsersTable() {
     }
     return list;
   }, [byEngagement, data]);
-
-  const copyPhone = (e: React.MouseEvent, tel: string) => {
-    e.stopPropagation();
-    navigator.clipboard.writeText(tel);
-    toast.success("تم نسخ رقم الهاتف");
-  };
 
   return (
     <div className="space-y-4">
