@@ -507,7 +507,7 @@ function MemberWeights({ userId }: { userId: string }) {
     setError(null);
     const value = Number(poids);
     if (!value || value < 30 || value > 250) {
-      setError("أدخل قيمة وزن صحيحة (٣٠ - ٢٥٠ كغم)");
+      setError("أدخل قيمة وزن صحيحة (30 - 250 كغم)");
       return;
     }
     try {

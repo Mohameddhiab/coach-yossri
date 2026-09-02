@@ -31,7 +31,7 @@ const schema = z
     email: z.string().email("البريد الإلكتروني غير صحيح"),
     telephone: z
       .string()
-      .regex(/^[\d+\s]{8,}$/, "يجب أن يتكون رقم الهاتف من ٨ أرقام على الأقل"),
+      .regex(/^[\d+\s]{8,}$/, "يجب أن يتكون رقم الهاتف من 8 أرقام على الأقل"),
     tier: z.string().optional(),
     date_debut: z.string().optional(),
     date_fin: z.string().optional(),
@@ -128,7 +128,7 @@ export function CreateUserForm({ onDone }: { onDone?: () => void }) {
           تم إنشاء الحساب. هذه هي كلمة المرور المُنشأة — يُرجى تسليمها للمشترك (تظهر مرة واحدة فقط):
         </div>
         <div className="text-xs text-muted-foreground">
-          سيُرسَل رابط تأكيد البريد الإلكتروني إلى المشترك عند أول تسجيل دخول له (صالح لمدة ٢٤ ساعة).
+          سيُرسَل رابط تأكيد البريد الإلكتروني إلى المشترك عند أول تسجيل دخول له (صالح لمدة 24 ساعة).
         </div>
         <div className="mx-auto flex max-w-sm items-center gap-2 rounded-xl border border-primary/40 bg-primary/10 p-3">
           <code dir="ltr" className="flex-1 text-lg font-bold tracking-wider text-primary">

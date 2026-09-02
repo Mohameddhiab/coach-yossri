@@ -20,7 +20,7 @@ export function PhotoGallery({ userId, canEdit = true }: { userId: string; canEd
   const onFile = async (file: File | undefined) => {
     if (!file) return;
     if (file.size > 3 * 1024 * 1024) {
-      toast.error("حجم الصورة كبير جدًا — يُرجى اختيار صورة أصغر من ٣ ميغابايت");
+      toast.error("حجم الصورة كبير جدًا — يُرجى اختيار صورة أصغر من 3 ميغابايت");
       return;
     }
     setUploading(true);

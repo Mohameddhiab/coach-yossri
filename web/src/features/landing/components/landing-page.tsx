@@ -657,7 +657,7 @@ function PricingSection({ whatsappUrl }: { whatsappUrl: string }) {
                   {full ? (
                     <Button asChild variant="outline" className="w-full">
                       <a
-                        href={waFor(plan, "أهلاً مدرب، أرغب بمزيد من المعلومات حول الحجز في باقة")}
+                        href={waFor(plan, "أهلاً مدرب، أرغب في مزيد من المعلومات حول الحجز في باقة")}
                         target="_blank"
                         rel="noopener noreferrer"
                       >
@@ -743,7 +743,7 @@ function FaqSection() {
     <section id="faq" className="scroll-mt-20 space-y-6 py-14">
       <SectionLabel>06 / FAQ</SectionLabel>
       <SectionTitle icon={<MessageCircle className="size-5" />}>
-        عندك سؤال؟ غالباً جوابه هنا.
+        لديك سؤال؟ الإجابة على الأرجح هنا.
       </SectionTitle>
       <Reveal>
         <Accordion type="single" collapsible className="rounded-xl border px-4">
@@ -780,7 +780,7 @@ function FinalCta({ whatsappUrl }: { whatsappUrl: string }) {
             أفضل نسخة منك تبدأ بقرار.
           </h2>
           <p className="mx-auto mt-3 max-w-md text-sm text-muted-foreground">
-            انضم إلى أكثر من ٢٥٠ مشتركًا غيّروا أجسامهم ببرنامج مصمم خصيصاً لهم ومتابعة حقيقية.
+            انضم إلى أكثر من 250 مشتركاً غيّروا أجسامهم ببرنامج مصمم خصيصاً لهم ومتابعة حقيقية.
           </p>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
             <Button asChild size="lg">

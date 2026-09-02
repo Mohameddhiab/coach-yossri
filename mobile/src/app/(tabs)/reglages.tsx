@@ -105,7 +105,7 @@ export default function ReglagesScreen() {
           secureTextEntry
           value={next}
           onChangeText={setNext}
-          placeholder="٦ أحرف على الأقل"
+          placeholder="6 أحرف على الأقل"
         />
         <Input
           label="تأكيد كلمة المرور الجديدة"

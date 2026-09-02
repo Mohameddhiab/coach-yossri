@@ -217,15 +217,15 @@ export interface BadgeDef {
 
 export const BADGE_DEFS: BadgeDef[] = [
   { id: "FIRST_WEIGH", label: "تسجيل الوزن الأول", description: "سجّلت وزنك لأول مرة", icon: "scale" },
-  { id: "REGULAR_10", label: "المواظب", description: "١٠ تسجيلات وزن أو أكثر", icon: "calendar" },
-  { id: "LOST_5", label: "فقدان ٥ كغم", description: "فقدت ٥ كغم منذ البداية", icon: "trophy" },
-  { id: "LOST_10", label: "فقدان ١٠ كغم", description: "فقدت ١٠ كغم منذ البداية", icon: "medal" },
-  { id: "GAINED_5", label: "زيادة ٥ كغم", description: "اكتسبت ٥ كغم من الكتلة العضلية", icon: "dumbbell" },
-  { id: "STREAK_7", label: "سلسلة ٧ أيام", description: "٧ أيام متتالية من الحضور", icon: "flame" },
-  { id: "STREAK_30", label: "سلسلة ٣٠ يومًا", description: "٣٠ يومًا متتاليًا من الحضور", icon: "flame" },
+  { id: "REGULAR_10", label: "المواظب", description: "10 تسجيلات وزن أو أكثر", icon: "calendar" },
+  { id: "LOST_5", label: "فقدان 5 كغم", description: "فقدت 5 كغم منذ البداية", icon: "trophy" },
+  { id: "LOST_10", label: "فقدان 10 كغم", description: "فقدت 10 كغم منذ البداية", icon: "medal" },
+  { id: "GAINED_5", label: "زيادة 5 كغم", description: "اكتسبت 5 كغم من الكتلة العضلية", icon: "dumbbell" },
+  { id: "STREAK_7", label: "سلسلة 7 أيام", description: "7 أيام متتالية من الحضور", icon: "flame" },
+  { id: "STREAK_30", label: "سلسلة 30 يومًا", description: "30 يومًا متتاليًا من الحضور", icon: "flame" },
   { id: "GOAL_DONE", label: "تحدّي الشهر", description: "أتممت هدف الشهر بنجاح", icon: "target" },
-  { id: "FIDELITY_BRONZE", label: "عضو برونزي", description: "٣ أشهر من العضوية", icon: "star" },
-  { id: "FIDELITY_SILVER", label: "عضو فضّي", description: "٦ أشهر من العضوية", icon: "star" },
+  { id: "FIDELITY_BRONZE", label: "عضو برونزي", description: "3 أشهر من العضوية", icon: "star" },
+  { id: "FIDELITY_SILVER", label: "عضو فضّي", description: "6 أشهر من العضوية", icon: "star" },
   { id: "FIDELITY_GOLD", label: "عضو ذهبي", description: "سنة كاملة من العضوية", icon: "medal" },
   { id: "MEMBER_1Y", label: "عام مع المدرب", description: "مضى عام كامل على انضمامك", icon: "calendar" },
 ];

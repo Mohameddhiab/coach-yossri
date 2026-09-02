@@ -65,9 +65,9 @@ export type ActiviteLevel = "SEDENTAIRE" | "LEGER" | "MODERE" | "INTENSE";
 
 export const ACTIVITE_LABELS: Record<ActiviteLevel, string> = {
   SEDENTAIRE: "خامل (جلوس طوال اليوم)",
-  LEGER: "نشاط خفيف (١ - ٣ مرات في الأسبوع)",
-  MODERE: "نشاط متوسط (٣ - ٥ مرات في الأسبوع)",
-  INTENSE: "نشاط مرتفع (٦ - ٧ مرات في الأسبوع)",
+  LEGER: "نشاط خفيف (1 - 3 مرات في الأسبوع)",
+  MODERE: "نشاط متوسط (3 - 5 مرات في الأسبوع)",
+  INTENSE: "نشاط مرتفع (6 - 7 مرات في الأسبوع)",
 };
 
 export const SEXE_LABELS: Record<Sexe, string> = {

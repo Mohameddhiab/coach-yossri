@@ -144,7 +144,7 @@ const DURATION_OPTIONS = [
   { value: 3, label: "3 أيام", days: ["DIM", "MAR", "VEN"] as WeekDay[] },
   { value: 5, label: "5 أيام", days: ["SAM", "DIM", "LUN", "MAR", "MER"] as WeekDay[] },
   { value: 7, label: "7 أيام", days: WEEK_DAYS },
-  { value: 8, label: "٧ أيام + جميع الأيام", days: [...WEEK_DAYS, "TOUS_LES_JOURS" as WeekDay] },
+  { value: 8, label: "7 أيام + جميع الأيام", days: [...WEEK_DAYS, "TOUS_LES_JOURS" as WeekDay] },
 ] as const;
 
 function ExerciseFormDialog({
@@ -364,12 +364,12 @@ function ExerciseFormDialog({
               id="ex-reps"
               value={data.repetitions ?? ""}
               onChange={(e) => onChange({ repetitions: e.target.value || null })}
-              placeholder="سطر لكل جولة — مثال: ٦-١٢ تكرار حتى الإخفاق العضلي"
+              placeholder="سطر لكل جولة — مثال: 6-12 تكرار حتى الإخفاق العضلي"
               maxLength={300}
               rows={3}
               className="text-sm leading-4"
             />
-            <p className="text-xs text-muted-foreground">سطر لكل جولة: ٦-١٢ حتى الإخفاق، {">"}١٢ زيادة الحمل، {"<"}٥ تخفيف الحمل</p>
+            <p className="text-xs text-muted-foreground">سطر لكل جولة: 6-12 حتى الإخفاق، {">"}12 زيادة الحمل، {"<"}5 تخفيف الحمل</p>
           </div>
         </div>
         <DialogFooter className="gap-2">

@@ -42,7 +42,7 @@ export function renderWelcomeEmail(
             <td width="28" valign="top" style="padding:5px 0;">
               <span style="display:inline-block;width:20px;height:20px;line-height:20px;text-align:center;
                 background:#1D1E23;border:1px solid #2A2D33;border-radius:6px;color:#FBBF24;
-                font-size:11px;font-weight:800;">١</span>
+                font-size:11px;font-weight:800;">1</span>
             </td>
             <td valign="top" style="padding:5px 0;font-size:13px;color:#C7C9CE;line-height:1.7;">سجّل دخولك بالبيانات أعلاه</td>
           </tr>
@@ -50,7 +50,7 @@ export function renderWelcomeEmail(
             <td width="28" valign="top" style="padding:5px 0;">
               <span style="display:inline-block;width:20px;height:20px;line-height:20px;text-align:center;
                 background:#1D1E23;border:1px solid #2A2D33;border-radius:6px;color:#FBBF24;
-                font-size:11px;font-weight:800;">٢</span>
+                font-size:11px;font-weight:800;">2</span>
             </td>
             <td valign="top" style="padding:5px 0;font-size:13px;color:#C7C9CE;line-height:1.7;">غيّر كلمة المرور من صفحة الإعدادات</td>
           </tr>
@@ -58,7 +58,7 @@ export function renderWelcomeEmail(
             <td width="28" valign="top" style="padding:5px 0;">
               <span style="display:inline-block;width:20px;height:20px;line-height:20px;text-align:center;
                 background:#1D1E23;border:1px solid #2A2D33;border-radius:6px;color:#FBBF24;
-                font-size:11px;font-weight:800;">٣</span>
+                font-size:11px;font-weight:800;">3</span>
             </td>
             <td valign="top" style="padding:5px 0;font-size:13px;color:#C7C9CE;line-height:1.7;">استكشف خطتك وابدأ رحلتك التدريبية</td>
           </tr>

@@ -17,7 +17,7 @@ export function renderVerifyEmail(name: string, confirmUrl: string): string {
     noteHtml:
       infoBox(`
         <span style="font-size:12px;color:#9BA0A8;display:block;margin-bottom:2px;">⏱ صلاحية الرابط</span>
-        <b style="font-size:13px;color:#FBBF24;">هذا الرابط صالح لمدة ٢٤ ساعة فقط.</b>
+        <b style="font-size:13px;color:#FBBF24;">هذا الرابط صالح لمدة 24 ساعة فقط.</b>
         <span style="display:block;margin-top:8px;font-size:12px;color:#9BA0A8;">
           إذا انتهت الصلاحية، اطلب من مدربك إعادة إرسال رابط التفعيل.
         </span>`) +
