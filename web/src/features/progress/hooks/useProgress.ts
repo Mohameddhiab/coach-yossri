@@ -22,6 +22,7 @@ export function useAddWeight(userId: string) {
     mutationFn: (input: Parameters<typeof addWeightLog>[1]) => addWeightLog(userId, input),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["weight-logs", userId] });
+      qc.invalidateQueries({ queryKey: ["me", "weight-logs"] });
       qc.invalidateQueries({ queryKey: ["users"] });
     },
   });
@@ -31,7 +32,10 @@ export function useDeleteWeight(userId: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (logId: string) => deleteWeightLog(logId),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["weight-logs", userId] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["weight-logs", userId] });
+      qc.invalidateQueries({ queryKey: ["me", "weight-logs"] });
+    },
   });
 }
 
