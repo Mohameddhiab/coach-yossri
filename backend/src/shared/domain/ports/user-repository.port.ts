@@ -24,7 +24,7 @@ export interface UserRepository {
     patch: Partial<
       Pick<
         User,
-        'nom' | 'prenom' | 'telephone' | 'dateNaissance' | 'sexe' | 'tailleCm'
+        'nom' | 'prenom' | 'telephone' | 'dateNaissance' | 'sexe' | 'tailleCm' | 'avatarUrl'
       >
     >,
   ): Promise<User>;

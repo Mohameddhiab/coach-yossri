@@ -69,7 +69,7 @@ import {
   useWorkoutTemplates,
 } from "@/features/workout-plans/hooks/useWorkoutPlan";
 import type { WorkoutExerciseInput, WorkoutPlan } from "@/features/workout-plans/api/workoutPlans.api";
-import { useLocalExercises } from "@/features/exercises/hooks/useExercises";
+import { useLocalExercises, useCreateExercise } from "@/features/exercises/hooks/useExercises";
 import type { Exercise } from "@/features/exercises/api/exercises.api";
 import { fallbackForCategory } from "@/shared/lib/exercise-fallbacks";
 import { getGuideExercise, getGuideImageUrl, getGuideImageUrls } from "@/shared/lib/exercise-guide-map";
@@ -167,6 +167,11 @@ function ExerciseFormDialog({
   isEditing: boolean;
 }) {
   const [search, setSearch] = useState("");
+  const [showCreate, setShowCreate] = useState(false);
+  const [newExName, setNewExName] = useState("");
+  const [newExCategory, setNewExCategory] = useState("Chest");
+  const [newExImageUrl, setNewExImageUrl] = useState("");
+  const createExerciseMut = useCreateExercise();
   const curatedHit = data.nom
     ? (Object.values(curatedByCategory)
         .flat()
@@ -298,6 +303,94 @@ function ExerciseFormDialog({
               </SelectContent>
             </Select>
           </div>
+
+          {!showCreate ? (
+            <button
+              type="button"
+              onClick={() => {
+                setShowCreate(true);
+                setNewExName(search || data.nom || "");
+              }}
+              className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-primary/40 bg-primary/5 px-3 py-2 text-xs font-medium text-primary transition-colors hover:bg-primary/10"
+            >
+              <Plus className="size-3.5" />
+              تمرين غير موجود؟ أنشئ واحداً مخصصاً
+            </button>
+          ) : (
+            <div className="space-y-2 rounded-lg border bg-muted/30 p-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-primary">
+                  تمرين مخصص جديد
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setShowCreate(false)}
+                  className="text-xs text-muted-foreground hover:text-foreground"
+                >
+                  إلغاء
+                </button>
+              </div>
+              <Input
+                value={newExName}
+                onChange={(e) => setNewExName(e.target.value)}
+                placeholder="اسم التمرين"
+              />
+              <Select value={newExCategory} onValueChange={setNewExCategory}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {CATEGORY_ORDER.map((c) => (
+                    <SelectItem key={c} value={c}>
+                      {CATEGORY_LABEL[c]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Input
+                value={newExImageUrl}
+                onChange={(e) => setNewExImageUrl(e.target.value)}
+                placeholder="رابط الصورة (اختياري)"
+                dir="ltr"
+              />
+              <Button
+                size="sm"
+                className="w-full"
+                disabled={!newExName.trim() || createExerciseMut.isPending}
+                onClick={async () => {
+                  try {
+                    const ex = await createExerciseMut.mutateAsync({
+                      name: newExName.trim(),
+                      category: newExCategory,
+                      image_url: newExImageUrl || undefined,
+                    });
+                    onChange({
+                      nom: ex.name,
+                      image_url:
+                        ex.imageUrl ??
+                        fallbackForCategory(ex.category) ??
+                        null,
+                    });
+                    setShowCreate(false);
+                    setNewExName("");
+                    setNewExImageUrl("");
+                    toast.success(`تم إنشاء "${ex.name}" بنجاح`);
+                  } catch (err: unknown) {
+                    const msg =
+                      err instanceof Error ? err.message : "فشل الإنشاء";
+                    toast.error(msg);
+                  }
+                }}
+              >
+                {createExerciseMut.isPending ? (
+                  <Loader2 className="size-3.5 animate-spin" />
+                ) : (
+                  <Plus className="size-3.5 ml-1" />
+                )}
+                إنشاء واختيار
+              </Button>
+            </div>
+          )}
 
           <div className="flex flex-col items-center gap-3">
             {guideImageUrls.length === 3 ? (

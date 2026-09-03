@@ -274,6 +274,7 @@ export default function UserDetailPage() {
                 <UserAvatar
                   prenom={user.prenom}
                   nom={user.nom}
+                  src={user.avatar_url}
                   className={cn(
                     "size-16 ring-4 ring-offset-2 ring-offset-card sm:size-20",
                     status === "ACTIF" && "ring-emerald-500",
@@ -379,7 +380,7 @@ export default function UserDetailPage() {
               </CardHeader>
               <CardContent className="space-y-3 text-sm">
                 <div className="flex items-center gap-3">
-                  <UserAvatar prenom={user.prenom} nom={user.nom} className="size-12" />
+                  <UserAvatar prenom={user.prenom} nom={user.nom} src={user.avatar_url} className="size-12" />
                   <div>
                     <div className="font-bold">{user.prenom} {user.nom}</div>
                     <div className="text-xs text-muted-foreground">

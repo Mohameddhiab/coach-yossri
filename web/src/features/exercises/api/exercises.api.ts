@@ -39,3 +39,11 @@ export function listLocalExercises(q?: string) {
   const qs = q ? `?q=${encodeURIComponent(q)}` : "";
   return apiClient<Exercise[]>("GET", `/exercises${qs}`);
 }
+
+export function createExercise(input: {
+  name: string;
+  category: string;
+  image_url?: string;
+}) {
+  return apiClient<Exercise>("POST", "/exercises", input);
+}

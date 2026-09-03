@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
-import { IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { JwtAuthGuard } from '@/shared/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@/shared/common/guards/roles.guard';
 import { Roles } from '@/shared/common/decorators/roles.decorator';
@@ -13,9 +13,22 @@ import {
   ListLocalExercisesUseCase,
   SearchWgerExercisesUseCase,
 } from '../application/use-cases/exercises.use-cases';
+import { CreateExerciseUseCase } from '../application/use-cases/create-exercise.use-case';
 
 export class ImportWgerDto {
   @IsString() wger_uuid!: string;
+}
+
+export class CreateExerciseDto {
+  @IsString()
+  @IsNotEmpty()
+  name!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  category!: string;
+
+  @IsOptional() @IsString() image_url?: string;
 }
 
 @Controller('exercises')
@@ -26,6 +39,7 @@ export class ExercisesController {
     private readonly importWgerUC: ImportExerciseFromWgerUseCase,
     private readonly listLocalUC: ListLocalExercisesUseCase,
     private readonly ensureCuratedUC: EnsureCuratedExercisesUseCase,
+    private readonly createExerciseUC: CreateExerciseUseCase,
   ) {}
 
   @Get('wger/search')
@@ -41,6 +55,18 @@ export class ExercisesController {
   @UseGuards(RolesGuard)
   async importWger(@Body() dto: ImportWgerDto, @CurrentUser() auth: AuthUser) {
     return this.importWgerUC.execute(dto.wger_uuid, auth.userId);
+  }
+
+  @Post()
+  @Roles('COACH')
+  @UseGuards(RolesGuard)
+  async create(@Body() dto: CreateExerciseDto, @CurrentUser() auth: AuthUser) {
+    return this.createExerciseUC.execute({
+      name: dto.name,
+      category: dto.category,
+      imageUrl: dto.image_url,
+      createdBy: auth.userId,
+    });
   }
 
   @Get()

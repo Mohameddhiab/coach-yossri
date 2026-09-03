@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  createExercise,
   importWgerExercise,
   listLocalExercises,
   searchWgerExercises,
@@ -28,6 +29,20 @@ export function useImportWgerExercise() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (wgerUuid: string) => importWgerExercise(wgerUuid),
+    onSuccess: (ex: Exercise) => {
+      qc.invalidateQueries({ queryKey: ["exercises"] });
+      qc.setQueryData<Exercise[]>(["exercises", ""], (prev) =>
+        prev ? [ex, ...prev.filter((e) => e.id !== ex.id)].slice(0, 30) : [ex],
+      );
+    },
+  });
+}
+
+export function useCreateExercise() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { name: string; category: string; image_url?: string }) =>
+      createExercise(input),
     onSuccess: (ex: Exercise) => {
       qc.invalidateQueries({ queryKey: ["exercises"] });
       qc.setQueryData<Exercise[]>(["exercises", ""], (prev) =>

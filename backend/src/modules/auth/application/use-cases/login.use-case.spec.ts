@@ -16,6 +16,7 @@ function makeUser(over: Partial<User> = {}): User & { passwordHash: string } {
     dateNaissance: null,
     sexe: null,
     tailleCm: null,
+    avatarUrl: null,
     emailVerified: false,
     emailVerifiedAt: null,
     lastLoginAt: null,

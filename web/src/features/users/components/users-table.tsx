@@ -261,6 +261,7 @@ export function UsersTable() {
                             <UserAvatar
                               prenom={user.prenom}
                               nom={user.nom}
+                              src={user.avatar_url}
                               className={cn(
                                 "size-10 ring-2 ring-offset-2 ring-offset-card transition-transform group-hover:scale-105",
                                 statusValue === "ACTIF" && "ring-emerald-500/70",
@@ -405,6 +406,7 @@ export function UsersTable() {
                   <UserAvatar
                     prenom={user.prenom}
                     nom={user.nom}
+                    src={user.avatar_url}
                     className={cn(
                       "size-11 ring-2 ring-offset-2 ring-offset-card",
                       statusValue === "ACTIF" && "ring-emerald-500/70",

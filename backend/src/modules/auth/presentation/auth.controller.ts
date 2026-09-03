@@ -2,18 +2,23 @@ import {
   Body,
   Controller,
   Get,
+  Patch,
   Post,
   Put,
   Req,
   Res,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { Throttle } from '@nestjs/throttler';
 import type { Request, Response } from 'express';
 import {
   IsBoolean,
   IsEmail,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
   MinLength,
@@ -36,6 +41,8 @@ import {
   RequestEmailVerificationUseCase,
   ConfirmEmailVerificationUseCase,
 } from '../application/use-cases/verify-email.use-case';
+import { UpdateOwnProfileUseCase } from '../application/use-cases/update-own-profile.use-case';
+import { UploadAvatarUseCase } from '../application/use-cases/upload-avatar.use-case';
 import { toUserApi } from '@/shared/mapping/user.mapper';
 import type { NotificationPrefs } from '@/shared/domain/entities';
 import {
@@ -93,6 +100,15 @@ export class VerifyEmailDto {
   token!: string;
 }
 
+export class UpdateProfileDto {
+  @IsOptional() @IsString() nom?: string;
+  @IsOptional() @IsString() prenom?: string;
+  @IsOptional() @IsString() telephone?: string;
+  @IsOptional() @IsString() sexe?: string | null;
+  @IsOptional() @IsNumber() taille_cm?: number | null;
+  @IsOptional() @IsString() date_naissance?: string | null;
+}
+
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -107,6 +123,8 @@ export class AuthController {
     private readonly confirmEmailVerificationUseCase: ConfirmEmailVerificationUseCase,
     private readonly refreshSessions: RefreshSessionRepository,
     private readonly rateLimiter: AuthRateLimitService,
+    private readonly updateOwnProfileUseCase: UpdateOwnProfileUseCase,
+    private readonly uploadAvatarUseCase: UploadAvatarUseCase,
   ) {}
 
   private setTokens(res: Response, accessToken: string, refreshToken: string) {
@@ -273,6 +291,67 @@ export class AuthController {
         nouveauPlan: dto.nouveau_plan,
       }),
     );
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('profile')
+  async updateProfile(
+    @CurrentUser() auth: AuthUser,
+    @Body() dto: UpdateProfileDto,
+  ) {
+    const dateNaissance =
+      dto.date_naissance === undefined
+        ? undefined
+        : dto.date_naissance
+          ? new Date(dto.date_naissance)
+          : null;
+
+    const user = await this.updateOwnProfileUseCase.execute(auth.userId, {
+      nom: dto.nom,
+      prenom: dto.prenom,
+      telephone: dto.telephone,
+      sexe: dto.sexe === undefined ? undefined : (dto.sexe ?? null),
+      tailleCm:
+        dto.taille_cm === undefined ? undefined : (dto.taille_cm ?? null),
+      dateNaissance,
+    });
+    return toUserApi(user);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('profile/avatar')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: { fileSize: 5 * 1024 * 1024 },
+      fileFilter: (_req, file, cb) => {
+        const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+        if (allowed.includes(file.mimetype)) cb(null, true);
+        else
+          cb(
+            new DomainException(
+              400,
+              'VALIDATION',
+              'نوع الصورة غير مدعوم (JPEG, PNG, WebP, GIF)',
+            ),
+            false,
+          );
+      },
+    }),
+  )
+  async uploadAvatar(
+    @CurrentUser() auth: AuthUser,
+    @UploadedFile()
+    file?: {
+      mimetype: string;
+      size: number;
+      originalname: string;
+      buffer: Buffer;
+    },
+  ) {
+    if (!file) {
+      throw new DomainException(400, 'VALIDATION', 'الرجاء اختيار صورة');
+    }
+    return this.uploadAvatarUseCase.execute(auth.userId, file);
   }
 }
 

@@ -97,6 +97,7 @@ export interface User {
 date_naissance?: string | null;
   sexe?: Sexe | null;
   taille_cm?: number | null;
+  avatar_url?: string | null;
   email_verified: boolean;
   email_verified_at?: string | null;
   coach_id: string | null;

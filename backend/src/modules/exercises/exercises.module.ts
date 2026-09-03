@@ -7,6 +7,7 @@ import {
   ListLocalExercisesUseCase,
   SearchWgerExercisesUseCase,
 } from './application/use-cases/exercises.use-cases';
+import { CreateExerciseUseCase } from './application/use-cases/create-exercise.use-case';
 import { ExercisesController } from './presentation/exercises.controller';
 
 @Module({
@@ -18,6 +19,7 @@ import { ExercisesController } from './presentation/exercises.controller';
     ImportExerciseFromWgerUseCase,
     ListLocalExercisesUseCase,
     EnsureCuratedExercisesUseCase,
+    CreateExerciseUseCase,
   ],
 })
 export class ExercisesModule {}

@@ -12,6 +12,8 @@ import {
   RequestEmailVerificationUseCase,
   ConfirmEmailVerificationUseCase,
 } from '../application/use-cases/verify-email.use-case';
+import { UpdateOwnProfileUseCase } from '../application/use-cases/update-own-profile.use-case';
+import { UploadAvatarUseCase } from '../application/use-cases/upload-avatar.use-case';
 import { PasswordResetTokenRepository } from '../infrastructure/password-reset-token.repository';
 import { EmailVerificationTokenRepository } from '../infrastructure/email-verification-token.repository';
 import { RefreshSessionRepository } from '../infrastructure/refresh-session.repository';
@@ -47,6 +49,8 @@ import { TOKEN_SERVICE } from '@/shared/domain/token-service.port';
     ResetPasswordUseCase,
     RequestEmailVerificationUseCase,
     ConfirmEmailVerificationUseCase,
+    UpdateOwnProfileUseCase,
+    UploadAvatarUseCase,
     PasswordResetTokenRepository,
     EmailVerificationTokenRepository,
     RefreshSessionRepository,

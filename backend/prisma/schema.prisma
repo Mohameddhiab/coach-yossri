@@ -72,6 +72,7 @@ model User {
   dateNaissance DateTime?
   sexe          Sexe?
   tailleCm      Int?
+  avatarUrl     String?
   emailVerified Boolean  @default(false)
   emailVerifiedAt DateTime?
   lastLoginAt    DateTime?

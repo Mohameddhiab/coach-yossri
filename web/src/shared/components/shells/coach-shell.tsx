@@ -140,6 +140,7 @@ function SidebarContent() {
             <UserAvatar
               prenom={user?.prenom ?? "كابتن"}
               nom={user?.nom ?? "يسري"}
+              src={user?.avatar_url}
               className="size-10 ring-2 ring-primary/30"
             />
             <span

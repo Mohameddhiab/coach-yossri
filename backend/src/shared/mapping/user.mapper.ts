@@ -10,6 +10,7 @@ export interface UserApi {
   date_naissance: string | null;
   sexe: string | null;
   taille_cm: number | null;
+  avatar_url: string | null;
   email_verified: boolean;
   email_verified_at: string | null;
   coach_id: string | null;
@@ -28,6 +29,7 @@ export function toUserApi(u: User): UserApi {
     date_naissance: u.dateNaissance ? u.dateNaissance.toISOString() : null,
     sexe: u.sexe,
     taille_cm: u.tailleCm,
+    avatar_url: u.avatarUrl,
     email_verified: u.emailVerified,
     email_verified_at: u.emailVerifiedAt
       ? u.emailVerifiedAt.toISOString()

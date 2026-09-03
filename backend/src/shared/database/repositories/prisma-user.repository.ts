@@ -22,6 +22,7 @@ export class PrismaUserRepository implements UserRepository {
     dateNaissance: Date | null;
     sexe: string | null;
     tailleCm: number | null;
+    avatarUrl: string | null;
     emailVerified: boolean;
     emailVerifiedAt: Date | null;
     lastLoginAt: Date | null;
@@ -39,6 +40,7 @@ export class PrismaUserRepository implements UserRepository {
       dateNaissance: row.dateNaissance,
       sexe: row.sexe as User['sexe'],
       tailleCm: row.tailleCm,
+      avatarUrl: row.avatarUrl,
       emailVerified: row.emailVerified,
       emailVerifiedAt: row.emailVerifiedAt,
       lastLoginAt: row.lastLoginAt,
@@ -90,7 +92,7 @@ export class PrismaUserRepository implements UserRepository {
     patch: Partial<
       Pick<
         User,
-        'nom' | 'prenom' | 'telephone' | 'dateNaissance' | 'sexe' | 'tailleCm'
+        'nom' | 'prenom' | 'telephone' | 'dateNaissance' | 'sexe' | 'tailleCm' | 'avatarUrl'
       >
     >,
   ): Promise<User> {
@@ -102,6 +104,7 @@ export class PrismaUserRepository implements UserRepository {
       data.dateNaissance = patch.dateNaissance;
     if (patch.sexe !== undefined) data.sexe = patch.sexe;
     if (patch.tailleCm !== undefined) data.tailleCm = patch.tailleCm;
+    if (patch.avatarUrl !== undefined) data.avatarUrl = patch.avatarUrl;
     const row = await this.prisma.user.update({ where: { id }, data });
     return this.map(row);
   }

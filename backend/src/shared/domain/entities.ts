@@ -20,6 +20,7 @@ export interface User {
   dateNaissance: Date | null;
   sexe: Sexe | null;
   tailleCm: number | null;
+  avatarUrl: string | null;
   emailVerified: boolean;
   emailVerifiedAt: Date | null;
   lastLoginAt: Date | null;
