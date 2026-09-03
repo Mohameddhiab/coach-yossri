@@ -35,7 +35,7 @@ function toPhotoApi(p: ProgressPhoto) {
 }
 
 class AddWeightDto {
-  @IsString() date?: string;
+  @IsOptional() @IsString() date?: string;
   @IsNumber() poids_kg!: number;
   @IsOptional() @IsString() note?: string;
 }
