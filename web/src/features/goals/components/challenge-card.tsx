@@ -10,6 +10,7 @@ import { useChallengeLeaderboard } from "@/features/goals/hooks/useChallenge";
 import type { LeaderboardPeriod } from "@/features/users/api/users.api";
 import { EmptyState } from "@/shared/components/empty-state";
 import { ErrorState } from "@/shared/components/error-state";
+import { UserAvatar } from "@/shared/components/user-avatar";
 
 const RANK_STYLE = [
   "bg-amber-400/20 text-amber-600 dark:text-amber-400",
@@ -107,6 +108,12 @@ export function ChallengeCard({ coach = false }: { coach?: boolean }) {
                     >
                       {i + 1}
                     </span>
+                    <UserAvatar
+                      src={row.avatar_url}
+                      prenom={row.pseudo === "أنت" ? "" : row.pseudo.split(".")[0]?.trim() ?? ""}
+                      nom={row.pseudo === "أنت" ? "" : row.pseudo.split(".")[1]?.trim() ?? ""}
+                      className="size-7 text-[10px]"
+                    />
                     <span className="truncate font-medium">{row.pseudo}</span>
                     {i === 0 && <Crown className="size-3.5 shrink-0 text-amber-500" />}
                   </div>

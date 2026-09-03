@@ -37,6 +37,7 @@ export class ChallengeController {
       count: 0,
       prenom: u.prenom,
       nom: u.nom,
+      avatarUrl: u.avatarUrl ?? null,
       dateDebut: u.createdAt,
     }));
 
@@ -67,6 +68,7 @@ export class ChallengeController {
         my_rank,
         top: top.map((r) => ({
           count: r.count,
+          avatar_url: r.avatarUrl,
           pseudo:
             r.user_id === auth.userId
               ? 'أنت'
@@ -80,6 +82,7 @@ export class ChallengeController {
       top: top.map((r) => ({
         count: r.count,
         pseudo: `${r.prenom} ${r.nom}`,
+        avatar_url: r.avatarUrl,
         user_id: r.user_id,
       })),
     };

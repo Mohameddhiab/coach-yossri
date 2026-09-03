@@ -104,6 +104,7 @@ export type LeaderboardPeriod = "7" | "30" | "all";
 export interface ChallengeRank {
   count: number;
   pseudo: string;
+  avatar_url?: string | null;
   user_id?: string;
 }
 
