@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Crown, Swords, Trophy } from "lucide-react";
+import { Crown, Flame, Swords, Trophy } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
@@ -29,7 +29,7 @@ export function ChallengeCard({ coach = false }: { coach?: boolean }) {
   const { data, isLoading, isError, refetch, isRefetching } =
     useChallengeLeaderboard(period);
 
-  const rows = data?.top ?? [];
+  const rows = (data?.top ?? []).slice(coach ? 0 : 3);
   const my_rank = data?.my_rank ?? null;
 
   return (
@@ -97,30 +97,47 @@ export function ChallengeCard({ coach = false }: { coach?: boolean }) {
               </div>
             )}
             {rows.map((row, i) => {
+              const absoluteRank = coach ? i + 1 : i + 4;
               const inner = (
                 <>
                   <div className="flex min-w-0 items-center gap-3">
                     <span
                       className={cn(
                         "flex size-7 shrink-0 items-center justify-center rounded-full text-xs font-bold tabular-nums",
-                        i < 3 ? RANK_STYLE[i] : "bg-muted text-muted-foreground",
+                        coach && i < 3 ? RANK_STYLE[i] : "bg-muted text-muted-foreground",
                       )}
                     >
-                      {i + 1}
+                      {absoluteRank}
                     </span>
                     <UserAvatar
                       src={row.avatar_url}
                       prenom={row.pseudo === "أنت" ? "" : row.pseudo.split(".")[0]?.trim() ?? ""}
                       nom={row.pseudo === "أنت" ? "" : row.pseudo.split(".")[1]?.trim() ?? ""}
-                      className="size-7 text-[10px]"
+                      className="size-8 text-[10px]"
                     />
-                    <span className="truncate font-medium">{row.pseudo}</span>
-                    {i === 0 && <Crown className="size-3.5 shrink-0 text-amber-500" />}
-                  </div>
-                  <div className="flex shrink-0 items-center gap-2">
-                    <span className="text-xs text-muted-foreground tabular-nums">
-                      {row.count} حصة
-                    </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex w-full items-center justify-between gap-2">
+                        <div className="flex min-w-0 items-center gap-2">
+                          <span className="truncate font-medium">{row.pseudo}</span>
+                          {i === 0 && <Crown className="size-3.5 shrink-0 text-amber-500" />}
+                          {row.streak > 0 && (
+                            <span className="flex shrink-0 items-center gap-0.5 text-[10px] font-semibold text-amber-500">
+                              <Flame className="size-3" />
+                              {row.streak}
+                            </span>
+                          )}
+                        </div>
+                        <span className="shrink-0 text-xs font-semibold text-muted-foreground tabular-nums">
+                          {row.count} حصة
+                        </span>
+                      </div>
+                      <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-muted">
+                        <div
+                          className="h-full rounded-full bg-primary/70"
+                          style={{ width: `${Math.max(4, Math.min(100, row.pct))}%` }}
+                        />
+                      </div>
+                    </div>
                     {coach && row.user_id && (
                       <span className="text-xs font-semibold text-primary">فتح</span>
                     )}

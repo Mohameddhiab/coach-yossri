@@ -103,14 +103,18 @@ export type LeaderboardPeriod = "7" | "30" | "all";
 
 export interface ChallengeRank {
   count: number;
+  streak: number;
+  checkin_dates: string[];
   pseudo: string;
   avatar_url?: string | null;
+  pct: number;
   user_id?: string;
 }
 
 export interface ChallengeLeaderboard {
   period: string;
-  my_rank: { rank: number; count: number; included: boolean } | null;
+  max_count: number;
+  my_rank: { rank: number; count: number; streak: number; included: boolean } | null;
   top: ChallengeRank[];
 }
 

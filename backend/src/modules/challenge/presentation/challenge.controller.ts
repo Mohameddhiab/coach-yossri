@@ -35,17 +35,24 @@ export class ChallengeController {
     const rows = allUsers.map((u) => ({
       user_id: u.id,
       count: 0,
+      streak: 0,
+      dates: [] as string[],
       prenom: u.prenom,
       nom: u.nom,
       avatarUrl: u.avatarUrl ?? null,
       dateDebut: u.createdAt,
     }));
 
-    const checkins = await this.goals.recentCheckins(since);
-    const byUser = new Map(checkins.map((c) => [c.userId, c.count]));
+    const detailed = await this.goals.recentCheckinsDetailed(since);
+    const byUser = new Map(
+      detailed.map((c) => [c.userId, { count: c.count, dates: c.dates, streak: c.streak }]),
+    );
 
     const ranked = rows
-      .map((r) => ({ ...r, count: byUser.get(r.user_id) ?? 0 }))
+      .map((r) => {
+        const d = byUser.get(r.user_id);
+        return { ...r, count: d?.count ?? 0, streak: d?.streak ?? 0, dates: d?.dates ?? [] };
+      })
       .sort(
         (a, b) =>
           b.count - a.count || a.dateDebut.getTime() - b.dateDebut.getTime(),
@@ -57,18 +64,25 @@ export class ChallengeController {
         ? {
             rank: myIndex + 1,
             count: ranked[myIndex]?.count ?? 0,
+            streak: ranked[myIndex]?.streak ?? 0,
             included: myIndex < limit,
           }
         : null;
+
+    const maxCount = ranked.length > 0 ? ranked[0].count : 1;
 
     const top = ranked.slice(0, limit);
     if (auth.role === 'USER') {
       return {
         period: windowDays === 0 ? 'all' : `${windowDays}`,
         my_rank,
+        max_count: maxCount,
         top: top.map((r) => ({
           count: r.count,
+          streak: r.streak,
+          checkin_dates: r.dates,
           avatar_url: r.avatarUrl,
+          pct: maxCount > 0 ? Math.round((r.count / maxCount) * 100) : 0,
           pseudo:
             r.user_id === auth.userId
               ? 'أنت'
@@ -79,10 +93,14 @@ export class ChallengeController {
     return {
       period: windowDays === 0 ? 'all' : `${windowDays}`,
       my_rank,
+      max_count: maxCount,
       top: top.map((r) => ({
         count: r.count,
+        streak: r.streak,
+        checkin_dates: r.dates,
         pseudo: `${r.prenom} ${r.nom}`,
         avatar_url: r.avatarUrl,
+        pct: maxCount > 0 ? Math.round((r.count / maxCount) * 100) : 0,
         user_id: r.user_id,
       })),
     };

@@ -12,4 +12,9 @@ export interface GoalRepository {
   ): Promise<MonthlyGoal>;
   checkin(userId: string, mois: string, now: Date): Promise<MonthlyGoal>;
   recentCheckins(weekAgo: number): Promise<{ userId: string; count: number }[]>;
+  recentCheckinsDetailed(
+    weekAgo: number,
+  ): Promise<
+    { userId: string; count: number; dates: string[]; streak: number }[]
+  >;
 }

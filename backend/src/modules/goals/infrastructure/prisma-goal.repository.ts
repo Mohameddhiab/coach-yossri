@@ -81,6 +81,38 @@ export class PrismaGoalRepository implements GoalRepository {
       return count > 0 ? [{ userId: g.userId, count }] : [];
     });
   }
+
+  async recentCheckinsDetailed(
+    weekAgo: number,
+  ): Promise<
+    { userId: string; count: number; dates: string[]; streak: number }[]
+  > {
+    const goals = await this.prisma.monthlyGoal.findMany();
+    const weekIso = new Date(weekAgo).getTime();
+    const todayStr = new Date().toISOString().slice(0, 10);
+
+    return goals.flatMap((g) => {
+      const allDates = Array.isArray(g.checkins)
+        ? (g.checkins as string[])
+        : [];
+      const dates = allDates.filter(
+        (c) => new Date(c).getTime() >= weekIso,
+      );
+      if (dates.length === 0) return [];
+
+      const daySet = new Set(dates.map((d) => d.slice(0, 10)));
+      let streak = 0;
+      let cursor = daySet.has(todayStr)
+        ? new Date()
+        : new Date(Date.now() - 86400000);
+      while (daySet.has(cursor.toISOString().slice(0, 10))) {
+        streak++;
+        cursor = new Date(cursor.getTime() - 86400000);
+      }
+
+      return [{ userId: g.userId, count: dates.length, dates, streak }];
+    });
+  }
 }
 
 export const PrismaGoalRepositoryProvider = {
