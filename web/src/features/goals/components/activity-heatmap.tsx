@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CalendarDays } from "lucide-react";
 
-const DAY_LABELS = ["إحد", "اثن", "ثلا", "أربع", "خميس", "جمعة", "سبت"];
+const DAY_LABELS = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
 
 function toDateKey(d: Date): string {
   return d.toISOString().slice(0, 10);
@@ -72,7 +72,7 @@ export function ActivityHeatmap({ dates }: { dates: string[] }) {
           {DAY_LABELS.map((l) => (
             <div
               key={l}
-              className="pb-1 text-center text-[11px] font-semibold text-muted-foreground"
+              className="pb-1 text-center text-[9px] font-semibold leading-tight text-muted-foreground sm:text-[11px]"
             >
               {l}
             </div>
