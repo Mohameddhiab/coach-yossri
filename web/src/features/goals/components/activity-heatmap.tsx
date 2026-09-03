@@ -3,8 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CalendarDays } from "lucide-react";
 
-const WEEKS = 5;
-const DAY_LABELS = ["إحد", "ثن", "ثلا", "أربع", "خم", "جمع", "سبت"];
+const DAY_LABELS = ["إحد", "اثن", "ثلا", "أربع", "خميس", "جمعة", "سبت"];
 
 function toDateKey(d: Date): string {
   return d.toISOString().slice(0, 10);
@@ -13,66 +12,120 @@ function toDateKey(d: Date): string {
 export function ActivityHeatmap({ dates }: { dates: string[] }) {
   const dateSet = new Set(dates.map((d) => d.slice(0, 10)));
   const today = new Date();
-  const todayDow = today.getDay();
-  const totalDays = WEEKS * 7;
-  const startDate = new Date(today);
-  startDate.setDate(startDate.getDate() - totalDays + ((6 - todayDow) % 7));
+  const todayKey = toDateKey(today);
+  const year = today.getFullYear();
+  const month = today.getMonth();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const firstDow = new Date(year, month, 1).getDay(); // 0 = Sunday
 
-  const cells: { key: string; active: boolean; isToday: boolean }[] = [];
-  for (let i = 0; i < totalDays; i++) {
-    const d = new Date(startDate);
-    d.setDate(d.getDate() + i);
+  // month name in Arabic
+  const monthLabel = today.toLocaleDateString("ar-TN", {
+    month: "long",
+    year: "numeric",
+  });
+
+  // Build calendar cells: leading empties + days + trailing empties to fill rows
+  type CalCell = { day: number | null; key: string; active: boolean; isToday: boolean };
+  const cells: CalCell[] = [];
+
+  for (let i = 0; i < firstDow; i++) {
+    cells.push({ day: null, key: `pad-start-${i}`, active: false, isToday: false });
+  }
+  for (let day = 1; day <= daysInMonth; day++) {
+    const d = new Date(year, month, day);
     const key = toDateKey(d);
     cells.push({
+      day,
       key,
       active: dateSet.has(key),
-      isToday: key === toDateKey(today),
+      isToday: key === todayKey,
+    });
+  }
+  // pad to complete last row
+  while (cells.length % 7 !== 0) {
+    cells.push({
+      day: null,
+      key: `pad-end-${cells.length}`,
+      active: false,
+      isToday: false,
     });
   }
 
-  const weeks: typeof cells[] = [];
-  for (let w = 0; w < WEEKS; w++) {
-    weeks.push(cells.slice(w * 7, w * 7 + 7));
-  }
+  const activeCount = cells.filter((c) => c.active).length;
 
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="flex items-center gap-2 text-base">
-          <CalendarDays className="size-4 text-primary" />
-          نشاطي هذا الشهر
-        </CardTitle>
+    <Card className="overflow-hidden">
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between gap-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <CalendarDays className="size-4 text-primary" />
+            نشاطي هذا الشهر
+          </CardTitle>
+          <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-medium tabular-nums">
+            {monthLabel} · {activeCount} / {daysInMonth}
+          </span>
+        </div>
       </CardHeader>
       <CardContent>
-        <div className="flex gap-1.5">
-          <div className="flex flex-col gap-0.5 pt-0.5">
-            {DAY_LABELS.map((l) => (
-              <span key={l} className="flex h-[18px] items-center text-[9px] text-muted-foreground">
-                {l}
-              </span>
-            ))}
-          </div>
-          {weeks.map((week, wi) => (
-            <div key={wi} className="flex flex-col gap-0.5">
-              {week.map((cell) => (
-                <div
-                  key={cell.key}
-                  title={cell.key}
-                  className={`h-[18px] w-[18px] rounded-[3px] border transition-colors ${
-                    cell.active
-                      ? "border-emerald-600/30 bg-emerald-500"
-                      : "border-border bg-muted/40"
-                  } ${cell.isToday ? "ring-2 ring-primary/40" : ""}`}
-                />
-              ))}
+        {/* Day labels */}
+        <div className="grid grid-cols-7 gap-1.5">
+          {DAY_LABELS.map((l) => (
+            <div
+              key={l}
+              className="pb-1 text-center text-[11px] font-semibold text-muted-foreground"
+            >
+              {l}
             </div>
           ))}
         </div>
-        <div className="mt-2 flex items-center gap-1.5 text-[10px] text-muted-foreground">
-          <div className="h-2.5 w-2.5 rounded-[2px] bg-muted/40 border border-border" />
-          <span>لم تتم</span>
-          <div className="ml-2 h-2.5 w-2.5 rounded-[2px] bg-emerald-500 border border-emerald-600/30" />
-          <span>تم التمرين</span>
+
+        {/* Calendar grid */}
+        <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
+          {cells.map((cell) => {
+            if (cell.day === null) {
+              return <div key={cell.key} className="aspect-square" />;
+            }
+            return (
+              <div
+                key={cell.key}
+                title={`${cell.key}${cell.active ? " — تم التمرين" : ""}`}
+                className={[
+                  "flex aspect-square items-center justify-center rounded-xl border text-sm font-bold tabular-nums transition-all",
+                  cell.active
+                    ? "border-emerald-600/20 bg-emerald-500 text-white shadow-sm"
+                    : "border-border bg-card text-muted-foreground hover:bg-muted/50",
+                  cell.isToday ? "ring-2 ring-amber-400 ring-offset-1 ring-offset-background" : "",
+                ].join(" ")}
+              >
+                {cell.day}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Legend + summary */}
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t pt-3">
+          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1.5">
+              <span className="size-3 rounded-md border border-border bg-card" />
+              لم تتم
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="size-3 rounded-md border border-emerald-600/20 bg-emerald-500" />
+              تم التمرين
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="size-3 rounded-md border-2 border-amber-400 bg-card" />
+              اليوم
+            </span>
+          </div>
+          <span className="text-xs font-medium text-muted-foreground">
+            {activeCount === 0
+              ? "لم تسجّل أي حضور هذا الشهر بعد"
+              : activeCount === 1
+                ? "يوم واحد نشط هذا الشهر"
+                : `${activeCount} أيام نشطة هذا الشهر`}
+          </span>
         </div>
       </CardContent>
     </Card>
