@@ -10,12 +10,14 @@ import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   CalendarDays,
+  ChevronLeft,
   Copy,
   Dumbbell,
   Edit3,
   FileDown,
   KeyRound,
   Mail,
+  MessageSquare,
   Phone,
   Send,
   ShieldAlert,
@@ -92,6 +94,7 @@ import {
 } from "@/features/users/hooks/useUsers";
 import { usePlan } from "@/features/meal-plans/hooks/useMealPlan";
 import { useWeightLogs } from "@/features/progress/hooks/useProgress";
+import { useWeightTarget } from "@/features/progress/hooks/useWeightTarget";
 import { useGoal } from "@/features/goals/hooks/useGoals";
 import { listSubscriptions } from "@/features/subscriptions/api/subscriptions.api";
 import {
@@ -138,6 +141,7 @@ export default function UserDetailPage() {
   const { data: plan } = usePlan(userId, tab === "plan");
   const { data: workout } = useWorkoutPlan(userId, tab === "plan");
   const { data: weightLogs } = useWeightLogs(userId, tab === "progress");
+  const { data: weightTarget } = useWeightTarget(userId);
   const { data: goal } = useGoal(userId, tab === "progress");
   const { data: subscriptions } = useQuery({
     queryKey: ["subscriptions", userId],
@@ -181,9 +185,25 @@ export default function UserDetailPage() {
   }, [editOpen, user, editForm]);
 
   if (isError) {
-    return (
+  const TAB_LABELS: Record<string, string> = {
+    overview: "نظرة عامة",
+    plan: "البرامج والتمارين",
+    progress: "التقدّم والوزن",
+    suivi: "المتابعة والملاحظات",
+  };
+
+  return (
       <div className="space-y-6">
-        <BackButton fallback="/users" />
+        <div className="flex items-center justify-between gap-2">
+          <BackButton fallback="/users" />
+          <nav aria-label="breadcrumb" className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <span className="font-medium text-foreground">
+              {user!.prenom} {user!.nom}
+            </span>
+            <ChevronLeft className="size-3.5 shrink-0" />
+            <span>{TAB_LABELS[tab] ?? "نظرة عامة"}</span>
+          </nav>
+        </div>
         <ErrorState onRetry={() => refetch()} retrying={isRefetching} />
       </div>
     );
@@ -340,6 +360,12 @@ export default function UserDetailPage() {
                   <span>خطة التمارين</span>
                 </Link>
               </Button>
+              <Button asChild variant="outline" className="gap-1.5 rounded-xl">
+                <Link href={`/messages`}>
+                  <MessageSquare className="size-4 text-primary" />
+                  <span>رسالة</span>
+                </Link>
+              </Button>
             </div>
           </div>
         </div>
@@ -353,10 +379,10 @@ export default function UserDetailPage() {
               <span className="truncate">نظرة عامة</span>
             </TabsTrigger>
             <TabsTrigger
-              value="suivi"
+              value="plan"
               className="min-w-0 justify-center gap-2 rounded-xl px-3 py-2.5 text-xs font-bold data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm"
             >
-              <span className="truncate">المتابعة والملاحظات</span>
+              <span className="truncate">البرامج والتمارين</span>
             </TabsTrigger>
             <TabsTrigger
               value="progress"
@@ -365,10 +391,10 @@ export default function UserDetailPage() {
               <span className="truncate">التقدّم والوزن</span>
             </TabsTrigger>
             <TabsTrigger
-              value="plan"
+              value="suivi"
               className="min-w-0 justify-center gap-2 rounded-xl px-3 py-2.5 text-xs font-bold data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm"
             >
-              <span className="truncate">البرامج والتمارين</span>
+              <span className="truncate">المتابعة والملاحظات</span>
             </TabsTrigger>
           </TabsList>
 
@@ -566,7 +592,7 @@ export default function UserDetailPage() {
         </TabsContent>
 
         <TabsContent value="suivi" className="space-y-4">
-          <div className="grid gap-5 [grid-template-columns:repeat(auto-fit,minmax(340px,1fr))] [&>*]:min-w-0">
+          <div className="grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(220px,1fr))] [&>*]:min-w-0">
             <CoachGoalCard userId={userId} />
             <FidelityCard history={subscriptions} />
             <ReferralCard user={user} />
@@ -583,6 +609,33 @@ export default function UserDetailPage() {
         </TabsContent>
 
         <TabsContent value="progress" className="space-y-4">
+          {/* 3 KPI stats as in reference capture */}
+          <div className="grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(220px,1fr))]">
+            <Card className="p-4">
+              <div className="text-xs text-muted-foreground">الوزن الحالي</div>
+              <div className="mt-1 flex items-baseline gap-1">
+                <span className="text-2xl font-black tabular-nums text-orange-500">{weightLogs?.[0]?.poids_kg ?? "—"}</span>
+                <span className="text-xs text-muted-foreground">كغ</span>
+              </div>
+            </Card>
+            <Card className="p-4">
+              <div className="text-xs text-muted-foreground">الهدف المستهدف</div>
+              <div className="mt-1 flex items-baseline gap-1">
+                <span className="text-2xl font-black tabular-nums text-emerald-500">{weightTarget?.poids_kg ?? "—"}</span>
+                <span className="text-xs text-muted-foreground">كغ</span>
+              </div>
+            </Card>
+            <Card className="p-4">
+              <div className="text-xs text-muted-foreground">المتبقي للهدف</div>
+              <div className="mt-1 flex items-baseline gap-1">
+                <span className="text-2xl font-black tabular-nums text-sky-500">
+                  {weightLogs?.[0] && weightTarget ? `${Math.round((weightLogs[0].poids_kg - weightTarget.poids_kg) * 10) / 10}` : "—"}
+                </span>
+                <span className="text-xs text-muted-foreground">كغ</span>
+              </div>
+            </Card>
+          </div>
+
           <WeightTargetCard userId={userId} logs={weightLogs} canEdit />
           <WeightProjectionCard logs={weightLogs} />
           <WeeklyReport
@@ -598,7 +651,9 @@ export default function UserDetailPage() {
             <CardContent>
               {weightLogs && weightLogs.length > 0 ? (
                 <>
-                  <WeightChart logs={weightLogs} />
+                  <div className="min-h-[300px]">
+                    <WeightChart logs={weightLogs} height={300} />
+                  </div>
                   <div className="mt-4 flex flex-wrap gap-1.5">
                     {weightLogs.slice(0, 6).map((log) => (
                       <Badge key={log.id} variant="secondary">
@@ -609,7 +664,7 @@ export default function UserDetailPage() {
                 </>
               ) : (
                 <EmptyState
-                  className="min-h-[280px]"
+                  className="min-h-[300px]"
                   title="لا يوجد أوزان مسجلة بعد"
                   description="يقوم العضو بتسجيل وزنه بنفسه من تطبيقه"
                 />
@@ -730,10 +785,13 @@ export default function UserDetailPage() {
                 lipides={plan.lipides_g}
               />
               <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">
-                    وجبات اليوم — {WEEK_DAY_LABELS[todayWeekDay()]}
-                  </CardTitle>
+                <CardHeader className="flex-row items-center justify-between space-y-0">
+                  <CardTitle className="text-base">وجبات اليوم</CardTitle>
+                  <Button asChild size="sm" className="gap-1 rounded-full">
+                    <Link href={`/users/${userId}/plan`}>
+                      <span className="text-sm leading-none">+</span> إضافة وجبة
+                    </Link>
+                  </Button>
                 </CardHeader>
                 <CardContent>
                   <MealPlanDayView plan={plan} day={todayWeekDay()} />

@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { FileDown } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { ChevronLeft } from "lucide-react";
 import { BackButton } from "@/shared/components/back-button";
 import { PageHeader } from "@/shared/components/page-header";
 import { PageLoader } from "@/shared/components/page-loader";
@@ -53,8 +54,15 @@ export default function UserWorkoutPage() {
 
   return (
     <div className="space-y-4">
-      <div className="mb-1">
+      <div className="flex items-center justify-between gap-2">
         <BackButton fallback={`/users/${userId}`} />
+        <nav aria-label="breadcrumb" className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <span className="font-medium text-foreground">
+            {user.prenom} {user.nom}
+          </span>
+          <ChevronLeft className="size-3.5 shrink-0" />
+          <span>خطة التمارين</span>
+        </nav>
       </div>
       <PageHeader
         title="خطة التمارين"

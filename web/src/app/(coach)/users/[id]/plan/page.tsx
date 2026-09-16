@@ -18,6 +18,7 @@ import {
 import { useWorkoutPlan } from "@/features/workout-plans/hooks/useWorkoutPlan";
 import { getPlan } from "@/features/meal-plans/api/mealPlans.api";
 import { useUser } from "@/features/users/hooks/useUsers";
+import { ChevronLeft } from "lucide-react";
 import { PageLoader } from "@/shared/components/page-loader";
 import { PageHeader } from "@/shared/components/page-header";
 import { BackButton } from "@/shared/components/back-button";
@@ -72,8 +73,17 @@ export default function UserPlanPage() {
 
   return (
     <div className="space-y-5">
+      <div className="flex items-center justify-between gap-2">
+        <BackButton fallback={`/users/${userId}`} />
+        <nav aria-label="breadcrumb" className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <span className="font-medium text-foreground">
+            {user.prenom} {user.nom}
+          </span>
+          <ChevronLeft className="size-3.5 shrink-0" />
+          <span>الخطة الغذائية</span>
+        </nav>
+      </div>
       <PageHeader
-        back={`/users/${userId}`}
         title="الخطة الغذائية"
         description={`برنامج التغذية الخاص بـ ${user.prenom} ${user.nom}`}
         actions={

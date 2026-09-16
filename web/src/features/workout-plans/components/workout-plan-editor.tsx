@@ -704,9 +704,8 @@ export function WorkoutPlanEditor({ userId }: { userId: string }) {
 
           <Tabs value={day} onValueChange={(v) => setDay(v as WeekDay)}>
             <TabsList
-              variant="line"
               aria-label="أيام التمارين"
-              className="w-full justify-start gap-0 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden rounded-none border-b bg-transparent p-0 h-auto"
+              className="flex h-auto w-full justify-start gap-1.5 overflow-x-auto rounded-2xl bg-muted/60 p-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             >
               {activeDays.map((d) => {
                 const count = exercises.filter((e) => e.jour_semaine === d || (d === "TOUS_LES_JOURS" && e.jour_semaine === "TOUS_LES_JOURS")).length;
@@ -716,17 +715,16 @@ export function WorkoutPlanEditor({ userId }: { userId: string }) {
                   <TabsTrigger
                     key={d}
                     value={d}
-                    className="shrink-0 whitespace-nowrap rounded-none border-b-2 border-transparent px-3.5 py-2.5 text-sm font-medium transition-colors hover:text-foreground data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+                    className="shrink-0 whitespace-nowrap rounded-xl border px-3.5 py-2.5 text-xs font-bold transition-colors data-[state=active]:border-primary data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
                   >
                     <span className="flex items-center gap-1.5">
-                      {isToday ? (
-                        <span className={`size-1.5 shrink-0 rounded-full ${isActive ? "bg-primary" : "bg-primary/60"}`} />
-                      ) : null}
+                      {isToday && !isActive ? <span className="size-1.5 shrink-0 rounded-full bg-primary animate-pulse" /> : null}
+                      {isToday && isActive ? <span className="size-1.5 shrink-0 rounded-full bg-white" /> : null}
                       {WEEK_DAY_LABELS[d]}
                       {count ? (
                         <span
                           className={`ms-1 inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-xs font-bold tabular-nums ${
-                            isActive ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                            isActive ? "bg-white/20 text-white" : "bg-card text-muted-foreground"
                           }`}
                         >
                           {count}

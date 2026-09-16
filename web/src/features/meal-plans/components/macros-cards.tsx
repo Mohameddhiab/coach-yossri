@@ -21,7 +21,7 @@ export function MacrosCards({
   const values: Record<string, number> = { cal: calories, pro: proteines, glu: glucides, lip: lipides };
 
   return (
-    <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+    <div className="grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(220px,1fr))]">
       {ITEMS.map((item) => (
         <div
           key={item.key}
