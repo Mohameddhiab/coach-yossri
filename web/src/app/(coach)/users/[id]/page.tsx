@@ -268,15 +268,15 @@ export default function UserDetailPage() {
 
         {/* Member 360 Hero Card */}
         <div className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/10 via-card to-card p-6 shadow-sm">
-          <div className="flex flex-wrap items-center justify-between gap-6">
-            <div className="flex items-center gap-4">
-              <div className="relative">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex min-w-0 items-center gap-4">
+              <div className="relative shrink-0">
                 <UserAvatar
                   prenom={user.prenom}
                   nom={user.nom}
                   src={user.avatar_url}
                   className={cn(
-                    "size-16 ring-4 ring-offset-2 ring-offset-card sm:size-20",
+                    "size-16 ring-4 ring-offset-2 ring-offset-card sm:size-18",
                     status === "ACTIF" && "ring-emerald-500",
                     status === "EXPIRE_BIENTOT" && "ring-amber-500",
                     status === "EXPIRE" && "ring-destructive",
@@ -284,22 +284,22 @@ export default function UserDetailPage() {
                 />
               </div>
 
-              <div className="space-y-1.5">
+              <div className="min-w-0 space-y-1.5">
                 <div className="flex flex-wrap items-center gap-2">
-                  <h1 className="text-2xl font-black text-foreground sm:text-3xl">
+                  <h1 className="text-2xl font-black leading-tight text-foreground sm:text-[28px]">
                     {user.prenom} {user.nom}
                   </h1>
                   <SubscriptionBadge status={status} />
                   <TierBadge tier={tier} />
                 </div>
 
-                <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1" dir="ltr">
-                    <Mail className="size-3.5 text-primary" />
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                  <span className="inline-flex items-center gap-1" dir="ltr">
+                    <Mail className="size-3.5 shrink-0 text-primary" />
                     {user.email}
                   </span>
                   {!user.email_verified && (
-                    <span className="flex items-center gap-1">
+                    <span className="inline-flex items-center gap-1">
                       <Badge variant="outline" className="border-destructive/40 text-destructive">
                         <ShieldAlert className="size-3" />
                         بريد غير مؤكد
@@ -316,17 +316,17 @@ export default function UserDetailPage() {
                       </Button>
                     </span>
                   )}
-                  <span className="flex items-center gap-1" dir="ltr">
-                    <Phone className="size-3.5 text-primary" />
+                  <span className="inline-flex items-center gap-1" dir="ltr">
+                    <Phone className="size-3.5 shrink-0 text-primary" />
                     {user.telephone}
                   </span>
-                  <span>عضو منذ {formatDate(user.created_at)}</span>
+                  <span className="whitespace-nowrap">عضو منذ {formatDate(user.created_at)}</span>
                 </div>
               </div>
             </div>
 
             {/* Quick Action Toolbar */}
-            <div className="flex flex-wrap items-center gap-2.5">
+            <div className="flex shrink-0 flex-wrap items-center gap-2 lg:justify-end">
               <RenewDialog userId={userId} userName={`${user.prenom} ${user.nom}`} />
               <Button asChild variant="outline" className="gap-1.5 rounded-xl">
                 <Link href={`/users/${userId}/plan`}>
@@ -345,35 +345,35 @@ export default function UserDetailPage() {
         </div>
 
         <Tabs value={tab} onValueChange={setTab} className="space-y-6">
-          <TabsList aria-label="أقسام الملف" className="h-auto w-full justify-start gap-1 overflow-x-auto rounded-2xl bg-muted/60 p-1.5 sm:w-auto">
+          <TabsList aria-label="أقسام الملف" className="grid h-auto w-full grid-cols-2 gap-1 rounded-2xl bg-muted/60 p-1.5 lg:grid-cols-4">
             <TabsTrigger
               value="overview"
-              className="gap-2 rounded-xl px-4 py-2 text-xs font-bold data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm"
+              className="min-w-0 justify-center gap-2 rounded-xl px-3 py-2.5 text-xs font-bold data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm"
             >
-              <span>نظرة عامة</span>
+              <span className="truncate">نظرة عامة</span>
             </TabsTrigger>
             <TabsTrigger
               value="suivi"
-              className="gap-2 rounded-xl px-4 py-2 text-xs font-bold data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm"
+              className="min-w-0 justify-center gap-2 rounded-xl px-3 py-2.5 text-xs font-bold data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm"
             >
-              <span>المتابعة والملاحظات</span>
+              <span className="truncate">المتابعة والملاحظات</span>
             </TabsTrigger>
             <TabsTrigger
               value="progress"
-              className="gap-2 rounded-xl px-4 py-2 text-xs font-bold data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm"
+              className="min-w-0 justify-center gap-2 rounded-xl px-3 py-2.5 text-xs font-bold data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm"
             >
-              <span>التقدّم والوزن</span>
+              <span className="truncate">التقدّم والوزن</span>
             </TabsTrigger>
             <TabsTrigger
               value="plan"
-              className="gap-2 rounded-xl px-4 py-2 text-xs font-bold data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm"
+              className="min-w-0 justify-center gap-2 rounded-xl px-3 py-2.5 text-xs font-bold data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm"
             >
-              <span>البرامج والتمارين</span>
+              <span className="truncate">البرامج والتمارين</span>
             </TabsTrigger>
           </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="grid gap-5 [grid-template-columns:repeat(auto-fit,minmax(340px,1fr))] [&>*]:min-w-0">
             <Card>
               <CardHeader>
                 <CardTitle className="text-[15px] font-bold">معلومات العضو</CardTitle>
@@ -566,13 +566,13 @@ export default function UserDetailPage() {
         </TabsContent>
 
         <TabsContent value="suivi" className="space-y-4">
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="grid gap-5 [grid-template-columns:repeat(auto-fit,minmax(340px,1fr))] [&>*]:min-w-0">
             <CoachGoalCard userId={userId} />
             <FidelityCard history={subscriptions} />
             <ReferralCard user={user} />
             <FollowUpCoachCard userId={userId} />
           </div>
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="grid gap-5 [grid-template-columns:repeat(auto-fit,minmax(340px,1fr))] [&>*]:min-w-0">
             <MemberTimeline userId={userId} />
             <NotesPanel
               userId={userId}
@@ -609,6 +609,7 @@ export default function UserDetailPage() {
                 </>
               ) : (
                 <EmptyState
+                  className="min-h-[280px]"
                   title="لا يوجد أوزان مسجلة بعد"
                   description="يقوم العضو بتسجيل وزنه بنفسه من تطبيقه"
                 />
@@ -678,6 +679,7 @@ export default function UserDetailPage() {
             </Card>
           ) : (
             <EmptyState
+              className="min-h-[280px]"
               title="لا يوجد خطة تمارين بعد"
               description="صيّر خطة تمارين مخصصة لهذا العضو"
               action={
@@ -740,6 +742,7 @@ export default function UserDetailPage() {
             </>
           ) : (
             <EmptyState
+              className="min-h-[280px]"
               title="لا يوجد خطة غذائية بعد"
               description="صيّر خطة مخصصة لهذا العضو"
               action={

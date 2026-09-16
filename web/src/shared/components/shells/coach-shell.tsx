@@ -59,7 +59,7 @@ function NavBadge({ count, variant = "danger" }: { count: number; variant?: "dan
   return (
     <span
       className={cn(
-        "ms-auto flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-xs font-black leading-none tabular-nums shadow-sm",
+        "flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-xs font-black leading-none tabular-nums shadow-sm",
         variant === "danger"
           ? "bg-destructive text-white animate-pulse"
           : "bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30",
@@ -82,9 +82,9 @@ function SidebarContent() {
   const unread = shell?.unread ?? 0;
 
   return (
-    <div className="flex h-full flex-col bg-sidebar">
+    <div className="flex h-full min-h-0 flex-col bg-sidebar">
       {/* Brand Header */}
-      <div className="flex h-20 items-center justify-between border-b border-sidebar-border px-5">
+      <div className="flex h-20 shrink-0 items-center justify-between border-b border-sidebar-border px-5">
         <Logo />
         <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary ring-1 ring-primary/20">
           Coach Pro
@@ -92,7 +92,7 @@ function SidebarContent() {
       </div>
 
       {/* Quick Action */}
-      <div className="p-3">
+      <div className="shrink-0 p-3">
         <Button
           asChild
           className="w-full justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 font-bold text-white shadow-lg shadow-amber-500/20 transition-shadow duration-200 hover:from-amber-600 hover:to-amber-700 hover:shadow-xl hover:shadow-amber-500/30"
@@ -105,7 +105,7 @@ function SidebarContent() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-2" aria-label="القائمة الرئيسية">
+      <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto px-3 py-2" aria-label="القائمة الرئيسية">
         {COACH_NAV.map((item) => {
           const active = isActive(pathname, item.href, item.exact);
           return (
@@ -121,7 +121,7 @@ function SidebarContent() {
             >
               <item.icon
                 className={cn(
-                  "size-4.5 transition-colors",
+                  "size-4.5 shrink-0 transition-colors",
                   active ? "text-primary" : "text-muted-foreground group-hover:text-primary",
                 )}
               />
@@ -134,7 +134,7 @@ function SidebarContent() {
       </nav>
 
       {/* Coach Profile Card Footer */}
-      <div className="border-t border-sidebar-border p-3">
+      <div className="mt-auto shrink-0 border-t border-sidebar-border p-3">
         <div className="flex items-center gap-3 rounded-xl bg-sidebar-accent/50 p-2.5 ring-1 ring-border/40">
           <div className="relative">
             <UserAvatar
@@ -256,8 +256,8 @@ export function CoachShell({ children }: { children: ReactNode }) {
         </header>
 
         {/* Page Container */}
-        <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-7xl space-y-6">
+        <main className="flex-1 px-6 py-6 sm:px-8">
+          <div className="mx-auto max-w-[1400px] space-y-6">
             {children}
           </div>
         </main>

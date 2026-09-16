@@ -114,6 +114,7 @@ export function PhotoGallery({ userId, canEdit = true }: { userId: string; canEd
         </div>
       ) : (
         <EmptyState
+          className="min-h-[280px]"
           title="لا توجد صور مسجلة بعد"
           description="أضف صورًا بانتظام (بنفس الزاوية والإضاءة) لمشاهدة تطور جسمك بوضوح"
         />

@@ -54,7 +54,7 @@ export function WorkoutPlanDayView({
   }
 
   return (
-    <div className="space-y-3">
+    <div className="grid grid-cols-1 gap-3 xl:grid-cols-2 [&>*]:min-w-0">
       {rows.map((e, idx) => {
         const img = displayImage(e);
         const guideEx = getGuideExercise(e.nom);
