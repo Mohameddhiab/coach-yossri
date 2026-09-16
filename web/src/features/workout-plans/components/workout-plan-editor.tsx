@@ -5,6 +5,8 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
   Calendar,
+  ChevronDown,
+  ChevronUp,
   Copy,
   Dumbbell,
   GripVertical,
@@ -83,7 +85,7 @@ function newKey() {
   return `draft-${crypto.randomUUID().slice(0, 8)}`;
 }
 
-function emptyExercise(jour: WeekDay): DraftExercise {
+function emptyExercise(jour: WeekDay, ordre = 0): DraftExercise {
   return {
     key: newKey(),
     jour_semaine: jour,
@@ -96,6 +98,7 @@ function emptyExercise(jour: WeekDay): DraftExercise {
     groupe_musculaire: null,
     notes: null,
     image_url: null,
+    ordre,
   };
 }
 
@@ -107,10 +110,11 @@ function draftFromPlan(plan: WorkoutPlan | null): {
   if (!plan) {
     return { titre: "", objectif: "PRISE_DE_MASSE", exercises: [] };
   }
+  const sorted = [...plan.exercises].sort((a, b) => (a.ordre ?? 0) - (b.ordre ?? 0));
   return {
     titre: plan.titre,
     objectif: plan.objectif,
-    exercises: plan.exercises.map((e) => ({
+    exercises: sorted.map((e) => ({
       key: e.id,
       jour_semaine: e.jour_semaine,
       nom: e.nom,
@@ -122,6 +126,7 @@ function draftFromPlan(plan: WorkoutPlan | null): {
       groupe_musculaire: e.groupe_musculaire,
       notes: e.notes,
       image_url: e.image_url,
+      ordre: e.ordre ?? 0,
     })),
   };
 }
@@ -545,7 +550,8 @@ export function WorkoutPlanEditor({ userId }: { userId: string }) {
   }, [dirty]);
 
   const openAddForm = () => {
-    setFormData(emptyExercise(day));
+    const maxOrdre = exercises.length ? Math.max(...exercises.map((e) => e.ordre ?? 0)) + 1 : 0;
+    setFormData(emptyExercise(day, maxOrdre));
     setEditingIdx(null);
     setFormOpen(true);
   };
@@ -568,6 +574,7 @@ export function WorkoutPlanEditor({ userId }: { userId: string }) {
       ...formData,
       key: editingIdx !== null ? exercises[editingIdx].key : newKey(),
       image_url: finalImage,
+      ordre: editingIdx !== null ? (formData.ordre ?? exercises[editingIdx].ordre ?? 0) : (formData.ordre ?? exercises.length),
     };
     if (editingIdx !== null) {
       setExercises((rows) => rows.map((r, i) => (i === editingIdx ? toSave : r)));
@@ -583,13 +590,35 @@ export function WorkoutPlanEditor({ userId }: { userId: string }) {
 
   const duplicateExercise = (idx: number) => {
     const src = exercises[idx];
-    const dup: DraftExercise = { ...src, key: newKey() };
+    const dup: DraftExercise = { ...src, key: newKey(), ordre: (src.ordre ?? 0) + 0.5 };
     setExercises((rows) => {
       const next = [...rows];
       next.splice(idx + 1, 0, dup);
-      return next;
+      // re-normalize ordre to 0..n-1 preserving current array order as chosen order 1->2...
+      return next.map((ex, i) => ({ ...ex, ordre: i }));
     });
     toast.success("تم نسخ التمرين");
+  };
+
+  const moveDayExercise = (dayKey: WeekDay, idxInDay: number, dir: -1 | 1) => {
+    const daySorted = exercises
+      .map((e, idx) => ({ e, idx }))
+      .filter(({ e }) => e.jour_semaine === dayKey)
+      .sort((a, b) => (a.e.ordre ?? 0) - (b.e.ordre ?? 0));
+    const target = idxInDay + dir;
+    if (target < 0 || target >= daySorted.length) return;
+    const from = daySorted[idxInDay];
+    const to = daySorted[target];
+    setExercises((prev) => {
+      const next = [...prev];
+      const fromEx = next[from.idx];
+      const toEx = next[to.idx];
+      // swap ordre to keep 1->2 sequence for this day
+      const tmp = fromEx.ordre;
+      next[from.idx] = { ...fromEx, ordre: toEx.ordre };
+      next[to.idx] = { ...toEx, ordre: tmp };
+      return next;
+    });
   };
 
   const handleSave = async () => {
@@ -612,6 +641,7 @@ export function WorkoutPlanEditor({ userId }: { userId: string }) {
         groupe_musculaire: null,
         notes: e.notes,
         image_url: getGuideImageUrl(e.nom, 1) ?? e.image_url ?? findCuratedByName(e.nom)?.imageUrl ?? fallbackForCategory(findCuratedByName(e.nom)?.category) ?? null,
+        ordre: e.ordre ?? 0,
       })),
     };
     try {
@@ -638,7 +668,8 @@ export function WorkoutPlanEditor({ userId }: { userId: string }) {
 
   const dayRows = exercises
     .map((e, idx) => ({ e, idx }))
-    .filter(({ e }) => e.jour_semaine === day);
+    .filter(({ e }) => e.jour_semaine === day)
+    .sort((a, b) => (a.e.ordre ?? 0) - (b.e.ordre ?? 0));
 
   const today = todayWeekDay();
 
@@ -777,7 +808,7 @@ export function WorkoutPlanEditor({ userId }: { userId: string }) {
                         </tr>
                       </thead>
                       <tbody>
-                        {dayRows.map(({ e, idx }) => {
+                        {dayRows.map(({ e, idx }, idxInDay) => {
                           const curatedHit = findCuratedByName(e.nom);
                           const guideUrl = getGuideImageUrl(e.nom, 1);
                           const displayImage = guideUrl ?? e.image_url ?? curatedHit?.imageUrl ?? fallbackForCategory(curatedHit?.category) ?? null;
@@ -785,6 +816,9 @@ export function WorkoutPlanEditor({ userId }: { userId: string }) {
                              <tr key={e.key} className="animate-fade-in align-top transition-colors hover:bg-primary/5">
                                 <td className={`${TD} font-semibold`}>
                                   <div className="flex items-center gap-2">
+                                    <span className="flex min-w-6 items-center justify-center rounded-full bg-muted px-1.5 py-0.5 text-xs font-black tabular-nums">
+                                      {idxInDay + 1}
+                                    </span>
                                     <GripVertical className="size-4 cursor-grab text-muted-foreground/60" aria-hidden="true" />
                                     {e.nom}
                                   </div>
@@ -812,6 +846,26 @@ export function WorkoutPlanEditor({ userId }: { userId: string }) {
                               <td className={`${TD} text-xs`}>{e.repos ?? "—"}</td>
                               <td className={TD}>
                                 <div className="flex items-center gap-1">
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="size-7"
+                                    disabled={idxInDay === 0}
+                                    onClick={() => moveDayExercise(day, idxInDay, -1)}
+                                    title="تحريك للأعلى"
+                                  >
+                                    <ChevronUp className="size-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="size-7"
+                                    disabled={idxInDay === dayRows.length - 1}
+                                    onClick={() => moveDayExercise(day, idxInDay, 1)}
+                                    title="تحريك للأسفل"
+                                  >
+                                    <ChevronDown className="size-4" />
+                                  </Button>
                                   <Button variant="ghost" size="icon" className="size-8" onClick={() => openEditForm(idx)}>
                                     <Pencil className="size-4" />
                                   </Button>
@@ -832,39 +886,62 @@ export function WorkoutPlanEditor({ userId }: { userId: string }) {
 
                   {/* Mobile cards */}
                   <div className="space-y-3 md:hidden">
-                    {dayRows.map(({ e, idx }) => {
+                    {dayRows.map(({ e, idx }, idxInDay) => {
                       const curatedHit = findCuratedByName(e.nom);
                       const guideUrl = getGuideImageUrl(e.nom, 1);
                       const displayImage = guideUrl ?? e.image_url ?? curatedHit?.imageUrl ?? fallbackForCategory(curatedHit?.category) ?? null;
                       const guideEx = getGuideExercise(e.nom);
                       const instruction = getExerciseInstruction(e.nom);
                       return (
-                         <div key={e.key} className="space-y-3 rounded-xl border p-3 shadow-sm transition-shadow hover:shadow-md">
-                          <div className="flex items-start justify-between gap-2">
-                             <div className="flex flex-col gap-1">
-                                <div className="flex items-center gap-2 font-bold">
-                                  <GripVertical className="size-4 text-muted-foreground/60" aria-hidden="true" />
-                                  {e.nom}
-                                </div>
-                                {guideEx && (
-                                  <div className="flex flex-wrap gap-1">
-                                    <Badge variant="secondary" className="text-[10px]">{guideEx.primaryMuscle}</Badge>
-                                    <Badge variant="outline" className="text-[10px]">{guideEx.equipment}</Badge>
-                                  </div>
-                                )}
-                              </div>
-                            <div className="flex shrink-0 items-center gap-1">
-                              <Button variant="ghost" size="icon" className="size-8" onClick={() => openEditForm(idx)}>
-                                <Pencil className="size-4" />
-                              </Button>
-                              <Button variant="ghost" size="icon" className="size-8" onClick={() => duplicateExercise(idx)}>
-                                <Copy className="size-4" />
-                              </Button>
-                              <Button variant="ghost" size="icon" className="size-8" onClick={() => setRemoveIdx(idx)}>
-                                <Trash2 className="size-4 text-destructive" />
-                              </Button>
-                            </div>
-                          </div>
+                          <div key={e.key} className="space-y-3 rounded-xl border p-3 shadow-sm transition-shadow hover:shadow-md">
+                           <div className="flex items-start justify-between gap-2">
+                              <div className="flex flex-col gap-1">
+                                 <div className="flex items-center gap-2 font-bold">
+                                   <span className="flex min-w-6 items-center justify-center rounded-full bg-muted px-1.5 py-0.5 text-xs font-black tabular-nums">
+                                     {idxInDay + 1}
+                                   </span>
+                                   <GripVertical className="size-4 text-muted-foreground/60" aria-hidden="true" />
+                                   {e.nom}
+                                 </div>
+                                 {guideEx && (
+                                   <div className="flex flex-wrap gap-1">
+                                     <Badge variant="secondary" className="text-[10px]">{guideEx.primaryMuscle}</Badge>
+                                     <Badge variant="outline" className="text-[10px]">{guideEx.equipment}</Badge>
+                                   </div>
+                                 )}
+                               </div>
+                             <div className="flex shrink-0 items-center gap-1">
+                               <Button
+                                 variant="ghost"
+                                 size="icon"
+                                 className="size-7"
+                                 disabled={idxInDay === 0}
+                                 onClick={() => moveDayExercise(day, idxInDay, -1)}
+                                 title="تحريك للأعلى"
+                               >
+                                 <ChevronUp className="size-4" />
+                               </Button>
+                               <Button
+                                 variant="ghost"
+                                 size="icon"
+                                 className="size-7"
+                                 disabled={idxInDay === dayRows.length - 1}
+                                 onClick={() => moveDayExercise(day, idxInDay, 1)}
+                                 title="تحريك للأسفل"
+                               >
+                                 <ChevronDown className="size-4" />
+                               </Button>
+                               <Button variant="ghost" size="icon" className="size-8" onClick={() => openEditForm(idx)}>
+                                 <Pencil className="size-4" />
+                               </Button>
+                               <Button variant="ghost" size="icon" className="size-8" onClick={() => duplicateExercise(idx)}>
+                                 <Copy className="size-4" />
+                               </Button>
+                               <Button variant="ghost" size="icon" className="size-8" onClick={() => setRemoveIdx(idx)}>
+                                 <Trash2 className="size-4 text-destructive" />
+                               </Button>
+                             </div>
+                           </div>
                           <div className="flex justify-center">
                             <div className="flex size-24 items-center justify-center overflow-hidden rounded-xl border bg-white p-1">
                               {(() => {

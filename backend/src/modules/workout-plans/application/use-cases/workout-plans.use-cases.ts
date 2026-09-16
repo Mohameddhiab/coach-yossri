@@ -38,6 +38,7 @@ type ExerciseInput = {
   groupe_musculaire?: string | null; // legacy
   jour_semaine?: string;
   image_url_legacy?: string | null;
+  ordre?: number;
 };
 
 @Injectable()
@@ -168,6 +169,7 @@ export function toWorkoutSnapshot(
       groupeMusculaire: e.groupeMusculaire,
       notes: e.notes,
       imageUrl: e.imageUrl,
+      ordre: e.ordre,
     })),
     createdAt: plan.createdAt.toISOString(),
     updatedAt: plan.updatedAt.toISOString(),
@@ -196,7 +198,8 @@ export function normalizeExercises(
   };
   const seen = new Set<string>();
   const out: WorkoutExercise[] = [];
-  for (const raw of input) {
+  for (let idx = 0; idx < input.length; idx++) {
+    const raw = input[idx];
     if (!raw) continue;
     const e = raw as Record<string, unknown>;
     const nom = e.nom ?? e.name;
@@ -219,6 +222,8 @@ export function normalizeExercises(
     const key = `${jour}|${String(nom).trim().toLowerCase()}|${series ?? ''}|${reps ?? ''}|${charge ?? ''}|${tempo ?? ''}|${repos ?? ''}|${groupe ?? ''}`;
     if (seen.has(key)) continue;
     seen.add(key);
+    const ordreRaw = e.ordre as unknown;
+    const ordre = typeof ordreRaw === 'number' && Number.isFinite(ordreRaw) ? ordreRaw : idx;
     out.push({
       id: `w-${Math.random().toString(36).slice(2, 10)}`,
       workoutPlanId: '',
@@ -232,7 +237,10 @@ export function normalizeExercises(
       groupeMusculaire: str(e.groupeMusculaire ?? e.groupe_musculaire),
       notes: str(e.notes),
       imageUrl: str(rawImage),
+      ordre,
     });
   }
+  // preserve chosen order 1->2->... (stable sort by ordre)
+  out.sort((a, b) => (a.ordre ?? 0) - (b.ordre ?? 0));
   return out;
 }

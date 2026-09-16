@@ -33,8 +33,8 @@ export function WorkoutPlanDayView({
     getGuideImageUrl(e.nom, 1) ?? e.image_url ?? getSystemImage(e.nom) ?? fallbackForCategory(findCurated(e.nom)?.category) ?? null;
 
   const rows = [
-    ...exercises.filter((e) => e.jour_semaine === day),
-    ...exercises.filter((e) => e.jour_semaine === "TOUS_LES_JOURS"),
+    ...exercises.filter((e) => e.jour_semaine === day).sort((a, b) => (a.ordre ?? 0) - (b.ordre ?? 0)),
+    ...exercises.filter((e) => e.jour_semaine === "TOUS_LES_JOURS").sort((a, b) => (a.ordre ?? 0) - (b.ordre ?? 0)),
   ];
 
   if (!rows.length) {

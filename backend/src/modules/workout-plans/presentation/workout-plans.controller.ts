@@ -46,6 +46,7 @@ export class WorkoutExerciseDto {
   @IsOptional() @IsString() groupe_musculaire?: string | null;
   @IsOptional() @IsString() notes?: string | null;
   @IsOptional() @IsString() image_url?: string | null;
+  @IsOptional() ordre?: number;
   // legacy (anciens clients) — toléré
   @IsOptional() repos_sec?: unknown;
 }
@@ -81,6 +82,7 @@ function toExerciseInput(e: WorkoutExerciseDto) {
     notes: e.notes,
     imageUrl: (e as Record<string, unknown>).image_url as
       string | null | undefined,
+    ordre: typeof e.ordre === 'number' ? e.ordre : 0,
   };
 }
 

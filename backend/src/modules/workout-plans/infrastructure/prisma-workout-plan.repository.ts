@@ -48,7 +48,7 @@ export class PrismaWorkoutPlanRepository implements WorkoutPlanRepository {
   }
 
   private exercisesSelect = {
-    orderBy: [{ jourSemaine: 'asc' as const }, { nom: 'asc' as const }],
+    orderBy: [{ ordre: 'asc' as const }, { jourSemaine: 'asc' as const }],
   };
 
   async findActive(userId: string): Promise<WorkoutPlanWithExercises | null> {
@@ -80,7 +80,7 @@ export class PrismaWorkoutPlanRepository implements WorkoutPlanRepository {
         statut: 'ACTIF',
         version: 1,
         exercises: {
-          create: exercises.map((e) => ({
+          create: exercises.map((e, idx) => ({
             jourSemaine: e.jourSemaine,
             nom: e.nom,
             charge: e.charge,
@@ -91,6 +91,7 @@ export class PrismaWorkoutPlanRepository implements WorkoutPlanRepository {
             groupeMusculaire: e.groupeMusculaire,
             notes: e.notes,
             imageUrl: e.imageUrl,
+            ordre: typeof e.ordre === 'number' ? e.ordre : idx,
           })),
         },
       },
@@ -118,7 +119,7 @@ export class PrismaWorkoutPlanRepository implements WorkoutPlanRepository {
       this.prisma.workoutExercise.deleteMany({
         where: { workoutPlanId: planId },
       }),
-      ...exercises.map((e) =>
+      ...exercises.map((e, idx) =>
         this.prisma.workoutExercise.create({
           data: {
             workoutPlanId: planId,
@@ -132,6 +133,7 @@ export class PrismaWorkoutPlanRepository implements WorkoutPlanRepository {
             groupeMusculaire: e.groupeMusculaire,
             notes: e.notes,
             imageUrl: e.imageUrl,
+            ordre: typeof e.ordre === 'number' ? e.ordre : idx,
           },
         }),
       ),

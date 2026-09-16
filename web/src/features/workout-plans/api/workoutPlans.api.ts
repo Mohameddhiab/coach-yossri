@@ -14,6 +14,7 @@ export interface WorkoutExercise {
   groupe_musculaire: string | null;
   notes: string | null;
   image_url: string | null;
+  ordre: number;
 }
 
 export interface WorkoutPlan {

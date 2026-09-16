@@ -333,6 +333,7 @@ model WorkoutExercise {
   groupeMusculaire String?
   notes            String?
   imageUrl         String?
+  ordre            Int         @default(0)
 
   @@index([workoutPlanId])
   @@map("workout_exercises")

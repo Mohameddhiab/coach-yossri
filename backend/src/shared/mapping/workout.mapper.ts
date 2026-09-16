@@ -13,6 +13,7 @@ export interface WorkoutExerciseApi {
   groupe_musculaire: string | null;
   notes: string | null;
   image_url: string | null;
+  ordre: number;
 }
 
 export function toWorkoutExerciseApi(e: WorkoutExercise): WorkoutExerciseApi {
@@ -29,6 +30,7 @@ export function toWorkoutExerciseApi(e: WorkoutExercise): WorkoutExerciseApi {
     groupe_musculaire: e.groupeMusculaire,
     notes: e.notes,
     image_url: e.imageUrl,
+    ordre: e.ordre ?? 0,
   };
 }
 
